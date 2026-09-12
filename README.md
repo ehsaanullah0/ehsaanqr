@@ -8,8 +8,6 @@
 
 ### **QR codes, but make them yours.**
 
-<br>
-
 A playful QR code generator for creating  
 **beautiful • customizable • randomized • scannable** QR codes.
 
@@ -148,6 +146,19 @@ you can **change it, style it, randomize it, and make it yours.**
 </table>
 </tr>
 <br>
+
+<img width="1250" height="644" alt="image" src="https://github.com/user-attachments/assets/2139f291-f76f-4fc5-bcee-055c6816eb9d" />
+
+<img width="1233" height="438" alt="image" src="https://github.com/user-attachments/assets/2d26b6ce-711e-41a8-9adf-105393658267" />
+
+<img width="1258" height="431" alt="image" src="https://github.com/user-attachments/assets/7128f85c-35aa-466e-b46c-0a8767f9fd23" />
+
+<img width="1216" height="492" alt="image" src="https://github.com/user-attachments/assets/71b53f21-af50-42ac-bc17-913c617366c6" />
+
+<img width="1204" height="644" alt="image" src="https://github.com/user-attachments/assets/fb5480ab-43ef-4f25-8202-b72e9f347373" />
+
+<img width="1268" height="678" alt="image" src="https://github.com/user-attachments/assets/032b73ea-116f-45d8-a961-9cdcc60795be" />
+
 
 # 🎨 MAKE IT LOOK LIKE YOU MEAN IT
 
@@ -573,14 +584,10 @@ A QR code is essentially a visual way of sharing information.
 
 <br>
 
-# **Make useful things.**
-
-# **Make them feel good to use.**
-
-</div>
-
-<br>
-
+<div align="center">
+  
+## **SUPPORT THE DEVELOPMENT**
+<img width="250" src="https://github.com/user-attachments/assets/6f75a39f-3e4a-4600-9122-108ed5ddf714" />
 
 # 👤 EHSAAN ULLAH
 
@@ -588,8 +595,6 @@ A QR code is essentially a visual way of sharing information.
 
 **Building small digital things
 that are useful, simple, and enjoyable to use.**
-
-<br>
 
 ### **◈ EHSAAN QR**
 
@@ -616,6 +621,7 @@ Made by EHSAAN.
 </sub>
 
 <br><br>
+
 
 **◈**
 
