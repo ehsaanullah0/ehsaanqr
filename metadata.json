@@ -1,0 +1,10 @@
+{
+  "name": "Remix Ehsaan QR",
+  "description": "Beautiful QR codes. Made simple. High-quality QR code generator with instant preview, custom styles, center logo, and scan validation.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

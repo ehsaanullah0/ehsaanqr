@@ -1,0 +1,374 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  QrType,
+  QrFormData,
+  QrStyleOptions,
+  AppTheme,
+  SavedQrDesign,
+  CustomizationTabKey,
+} from './types';
+import { DEFAULT_FORM_DATA, buildPayload, validatePayload } from './utils/qrPayloads';
+import { analyzeReadability } from './utils/contrast';
+import { renderQrToCanvas } from './utils/qrRenderer';
+import { Header } from './components/Header';
+import { TypeSelector } from './components/TypeSelector';
+import { ContentForm } from './components/ContentForm';
+import { CustomizationPanel } from './components/CustomizationPanel';
+import { LivePreviewCard } from './components/LivePreviewCard';
+import { TestQrModal } from './components/TestQrModal';
+import { RecentDesignsModal } from './components/RecentDesignsModal';
+import { MobileFloatingNav } from './components/MobileFloatingNav';
+import { Toast } from './components/Toast';
+import { Footer } from './components/Footer';
+import { Sparkles, ShieldCheck, ExternalLink } from 'lucide-react';
+
+const STORAGE_THEME_KEY = 'ehsaan_qr_theme';
+const STORAGE_SAVED_KEY = 'ehsaan_qr_saved_designs';
+
+const INITIAL_STYLE: QrStyleOptions = {
+  colorMode: 'solid',
+  fgColor: '#000000', // Default custom FG black
+  fgColorEnd: '#1F2937',
+  gradientAngle: 135,
+  bgColor: '#FFFFFF',
+  transparentBg: false,
+  bgSaturationPreference: 'low',
+  patternStyle: 'liquid', // Default Liquid Flow
+  cornerStyle: 'smooth',
+  eyeStyle: 'rounded',
+  pupilStyle: 'auto',
+  customEyeColors: true,
+  eyeOuterColor: '#000000',
+  eyeInnerColor: '#000000',
+  logo: {
+    type: 'none',
+    sizeRatio: 0.2,
+    padding: 4,
+    background: 'white',
+    customBgColor: '#FFFFFF',
+    borderRadius: 50,
+  },
+  size: 1024,
+  margin: 2,
+  errorCorrection: 'Q',
+};
+
+export default function App() {
+  // Theme state: defaults to dark theme
+  const [theme, setTheme] = useState<AppTheme>(() => {
+    const saved = localStorage.getItem(STORAGE_THEME_KEY);
+    if (saved === 'light' || saved === 'dark' || saved === 'material') {
+      return saved;
+    }
+    return 'dark';
+  });
+
+  // Active QR type
+  const [selectedType, setSelectedType] = useState<QrType>('url');
+
+  // Form Data
+  const [formData, setFormData] = useState<QrFormData>(DEFAULT_FORM_DATA);
+
+  // Styling Options
+  const [styleOptions, setStyleOptions] = useState<QrStyleOptions>(INITIAL_STYLE);
+
+  // Active Customization Tab (synchronized across desktop in-panel tabs and mobile/tablet floating nav)
+  const [activeCustomTab, setActiveCustomTab] = useState<CustomizationTabKey>('colors');
+
+  // Saved designs in local storage
+  const [savedDesigns, setSavedDesigns] = useState<SavedQrDesign[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_SAVED_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // UI Modals & Toasts
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Sync theme changes to DOM root
+  useEffect(() => {
+    localStorage.setItem(STORAGE_THEME_KEY, theme);
+    const root = document.documentElement;
+    root.classList.remove('dark', 'material', 'colorful', 'colourful');
+
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else if (theme === 'material') {
+      root.classList.add('material');
+    }
+  }, [theme]);
+
+  // Sync saved designs to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_SAVED_KEY, JSON.stringify(savedDesigns));
+    } catch (e) {
+      console.warn('Failed to save designs to localStorage:', e);
+    }
+  }, [savedDesigns]);
+
+  // Handle form data change
+  const handleFormChange = <K extends keyof QrFormData>(
+    key: K,
+    val: QrFormData[K]
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: val,
+    }));
+  };
+
+  // Build current payload
+  const currentPayload = useMemo(() => {
+    return buildPayload(selectedType, formData);
+  }, [selectedType, formData]);
+
+  // Validate current payload
+  const validation = useMemo(() => {
+    return validatePayload(selectedType, formData);
+  }, [selectedType, formData]);
+
+  // Analyze readability
+  const readability = useMemo(() => {
+    return analyzeReadability(styleOptions);
+  }, [styleOptions]);
+
+  // Save current design locally
+  const handleSaveDesign = async () => {
+    let thumbnail: string | undefined;
+    try {
+      const offscreen = document.createElement('canvas');
+      await renderQrToCanvas(offscreen, currentPayload, {
+        ...styleOptions,
+        size: 120,
+      });
+      thumbnail = offscreen.toDataURL('image/png');
+    } catch (e) {
+      console.warn('Could not generate thumbnail', e);
+    }
+
+    const typeNames: Record<QrType, string> = {
+      url: 'Website QR',
+      text: 'Text QR',
+      wifi: 'Wi-Fi QR',
+      email: 'Email QR',
+      phone: 'Phone QR',
+      sms: 'SMS QR',
+      whatsapp: 'WhatsApp QR',
+      vcard: 'Contact Card',
+      upi: 'UPI Payment QR',
+      calendar: 'Event Invite QR',
+    };
+
+    const newDesign: SavedQrDesign = {
+      id: 'design-' + Date.now(),
+      name: `${typeNames[selectedType]} - ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+      timestamp: Date.now(),
+      qrType: selectedType,
+      formData: { [selectedType]: formData[selectedType] },
+      style: { ...styleOptions },
+      previewThumbnail: thumbnail,
+    };
+
+    setSavedDesigns((prev) => [newDesign, ...prev.slice(0, 24)]);
+    setToastMessage('Design saved locally ✓');
+  };
+
+  // Load a saved design
+  const handleLoadDesign = (design: SavedQrDesign) => {
+    setSelectedType(design.qrType);
+    if (design.formData) {
+      setFormData((prev) => ({
+        ...prev,
+        ...design.formData,
+      }));
+    }
+    setStyleOptions(design.style);
+    setToastMessage(`Loaded "${design.name}" ✓`);
+  };
+
+  // Duplicate design
+  const handleDuplicateDesign = (design: SavedQrDesign) => {
+    const copy: SavedQrDesign = {
+      ...design,
+      id: 'design-' + Date.now(),
+      name: `${design.name} (Copy)`,
+      timestamp: Date.now(),
+    };
+    setSavedDesigns((prev) => [copy, ...prev]);
+    setToastMessage('Design duplicated ✓');
+  };
+
+  // Delete design
+  const handleDeleteDesign = (id: string) => {
+    setSavedDesigns((prev) => prev.filter((d) => d.id !== id));
+    setToastMessage('Design deleted');
+  };
+
+  // Clear all saved
+  const handleClearAllSaved = () => {
+    if (confirm('Clear all saved QR designs?')) {
+      setSavedDesigns([]);
+      setToastMessage('Saved designs cleared');
+    }
+  };
+
+  return (
+    <div
+      className={`min-h-screen flex flex-col selection:bg-red-500 selection:text-white transition-colors duration-200 ${
+        theme === 'dark'
+          ? 'bg-zinc-950 text-zinc-100'
+          : 'bg-zinc-50 text-zinc-900'
+      }`}
+    >
+      {/* Refined Header */}
+      <Header
+        theme={theme}
+        onThemeChange={setTheme}
+        onOpenHistory={() => setIsHistoryOpen(true)}
+        onOpenScanner={() => setIsScannerOpen(true)}
+        savedCount={savedDesigns.length}
+      />
+
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-7 pb-28 lg:pb-12">
+        {/* Sub-header Landing & Quick Actions */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight text-zinc-900 dark:text-zinc-50">
+              Create your QR code
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+              Choose a type, customize the design, and download it instantly.
+            </p>
+          </div>
+
+          {/* Minimal ehsaan.odoo.com Branding in place of quick start buttons */}
+          <div className="flex items-center gap-2">
+            <a
+              id="header-ehsaan-odoo-link"
+              href="https://ehsaan.odoo.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-zinc-200/90 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 hover:border-red-500/50 dark:hover:border-red-500/50 text-xs text-zinc-600 dark:text-zinc-300 hover:text-red-600 dark:hover:text-red-400 shadow-2xs backdrop-blur-xs transition-all group focus:outline-none focus:ring-2 focus:ring-red-500/30"
+              title="Visit official portal: ehsaan.odoo.com"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+              </span>
+              <span className="text-zinc-500 dark:text-zinc-400 font-medium">Powered by</span>
+              <span className="text-zinc-400 dark:text-zinc-600 font-normal">•</span>
+              <span className="font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-red-600 dark:group-hover:text-red-400">
+                ehsaan.odoo.com
+              </span>
+              <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-red-500 transition-colors ml-0.5" />
+            </a>
+          </div>
+        </div>
+
+        {/* Top Hero Section: Main QR Code Preview & Instant Export */}
+        <section aria-label="Main QR Code Preview" className="w-full">
+          <LivePreviewCard
+            payload={currentPayload}
+            options={styleOptions}
+            readability={readability}
+            onShowToast={setToastMessage}
+            onOpenScanner={() => setIsScannerOpen(true)}
+            onSaveDesign={handleSaveDesign}
+            onOptionsChange={(newOpts) =>
+              setStyleOptions((prev) => ({
+                ...prev,
+                ...newOpts,
+              }))
+            }
+          />
+        </section>
+
+        {/* Settings Area (Below the QR Code Preview) */}
+        <section aria-label="QR Code Settings" className="space-y-6 pt-2">
+          {/* Section Heading */}
+          <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800 pb-3">
+            <div>
+              <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
+                Configure & Customize
+              </h2>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                Select your data format, enter details, and style the matrix.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 1: QR Type Selection */}
+          <div>
+            <TypeSelector
+              selectedType={selectedType}
+              onSelectType={setSelectedType}
+            />
+          </div>
+
+          {/* Step 2 & 3: Content Form and Styling Panels in a Balanced Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Wing: Content Input Fields */}
+            <div className="lg:col-span-6 space-y-6">
+              <ContentForm
+                type={selectedType}
+                formData={formData}
+                onChange={handleFormChange}
+                validation={validation}
+              />
+            </div>
+
+            {/* Right Wing: Customization Tabs */}
+            <div className="lg:col-span-6 space-y-6">
+              <CustomizationPanel
+                options={styleOptions}
+                onChange={setStyleOptions}
+                activeTab={activeCustomTab}
+                onTabChange={setActiveCustomTab}
+              />
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* Minimal Footer */}
+      <Footer />
+
+      {/* Floating Bottom Navigation Bar: Mobile and Tablet format for reachability */}
+      <MobileFloatingNav
+        activeTab={activeCustomTab}
+        onSelectTab={setActiveCustomTab}
+        hasLogo={styleOptions.logo.type !== 'none'}
+      />
+
+      {/* QR Validation / Camera Scanner Modal */}
+      <TestQrModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        payload={currentPayload}
+        options={styleOptions}
+        onShowToast={setToastMessage}
+      />
+
+      {/* Recent / Saved Designs Modal */}
+      <RecentDesignsModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        savedDesigns={savedDesigns}
+        onLoadDesign={handleLoadDesign}
+        onDuplicateDesign={handleDuplicateDesign}
+        onDeleteDesign={handleDeleteDesign}
+        onClearAll={handleClearAllSaved}
+      />
+
+      {/* Micro-interaction Toast */}
+      <Toast message={toastMessage} onClose={() => setToastMessage(null)} />
+    </div>
+  );
+}

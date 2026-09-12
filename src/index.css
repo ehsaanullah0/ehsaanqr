@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code, kbd, samp, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Light theme defaults */
+html:not(.dark):not(.material) body {
+  background-color: #fafafa;
+  color: #09090b;
+}
+
+/* Dark theme polished styling */
+html.dark:not(.material) body {
+  background-color: #09090b;
+  color: #fafafa;
+}
+
+/* Google Material Expressive Theme: M3 Expressive dynamic tonal engine */
+html.material body {
+  background-color: #f8f9fe;
+  background-image: 
+    radial-gradient(at 15% 10%, rgba(26, 115, 232, 0.09) 0px, transparent 40%),
+    radial-gradient(at 85% 15%, rgba(234, 67, 53, 0.08) 0px, transparent 45%),
+    radial-gradient(at 50% 90%, rgba(251, 188, 4, 0.09) 0px, transparent 45%),
+    radial-gradient(at 80% 80%, rgba(52, 168, 83, 0.08) 0px, transparent 45%);
+  background-attachment: fixed;
+  color: #1a1c22;
+}
+
+html.material header {
+  background-color: rgba(243, 245, 252, 0.92) !important;
+  border-bottom-color: rgba(200, 208, 226, 0.8) !important;
+  backdrop-filter: blur(20px);
+}
+
+html.material .bg-white {
+  background-color: #ffffff !important;
+  border-color: rgba(218, 224, 238, 0.9) !important;
+  box-shadow: 0 4px 20px -2px rgba(26, 115, 232, 0.06), 0 1px 4px 0 rgba(0, 0, 0, 0.04) !important;
+}
+
+html.material .bg-zinc-50,
+html.material .bg-zinc-100\/70 {
+  background-color: #f1f4fb !important;
+}
+
+html.material .border-zinc-200,
+html.material .border-zinc-200\/80,
+html.material .border-zinc-200\/90 {
+  border-color: #dbe1f0 !important;
+}
+
+html.material .text-zinc-900 {
+  color: #181c24 !important;
+}
+
+html.material .text-zinc-700 {
+  color: #3b4252 !important;
+}
+
+html.material .text-zinc-500 {
+  color: #5c6479 !important;
+}
+
+html.material button:not([disabled]) {
+  transition: transform 0.15s cubic-bezier(0.2, 0, 0, 1), background-color 0.15s ease, border-color 0.15s ease;
+}
+
+html.material button:active:not([disabled]) {
+  transform: scale(0.975);
+}
+
+/* Custom scrollbar for preview */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.5);
+}
+
+
