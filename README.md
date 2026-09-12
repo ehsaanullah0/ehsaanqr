@@ -1,313 +1,651 @@
-# ◈ EHSAAN QR
+<p align="center">
+<img width="200" height="200" src="https://github.com/user-attachments/assets/5e9482b0-4af5-44c6-95b4-d38c92f610f0" />
+</p>
 
 <div align="center">
 
-### **Beautiful QR codes. Made simple.**
+# ◈ EHSAAN QR
 
-A customizable QR code generator built to make QR codes feel less ordinary.
-
-**Generate. Customize. Randomize. Scan.**
+### **QR codes, but make them yours.**
 
 <br>
 
-[**🌐 Open EHSAAN QR**](https://ehsaanqr.ai.studio/)
+A playful QR code generator for creating  
+**beautiful • customizable • randomized • scannable** QR codes.
+
+<br>
+
+<a href="https://ehsaanqr.ai.studio/">
+  <img src="https://img.shields.io/badge/◈%20OPEN%20EHSAAN%20QR-111111?style=for-the-badge&labelColor=E7AC08" alt="Open EHSAAN QR">
+</a>
+
+<br><br>
+
+<table>
+<tr>
+
+<td align="center" width="160">
+
+<img src="https://img.shields.io/badge/🎨-DESIGN-E7AC08?style=for-the-badge&labelColor=111111">
+
+<br>
+
+<sub><b>Customizable</b></sub>
+
+</td>
+
+<td align="center" width="160">
+
+<img src="https://img.shields.io/badge/🎲-STYLE-8B5CF6?style=for-the-badge&labelColor=111111">
+
+<br>
+
+<sub><b>Randomized</b></sub>
+
+</td>
+
+<td align="center" width="160">
+
+<img src="https://img.shields.io/badge/◈-SHAPES-22C55E?style=for-the-badge&labelColor=111111">
+
+<br>
+
+<sub><b>Creative</b></sub>
+
+</td>
+
+<td align="center" width="160">
+
+<img src="https://img.shields.io/badge/✓-SCAN-38BDF8?style=for-the-badge&labelColor=111111">
+
+<br>
+
+<sub><b>Scanability</b></sub>
+
+</td>
+
+</tr>
+</table>
+
+</div>
+<br>
+
+> [!NOTE]
+>
+> ### **MORE FROM EHSAAN**
+>
+> 🗜️ **[EHSAAN COMPRESS](https://ehsaancompress.ai.studio/)**  
+> Compress images without the unnecessary fuss.
+>
+> 🎨 **[EHSAAN COLOUR STUDIO](https://ehsaancolour.ai.studio/)**  
+> Explore, create, and play with color.
+>
+> ◈ **[EHSAAN GITHUB](https://github.com/ehsaanullah0/fertenix/)**  
+> The main home of the EHSAAN project.
+
+## **Most QR generators give you this:**
+
+<div align="center">
+<img width="300" height="300" alt="image" src="https://github.com/user-attachments/assets/8d8816b1-2a14-4adb-baad-881ceffd8904" />
+
+---
+
+## **BUT EHSAAN QR asks:**
+
+> **What if QR codes didn't all have to look the same?**
+
+So instead of settling for one boring configuration,
+you can **change it, style it, randomize it, and make it yours.**
+
+<br>
+
+<div align="center">
+
+**Generate → Customize → Randomize → Preview → Export**
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="33%">
+
+<img src="https://github.com/user-attachments/assets/eaf21ade-ab81-4c28-a93d-ef16291f4809" width="220">
+
+</td>
+
+<td align="center" width="33%">
+
+<img src="https://github.com/user-attachments/assets/32a48936-2f3a-44a5-9942-25e0654cd237" width="220">
+
+</td>
+
+<td align="center" width="33%">
+
+<img src="https://github.com/user-attachments/assets/20bf2918-beec-4dfb-8b11-5e1abfeb6e31" width="220" />
+
+</td>
+</tr>
+
+<tr>
+<td align="center">
+
+<img src="https://github.com/user-attachments/assets/7b3e9c39-e240-4d74-bb91-cae74bbde036" width="220">
+
+</td>
+
+<td align="center">
+
+<img src="https://github.com/user-attachments/assets/02e86d52-4048-4ecc-a0db-1dc716a45390" width="220">
+
+</td>
+
+<td align="center">
+
+<img src="https://github.com/user-attachments/assets/5a0501e8-e41f-4682-a314-fa022ecb1879" width="220">
+
+</td>
+</tr>
+</table>
+</tr>
+<br>
+
+# 🎨 MAKE IT LOOK LIKE YOU MEAN IT
+
+<div align="center">
+
+| ◈ COLORS | ◇ SHAPES | ⬡ EYES | ✦ BACKGROUNDS |
+| :------: | :------: | :----: | :-----------: |
+|   Bold   |   Soft   |  Sharp |    Minimal    |
+|   Dark   |  Rounded | Custom |    Creative   |
+|  Bright  |  Unusual | Styled |  Experimental |
+
+</div>
+
+EHSAAN QR isn't built around the idea that every QR code should be a
+black square sitting on a white square.
+
+Play with the visual system.
+
+Mix things together.
+
+Break the usual pattern.
+
+Then keep the one that feels right.
+
+---
+
+# 🎲 RANDOMIZE
+
+<div align="center">
+
+### **Don't know what you want?**
+
+### **Let EHSAAN QR surprise you.**
+
+</div>
+
+The **Randomize** system is one of the heartbeats of EHSAAN QR.
+
+Instead of manually changing every setting:
+
+**Press randomize.**
+
+And get a new visual combination.
+
+```text
+          ┌──────────────────┐
+          │                  │
+          │     RANDOMIZE    │
+          │        ✦         │
+          │                  │
+          └────────┬─────────┘
+                   │
+       ┌───────────┼───────────┐
+       ▼           ▼           ▼
+    COLORS       SHAPES      STYLE
+       │           │           │
+       └───────────┼───────────┘
+                   ▼
+             ✦ NEW QR ✦
+```
+
+Every generation can feel different.
+
+Sometimes minimal.
+
+Sometimes weird.
+
+Sometimes surprisingly good.
+
+**That's the fun.**
+
+---
+
+# 🛡️ BUT...
+
+<div align="center">
+
+## **PRETTY IS USELESS IF IT DOESN'T SCAN.**
+
+</div>
+
+A QR code can look fantastic and still fail at the one thing
+a QR code is supposed to do.
+
+**Get scanned.**
+
+That's why EHSAAN QR treats scanability as a fundamental constraint
+rather than an optional extra.
+
+The visual system is intended to preserve enough distinction between
+the QR pattern and its surroundings while still allowing creative
+customization.
+
+### Think of it like this:
+
+> **More freedom.
+> Not less usability.**
+
+---
+
+# 🧪 THE FUN PART
+
+<div align="center">
+
+### Start ordinary.
+
+`████████████`
+
+↓
+
+### Change the shape.
+
+`● ● ● ● ● ●`
+
+↓
+
+### Change the colors.
+
+`✦ ✦ ✦ ✦ ✦ ✦`
+
+↓
+
+### Randomize.
+
+`◈ ◇ ● ✦ ◇ ◈`
+
+↓
+
+### **Keep the one you love.**
 
 </div>
 
 ---
 
-## ✦ ABOUT
+# 🧩 WHAT CAN YOU DO?
 
-**EHSAAN QR** is a modern QR code generator designed around one simple idea:
+<div align="center">
 
-> **QR codes don't have to look boring.**
+### 🌐 LINK IT
 
-Most QR generators focus on producing the same familiar black-and-white square.
+Websites • Pages • Resources
 
-EHSAAN QR takes a different approach.
+### 🎨 STYLE IT
 
-It allows you to create QR codes with **custom colors, shapes, styles, backgrounds, and visual combinations** while keeping the most important thing intact:
+Colors • Shapes • Visual treatments
 
-**The QR code must remain usable and scannable.**
+### 🎲 RANDOMIZE IT
 
-Whether you're creating a QR code for a website, social profile, digital menu, event, business card, campaign, or personal project, EHSAAN QR gives you more control over how the final code looks.
+Generate unexpected combinations
 
----
+### 👀 PREVIEW IT
 
-## ✨ WHAT MAKES IT DIFFERENT?
+See the result before using it
 
-EHSAAN QR is not designed to produce one "perfect" QR code.
+### 📦 EXPORT IT
 
-It is designed to give you **many different possibilities**.
+Take your finished QR wherever you need it
 
-The built-in randomization system can create different combinations of:
-
-* 🎨 Colors
-* ◈ QR module shapes
-* ⬡ Finder / eye styles
-* 🖼️ Background styles
-* ✦ Visual combinations
-* 📐 Layout variations
-
-This means every generation can feel a little different.
-
-Instead of repeatedly creating the same conventional QR code, you can explore different visual styles until you find one that fits your project.
+</div>
 
 ---
 
-## 🎨 CUSTOMIZATION
+# ✦ MADE FOR...
 
-EHSAAN QR gives you control over the appearance of your QR code rather than treating it as a fixed black-and-white pattern.
+<table>
+<tr>
+<td width="50%">
 
-### Color
+### 💼 BUSINESS
 
-Customize the visual relationship between:
+Business cards
+Packaging
+Brochures
+Promotional material
 
-* QR foreground
-* Background
-* Finder patterns
-* Other supported visual elements
+</td>
+<td width="50%">
 
-Create something subtle, bold, minimal, or expressive.
+### 🎨 CREATIVE
 
-### Shapes
+Posters
+Artwork
+Portfolios
+Personal projects
 
-Change the appearance of the QR modules to move beyond the traditional square-pixel look.
+</td>
+</tr>
 
-Different shapes can give the same QR code a completely different personality.
+<tr>
+<td width="50%">
 
-### Finder Patterns
+### 🍽️ EVERYDAY
 
-The three large positioning patterns are an important part of the QR code's identity.
+Menus
+Events
+Invitations
+Digital information
 
-EHSAAN QR allows supported finder/eye styles to be customized so the overall design feels more intentional.
+</td>
+<td width="50%">
 
-### Backgrounds
+### 📱 DIGITAL
 
-The background doesn't have to be an afterthought.
+Websites
+Social profiles
+Online resources
+Campaigns
 
-Experiment with different background treatments while maintaining enough visual separation between the QR pattern and its surroundings.
-
----
-
-## 🎲 RANDOMIZE
-
-One of the core ideas behind EHSAAN QR is **randomized design generation**.
-
-Instead of manually changing every setting, simply randomize the QR code and explore a new combination.
-
-### Randomization can affect:
-
-* Color combinations
-* Module shapes
-* Eye styles
-* Background appearance
-* Other supported design parameters
-
-This turns QR generation into more of an **exploration process**.
-
-> **Generate → Discover → Keep what you like.**
-
-Not every combination will be equally suitable for every environment, which is why scanability remains an important part of the generation process.
+</td>
+</tr>
+</table>
 
 ---
 
-## 🛡️ SCANABILITY FIRST
+# 🖥️ THE EXPERIENCE
 
-A QR code can look beautiful and still be useless if a phone cannot read it.
+<div align="center">
 
-That's why EHSAAN QR is designed around a simple principle:
+### **01**
 
-> **Design freedom should not come at the cost of usability.**
+## PUT SOMETHING IN
 
-The generator should allow creative combinations while avoiding or correcting combinations that become difficult to scan.
+Give EHSAAN QR the content.
 
-This is particularly important when using:
+↓
 
-* Dark backgrounds
-* Low-contrast colors
-* Unusual module shapes
-* Aggressive visual combinations
-* Highly customized finder patterns
+### **02**
 
-The goal isn't to restrict creativity.
+## MAKE IT YOURS
 
-The goal is to make **creative QR codes that still work.**
+Choose the visual direction.
 
----
+↓
 
-## ⚡ HOW TO USE
+### **03**
 
-Using EHSAAN QR is straightforward.
+## PLAY
 
-### 01 — Enter your content
+Randomize.
 
-Provide the information you want your QR code to represent.
+Experiment.
 
-For example:
+Try something unexpected.
 
-* Website URL
-* Social profile
-* Text
-* Contact information
-* Digital resource
-* Any other supported QR content
+↓
 
-### 02 — Customize
+### **04**
 
-Adjust the available visual options to match your preference.
+## CHECK
 
-### 03 — Randomize
+Make sure it looks right
+and remains usable.
 
-Don't know what style to choose?
+↓
 
-Use the randomization system to discover new combinations.
+### **05**
 
-### 04 — Preview
+## TAKE IT WITH YOU
 
-Check the generated QR code before exporting it.
+Export your QR.
 
-### 05 — Export
-
-Save your finished QR code and use it wherever you need it.
+</div>
 
 ---
 
-## 🧩 USE CASES
+# ◈ WHY IT EXISTS
 
-EHSAAN QR can be useful for a wide range of situations.
+There are thousands of QR generators.
 
-| Use Case             | Example                                   |
-| -------------------- | ----------------------------------------- |
-| 🌐 Websites          | Link directly to a website                |
-| 📱 Social Media      | Share profiles and pages                  |
-| 💼 Business          | Business cards, brochures, packaging      |
-| 🍽️ Restaurants      | Menus and ordering pages                  |
-| 🎟️ Events           | Invitations and event information         |
-| 📦 Products          | Packaging and product information         |
-| 🎨 Creative Projects | Posters, artwork and portfolios           |
-| 🏠 Personal          | Wi-Fi, contact details and personal links |
-| 📢 Marketing         | Campaigns and promotional materials       |
+Most of them work perfectly well.
 
----
+But most of them also produce something that looks like...
 
-## 🖥️ DESIGN PHILOSOPHY
+<div align="center">
 
-EHSAAN QR follows the broader philosophy behind the EHSAAN project:
+### **a QR code.**
 
-> **Make useful things.
-> Make them feel good to use.**
+</div>
 
-The objective isn't to add customization simply because customization exists.
+EHSAAN QR is an experiment in asking:
 
-Every visual option should contribute to making QR codes more personal, interesting, and useful.
+> **Can something functional also be visually interesting?**
 
-The interface is intentionally focused on the actual task:
+The answer is **yes**.
 
-**Create a QR code → make it yours → use it.**
+A QR code is still a QR code.
+
+But now it can have a little more character.
 
 ---
 
-## 🔐 PRIVACY
+# 🧠 THE IDEA BEHIND EHSAAN QR
 
-EHSAAN QR is designed as a lightweight browser-based tool.
+<div align="center">
 
-Your QR content is used to generate the QR code you request.
+## **FUNCTION × DESIGN**
 
-For sensitive information, users should always consider the nature of the content they are encoding before sharing or publishing a QR code.
+### not
 
-> **Never encode information into a publicly distributed QR code that you wouldn't want someone else to obtain.**
+## **FUNCTION vs DESIGN**
 
----
+</div>
 
-## 🚀 THE EXPERIENCE
+The goal isn't to make QR codes complicated.
 
-EHSAAN QR is built around a simple workflow:
+It's to make customization feel natural.
 
-```text
-        YOUR CONTENT
-             │
-             ▼
-      ┌─────────────┐
-      │  GENERATE   │
-      └──────┬──────┘
-             │
-             ▼
-      ┌─────────────┐
-      │  CUSTOMIZE  │
-      └──────┬──────┘
-             │
-             ▼
-      ┌─────────────┐
-      │  RANDOMIZE  │
-      └──────┬──────┘
-             │
-             ▼
-      ┌─────────────┐
-      │   PREVIEW   │
-      └──────┬──────┘
-             │
-             ▼
-      ┌─────────────┐
-      │    EXPORT   │
-      └─────────────┘
-```
+No unnecessary complexity.
 
-Simple on the surface.
+No giant learning curve.
 
-Flexible underneath.
+Just enough control to make something that feels **yours**.
 
 ---
 
-## 🌐 THE WEBSITE
+# ⚡ QUICK LOOK
 
-The official home of EHSAAN QR:
+<div align="center">
 
-**[ehsaanqr.ai.studio](https://ehsaanqr.ai.studio/)**
+|                 |    |
+| :-------------- | -: |
+| **Generate**    |  ◉ |
+| **Customize**   |  ✦ |
+| **Randomize**   | 🎲 |
+| **Preview**     | 👁 |
+| **Export**      |  ↓ |
+| **Scanability** |  ✓ |
 
-> [!TIP]
-> **Try the randomizer.**
->
-> Some of the most interesting QR designs are the ones you don't plan yourself.
+</div>
 
----
+<br>
 
-## 🧪 PROJECT STATUS
+<div align="center">
 
-EHSAAN QR is an actively evolving project.
+### **Simple underneath.**
 
-The generator and its visual system may continue to receive improvements as new ideas, customization options, and scanability improvements are developed.
+### **Playful on top.**
 
-Possible future improvements may include:
-
-* [ ] More QR module styles
-* [ ] More finder / eye designs
-* [ ] More color combinations
-* [ ] Advanced gradients
-* [ ] More background options
-* [ ] Additional export controls
-* [ ] More customization controls
-* [ ] Further scanability improvements
-* [ ] Additional QR content types
+</div>
 
 ---
 
-## 🛠️ BUILT WITH
+# 🌐 TRY IT
 
-EHSAAN QR is built as a modern web-based tool using **Google AI Studio**.
+<div align="center">
 
-The project is designed to run directly in the browser, making it accessible without requiring users to install a dedicated QR application.
+<a href="https://ehsaanqr.ai.studio/">
+
+<img src="https://img.shields.io/badge/✦%20TRY%20EHSAAN%20QR-E7AC08?style=for-the-badge&labelColor=111111" alt="Try EHSAAN QR">
+
+</a>
+
+<br><br>
+
+**https://ehsaanqr.ai.studio/**
+
+</div>
 
 ---
 
-## 💡 WHY EHSAAN QR?
+# 🛠️ BUILT WITH
 
-Because QR codes are everywhere.
+<div align="center">
 
-And most of them look exactly the same.
+**Google AI Studio**
 
-EHSAAN QR explores what happens when something as ordinary as a QR code gets a little more attention to **design, customization, and personality**.
+<br>
 
-It isn't trying to replace simple QR generators.
+A browser-based web experience designed to stay
+lightweight, accessible, and easy to use.
 
-It is trying t
+</div>
+
+---
+
+# 🧪 PROJECT STATUS
+
+<div align="center">
+
+### 🟢 **ALIVE & EVOLVING**
+
+</div>
+
+EHSAAN QR is an evolving project.
+
+The visual system can continue to grow with:
+
+* ◈ New QR shapes
+* 🎨 More color combinations
+* ✦ More visual styles
+* 👁 More eye / finder designs
+* 🖼️ More background treatments
+* ⚙️ More export controls
+* 🛡️ Further scanability improvements
+* 🧩 More QR functionality
+
+The idea is simple:
+
+> **Keep adding possibilities without adding unnecessary complexity.**
+
+---
+
+# 🔐 A SMALL PRIVACY NOTE
+
+EHSAAN QR is designed as a browser-based tool.
+
+As with any QR generator, think carefully about what you encode
+before putting a QR code somewhere public.
+
+A QR code is essentially a visual way of sharing information.
+
+**Don't encode something publicly that you wouldn't want publicly accessible.**
+
+---
+
+# ◈ PART OF EHSAAN
+
+<div align="center">
+
+### **Different tools.**
+
+### **Same philosophy.**
+
+<br>
+
+# **Make useful things.**
+
+# **Make them feel good to use.**
+
+</div>
+
+<br>
+
+
+# 👤 EHSAAN ULLAH
+
+<div align="center">
+
+**Building small digital things
+that are useful, simple, and enjoyable to use.**
+
+<br>
+
+### **◈ EHSAAN QR**
+
+**Make the ordinary a little less ordinary.**
+
+<br>
+
+<a href="https://ehsaanqr.ai.studio/">
+<img src="https://img.shields.io/badge/OPEN%20THE%20TOOL-111111?style=for-the-badge" alt="Open tool">
+</a>
+
+</div>
+
+---
+
+<div align="center">
+
+<sub>
+
+Built with curiosity.
+Designed with intention.
+Made by EHSAAN.
+
+</sub>
+
+<br><br>
+
+**◈**
+
+</div>
+<p align="center">
+  <a href="https://ehsaan.odoo.com/" target="_blank">
+<img width="130" height="130" alt="cropped_circle_image" src="https://github.com/user-attachments/assets/336454db-ef7d-4003-b33a-db16a945ae3c" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="mailto:worsmon@gmail.com">
+    <img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
+  </a>
+  &nbsp;
+  <a href="https://github.com/worsmon-org">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+  </a>
+  &nbsp;
+  <a href="https://ehsaan.odoo.com/">
+    <img src="https://img.shields.io/badge/Website-0A84FF?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Website">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/ehsaanullah0/niagara-premium/releases/tag/v.10.21">
+    <img src="https://img.shields.io/badge/Release-Niagara.pro-c9b58a?style=for-the-badge" />
+  </a>
+</p>
+
+<p align="center">
+  <sub>Built with curiosity, too many tabs, and the occasional “let's see what happens.”</sub>
+</p>
