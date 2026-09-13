@@ -25,18 +25,25 @@ import {
 } from 'lucide-react';
 import { EhsaanFlameIcon } from './EhsaanLogo';
 import { resolvePupilShape } from '../utils/qrRenderer';
+import { SmartRandomizeController } from './SmartRandomizeController';
 import {
   getRandomBg,
   getRandomPupil,
   getRandomBgAndPupil,
   getRandomAllOptions,
 } from '../utils/colorRandomizer';
+import { RandomizeTarget, RandomizeType } from '../types';
 
 interface CustomizationPanelProps {
   options: QrStyleOptions;
   onChange: (options: QrStyleOptions) => void;
   activeTab?: CustomizationTabKey;
   onTabChange?: (tab: CustomizationTabKey) => void;
+  selectedRandomizeTarget?: RandomizeTarget;
+  selectedRandomizeType?: RandomizeType;
+  onRandomizeTargetChange?: (target: RandomizeTarget) => void;
+  onRandomizeTypeChange?: (type: RandomizeType) => void;
+  onShowToast?: (msg: string) => void;
 }
 
 type TabKey = CustomizationTabKey;
@@ -263,8 +270,21 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   onChange,
   activeTab: propActiveTab,
   onTabChange,
+  selectedRandomizeTarget,
+  selectedRandomizeType,
+  onRandomizeTargetChange,
+  onRandomizeTypeChange,
+  onShowToast,
 }) => {
   const [internalTab, setInternalTab] = useState<TabKey>('colors');
+  const [internalRandTarget, setInternalRandTarget] = useState<RandomizeTarget>('all');
+  const [internalRandType, setInternalRandType] = useState<RandomizeType>('both');
+
+  const currentRandTarget = selectedRandomizeTarget ?? internalRandTarget;
+  const currentRandType = selectedRandomizeType ?? internalRandType;
+  const handleTargetChange = onRandomizeTargetChange ?? setInternalRandTarget;
+  const handleTypeChange = onRandomizeTypeChange ?? setInternalRandType;
+
   const activeTab = propActiveTab ?? internalTab;
   const setActiveTab = (tab: TabKey) => {
     if (onTabChange) {
@@ -415,24 +435,27 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
         </div>
       </div>
 
-      {/* Quick Action Header with Randomize All */}
-      <div className="px-3.5 sm:px-5 py-2.5 bg-zinc-50/80 dark:bg-zinc-900/50 border-b border-zinc-200/80 dark:border-zinc-800 flex items-center justify-between">
-        <div className="flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400">
+      {/* Quick Action Header with Smart Randomize Controller */}
+      <div className="px-3.5 sm:px-5 py-2.5 bg-zinc-50/80 dark:bg-zinc-900/50 border-b border-zinc-200/80 dark:border-zinc-800 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 text-xs text-zinc-600 dark:text-zinc-400 min-w-0">
           <Sparkles className="w-3.5 h-3.5 text-red-600 dark:text-red-400 shrink-0" />
-          <span className="font-semibold text-zinc-800 dark:text-zinc-200">Customizer</span>
-          <span>•</span>
-          <span className="text-[11px] text-zinc-500">Fine-tune or roll full designs</span>
+          <span className="font-semibold text-zinc-800 dark:text-zinc-200 truncate">Customizer</span>
+          <span className="hidden xs:inline">•</span>
+          <span className="text-[11px] text-zinc-500 truncate hidden sm:inline">Fine-tune or roll designs</span>
         </div>
-        <button
-          type="button"
-          id="btn-panel-randomize-all"
-          onClick={handleRandomizeAll}
-          className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all active:scale-95 shadow-2xs group"
-          title="Randomize everything: FG, BG, Pattern, Eye shapes, and Pupil shapes"
-        >
-          <Sparkles className="w-3 h-3 text-white shrink-0 group-hover:rotate-12 transition-transform" />
-          <span>Randomize All</span>
-        </button>
+        <SmartRandomizeController
+          options={options}
+          onOptionsChange={update}
+          onShowToast={(msg) => {
+            if (onShowToast) onShowToast(msg);
+          }}
+          saturationPreference={options.bgSaturationPreference}
+          selectedTarget={currentRandTarget}
+          selectedType={currentRandType}
+          onTargetChange={handleTargetChange}
+          onTypeChange={handleTypeChange}
+          idPrefix="panel-rand"
+        />
       </div>
 
       <div className="p-3.5 sm:p-5">

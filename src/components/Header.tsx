@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppTheme } from '../types';
 import { EhsaanLogo } from './EhsaanLogo';
-import { Sun, Moon, Sparkles, ShieldCheck, History, QrCode } from 'lucide-react';
+import { Sun, Moon, Sparkles, ShieldCheck, History, QrCode, Layers } from 'lucide-react';
 
 interface HeaderProps {
   theme: AppTheme;
@@ -46,16 +46,16 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="hidden sm:inline">Test QR</span>
           </button>
 
-          {/* Saved Designs button */}
+          {/* Saved Templates button */}
           <button
             id="header-saved-designs-btn"
             onClick={onOpenHistory}
             className="relative flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500/30"
-            title="View saved QR designs"
-            aria-label="View saved QR designs"
+            title="View saved QR design templates"
+            aria-label="View saved QR design templates"
           >
-            <History className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
-            <span className="hidden sm:inline">Saved</span>
+            <Layers className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+            <span className="hidden sm:inline">Templates</span>
             {savedCount > 0 && (
               <span className="flex items-center justify-center w-4 h-4 text-[10px] font-bold rounded-full bg-red-600 text-white">
                 {savedCount}

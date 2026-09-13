@@ -27,14 +27,17 @@ import {
   Wand2,
 } from 'lucide-react';
 import { EhsaanFlameIcon } from './EhsaanLogo';
+import { SmartRandomizeController } from './SmartRandomizeController';
 import {
   getRandomBgAndPupil,
   getRandomBg,
   getRandomPupil,
   getRandomAllOptions,
+  executeSmartRandomize,
   SaturationPreference,
 } from '../utils/colorRandomizer';
 import { PreDownloadCheckModal } from './PreDownloadCheckModal';
+import { RandomizeTarget, RandomizeType } from '../types';
 
 interface LivePreviewCardProps {
   payload: string;
@@ -44,6 +47,10 @@ interface LivePreviewCardProps {
   onOpenScanner: () => void;
   onSaveDesign: () => void;
   onOptionsChange?: (opts: Partial<QrStyleOptions>) => void;
+  selectedRandomizeTarget?: RandomizeTarget;
+  selectedRandomizeType?: RandomizeType;
+  onRandomizeTargetChange?: (target: RandomizeTarget) => void;
+  onRandomizeTypeChange?: (type: RandomizeType) => void;
 }
 
 export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
@@ -54,6 +61,10 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
   onOpenScanner,
   onSaveDesign,
   onOptionsChange,
+  selectedRandomizeTarget,
+  selectedRandomizeType,
+  onRandomizeTargetChange,
+  onRandomizeTypeChange,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('png');
@@ -76,9 +87,14 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
 
   const handleRandomizeAll = () => {
     if (!onOptionsChange) return;
-    const newOptions = getRandomAllOptions(options, bgSaturation);
-    onOptionsChange(newOptions);
-    onShowToast(`Randomized All: Pattern, Eye & Pupil Shapes, and Colors ✓`);
+    const { updated, message } = executeSmartRandomize(
+      options,
+      selectedRandomizeTarget || 'all',
+      selectedRandomizeType || 'both',
+      bgSaturation
+    );
+    onOptionsChange(updated);
+    onShowToast(message);
   };
 
   const handleRandomizeBgAndPupil = () => {
@@ -230,18 +246,27 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Readability Status Pill */}
-          {readability.score === 'excellent' || readability.score === 'good' ? (
-            <div className="flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-[11px] sm:text-xs font-semibold">
+          {/* Readability Score & Status Pill */}
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border text-[11px] sm:text-xs font-bold ${
+              readability.level === 'excellent' || readability.level === 'good'
+                ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+                : readability.level === 'moderate'
+                ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400'
+                : readability.level === 'risky'
+                ? 'bg-orange-50 dark:bg-orange-950/40 border-orange-200 dark:border-orange-800 text-orange-700 dark:text-orange-400'
+                : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400'
+            }`}
+          >
+            {readability.level === 'excellent' || readability.level === 'good' ? (
               <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-              <span>Scan-ready</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-[11px] sm:text-xs font-semibold">
+            ) : (
               <AlertTriangle className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-              <span>Check contrast</span>
-            </div>
-          )}
+            )}
+            <span>
+              {readability.overallScore}/100 • <span className="capitalize">{readability.level}</span>
+            </span>
+          </div>
 
           {/* Test QR Trigger Button */}
           <button
@@ -300,51 +325,45 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
             <span>{ecNames[options.errorCorrection]}</span>
           </div>
 
-          {/* Randomize Options: Compact 4-button grid on all viewports */}
+          {/* Randomize Options: Smart Expandable Controller with quick actions */}
           {onOptionsChange && (
-            <div className="w-full max-w-[210px] sm:max-w-[280px] mt-2 sm:mt-3 pt-2 sm:pt-2.5 border-t border-zinc-200/80 dark:border-zinc-800/80 grid grid-cols-4 gap-1 sm:gap-1.5">
-              <button
-                type="button"
-                id="btn-randomize-all-preview"
-                onClick={handleRandomizeAll}
-                className="flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[10px] sm:text-xs font-bold transition-all active:scale-98 shadow-2xs group"
-                title="Randomize All: FG, BG, Pattern, Eye shape, and Pupil shape"
-              >
-                <Sparkles className="w-3 h-3 text-white shrink-0 group-hover:rotate-12 transition-transform" />
-                <span className="truncate">All</span>
-              </button>
-
-              <button
-                type="button"
-                id="btn-randomize-preview-main"
-                onClick={handleRandomizeBgAndPupil}
-                className="flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-white text-[10px] sm:text-xs font-bold transition-all active:scale-98 shadow-2xs group"
-                title="Randomize both background and pupil colors"
-              >
-                <Dices className="w-3 h-3 text-red-500 shrink-0 group-hover:rotate-12 transition-transform" />
-                <span className="truncate">Both</span>
-              </button>
+            <div className="w-full max-w-[260px] sm:max-w-[340px] mt-2 sm:mt-3 pt-2 sm:pt-2.5 border-t border-zinc-200/80 dark:border-zinc-800/80 flex items-center gap-1.5 sm:gap-2">
+              <div className="flex-1 min-w-0">
+                <SmartRandomizeController
+                  options={options}
+                  onOptionsChange={onOptionsChange}
+                  onShowToast={onShowToast}
+                  saturationPreference={bgSaturation}
+                  selectedTarget={selectedRandomizeTarget || 'all'}
+                  selectedType={selectedRandomizeType || 'both'}
+                  onTargetChange={onRandomizeTargetChange || (() => {})}
+                  onTypeChange={onRandomizeTypeChange || (() => {})}
+                  idPrefix="preview-rand"
+                  compact
+                  className="w-full"
+                />
+              </div>
 
               <button
                 type="button"
                 id="btn-randomize-bg-preview"
                 onClick={handleRandomizeBg}
-                className="flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-[10px] sm:text-xs font-semibold text-zinc-700 dark:text-zinc-300 transition-colors shadow-2xs"
+                className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-[10px] sm:text-xs font-semibold text-zinc-700 dark:text-zinc-300 transition-colors shadow-2xs shrink-0 cursor-pointer"
                 title="Randomize background color only"
               >
                 <Shuffle className="w-2.5 h-2.5 text-zinc-400 shrink-0" />
-                <span className="truncate">BG</span>
+                <span>BG</span>
               </button>
 
               <button
                 type="button"
                 id="btn-randomize-pupil-preview"
                 onClick={handleRandomizePupil}
-                className="flex items-center justify-center gap-1 py-1.5 px-1 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-[10px] sm:text-xs font-semibold text-zinc-700 dark:text-zinc-300 transition-colors shadow-2xs"
+                className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-[10px] sm:text-xs font-semibold text-zinc-700 dark:text-zinc-300 transition-colors shadow-2xs shrink-0 cursor-pointer"
                 title="Randomize pupil color only"
               >
                 <Shuffle className="w-2.5 h-2.5 text-zinc-400 shrink-0" />
-                <span className="truncate">Pupil</span>
+                <span>Pupil</span>
               </button>
             </div>
           )}
@@ -425,31 +444,6 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                 </div>
               </button>
             </div>
-
-            {/* Quick Randomize Trigger Row: Roll All + Roll BG */}
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-0.5 text-xs">
-              <button
-                type="button"
-                id="btn-quick-randomize-all"
-                onClick={handleRandomizeAll}
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-600/10 dark:bg-red-500/15 border border-red-500/30 text-red-600 dark:text-red-400 font-bold hover:bg-red-600/20 transition-colors"
-                title="Randomize entire QR code design (FG, BG, Pattern, Eye, Pupil)"
-              >
-                <Sparkles className="w-3 h-3 text-red-600 dark:text-red-400" />
-                <span>Randomize All (FG, BG, Pattern & Eyes)</span>
-              </button>
-
-              <button
-                type="button"
-                id="btn-quick-randomize-bg"
-                onClick={handleRandomizeBg}
-                className="flex items-center gap-1 text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
-                title={`Generate another ${bgSaturation === 'high' ? 'vibrant' : 'pastel'} background`}
-              >
-                <Shuffle className="w-3 h-3" />
-                <span>Roll {bgSaturation === 'high' ? 'Vibrant' : 'Pastel'} BG</span>
-              </button>
-            </div>
           </div>
 
           {/* Format Selector Pills & Export Resolution */}
@@ -518,14 +512,14 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
             )}
           </div>
 
-          {/* Main Download CTA and Direct Test Action Suite */}
-          <div className="flex flex-col sm:flex-row gap-2">
+          {/* Main Download CTA */}
+          <div>
             <button
               id="main-download-qr-btn"
               type="button"
               disabled={isExporting || !payload}
               onClick={handleDownloadClick}
-              className="flex-1 flex items-center justify-center gap-2 py-3 sm:py-3.5 px-4 sm:px-6 min-h-[44px] sm:min-h-[48px] rounded-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-red-600/20 hover:shadow-red-600/30 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-red-500/30"
+              className="w-full flex items-center justify-center gap-2 py-3 sm:py-3.5 px-4 sm:px-6 min-h-[44px] sm:min-h-[48px] rounded-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-bold text-xs sm:text-sm shadow-md shadow-red-600/20 hover:shadow-red-600/30 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-red-500/30"
             >
               <Download className="w-4 h-4 shrink-0" />
               <span>
@@ -533,17 +527,6 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                   ? 'Generating Export...'
                   : `Download ${selectedFormat.toUpperCase()} (${exportRes}px)`}
               </span>
-            </button>
-
-            <button
-              id="btn-direct-test-qr"
-              type="button"
-              onClick={onOpenScanner}
-              className="flex items-center justify-center gap-1.5 py-3 sm:py-3.5 px-4 rounded-full border border-zinc-200/90 dark:border-zinc-700/80 bg-zinc-100/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 font-bold text-xs sm:text-sm transition-all shadow-2xs hover:scale-[1.01] active:scale-[0.99]"
-              title="Test QR Code with scanner & decoder"
-            >
-              <QrCode className="w-4 h-4 text-red-500 shrink-0" />
-              <span>Test QR</span>
             </button>
           </div>
 
@@ -585,16 +568,16 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
               <span>Share QR</span>
             </button>
 
-            {/* Save Design Locally */}
+            {/* Save Template Locally */}
             <button
               id="btn-save-design"
               type="button"
               onClick={onSaveDesign}
               className="flex items-center justify-center gap-1.5 py-2 sm:py-2.5 px-2.5 min-h-[40px] sm:min-h-[44px] rounded-xl border border-zinc-200/90 dark:border-zinc-700/80 bg-zinc-100/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 active:scale-[0.98] transition-all text-center shadow-2xs font-semibold text-[11px] sm:text-xs"
-              title="Save design to local browser storage"
+              title="Save visual styling as a reusable design template"
             >
               <BookmarkPlus className="w-3.5 h-3.5 shrink-0 text-red-500" />
-              <span>Save Design</span>
+              <span>Save Template</span>
             </button>
           </div>
 

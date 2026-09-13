@@ -1,4 +1,4 @@
-import { getContrastRatio } from './contrast';
+import { getContrastRatio, analyzeReadability } from './contrast';
 import {
   QrStyleOptions,
   PatternStyle,
@@ -6,6 +6,8 @@ import {
   PupilStyle,
   QrCornerStyle,
   ColorMode,
+  RandomizeTarget,
+  RandomizeType,
 } from '../types';
 
 export type SaturationPreference = 'low' | 'high';
@@ -255,12 +257,10 @@ export function getRandomBgAndPupil(
  * - Corner Style (sharp vs smooth)
  * - Eye colors (harmonious or contrasting outer/inner)
  */
-export function getRandomAllOptions(
+function generateCandidateOptions(
   current: QrStyleOptions,
-  saturationPreference?: SaturationPreference
+  pref: SaturationPreference
 ): QrStyleOptions {
-  const pref = saturationPreference || current.bgSaturationPreference || 'low';
-
   // 1. Pick a random pattern
   const newPattern = getRandomItem(PATTERN_STYLES_POOL, current.patternStyle);
 
@@ -270,15 +270,14 @@ export function getRandomAllOptions(
   // 3. Pick a random pupil shape
   const newPupilStyle = getRandomItem(PUPIL_STYLES_POOL, current.pupilStyle);
 
-  // 4. Pick corner style (smooth vs sharp)
-  const newCornerStyle: QrCornerStyle = Math.random() > 0.4 ? 'smooth' : 'sharp';
+  // 4. Retain QR corner style without randomizing (defaults to smooth)
+  const newCornerStyle: QrCornerStyle = current.cornerStyle || 'smooth';
 
-  // 5. Pick color mode (solid or gradient)
+  // 5. Pick color mode (solid or vibrant linear gradient)
   const useGradient = Math.random() > 0.45;
   const newColorMode: ColorMode = useGradient ? 'linear-gradient' : 'solid';
 
   // 6. Select Foreground Colors
-  // Usually deep dark for highest readability, or vibrant with soft background
   const fgPool = Math.random() > 0.3 ? DARK_FG_COLORS : VIBRANT_FG_COLORS;
   const newFgColor = getRandomItem(fgPool, current.fgColor);
   const newFgColorEnd = useGradient
@@ -294,12 +293,13 @@ export function getRandomAllOptions(
   let newEyeInnerColor = newFgColor;
 
   if (useCustomEyeColors) {
-    newEyeOuterColor = getRandomItem(
-      DARK_FG_COLORS.concat(VIBRANT_FG_COLORS).filter(
-        (c) => getContrastRatio(c, newBgColor) >= 3.0
-      ),
-      newBgColor
-    ) || newFgColor;
+    newEyeOuterColor =
+      getRandomItem(
+        DARK_FG_COLORS.concat(VIBRANT_FG_COLORS).filter(
+          (c) => getContrastRatio(c, newBgColor) >= 3.0
+        ),
+        newBgColor
+      ) || newFgColor;
 
     newEyeInnerColor = getRandomPupil(newBgColor, newEyeOuterColor);
   }
@@ -321,4 +321,501 @@ export function getRandomAllOptions(
     bgSaturationPreference: pref,
   };
 }
+
+/**
+ * Intelligent Randomizer with Generate -> Score -> Decide Loop
+ * Preserves maximum creative freedom, unusual colors, gradients, and shapes
+ * while validating optical readability.
+ */
+export function getRandomAllOptions(
+  current: QrStyleOptions,
+  saturationPreference?: SaturationPreference
+): QrStyleOptions {
+  const pref = saturationPreference || current.bgSaturationPreference || 'low';
+
+  // Attempt generation with readability evaluation (Generate -> Score -> Decide)
+  let bestCandidate = generateCandidateOptions(current, pref);
+  let bestReport = analyzeReadability(bestCandidate);
+
+  // If initial candidate has good/moderate/excellent readability (score >= 60), keep it!
+  if (bestReport.overallScore >= 60) {
+    return bestCandidate;
+  }
+
+  // If score is risky (< 60) or poor (< 40), try up to 3 creative re-rolls to find a vibrant combination with better contrast
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const nextCandidate = generateCandidateOptions(current, pref);
+    const nextReport = analyzeReadability(nextCandidate);
+
+    if (nextReport.overallScore > bestReport.overallScore) {
+      bestCandidate = nextCandidate;
+      bestReport = nextReport;
+    }
+
+    if (bestReport.overallScore >= 60) {
+      break;
+    }
+  }
+
+  return bestCandidate;
+}
+
+export const VALID_RANDOMIZE_TYPES: Record<RandomizeTarget, RandomizeType[]> = {
+  all: ['both', 'shape', 'color'],
+  matrix: ['shape'],
+  foreground: ['color'],
+  background: ['color'],
+  eyes: ['both', 'shape', 'color'],
+  eyeColor: ['color'],
+  pupil: ['both', 'shape', 'color'],
+  pupilColor: ['color'],
+  logo: ['both', 'shape', 'color'],
+  frame: ['shape'],
+};
+
+export const RANDOMIZE_TARGET_INFO: Record<
+  RandomizeTarget,
+  { label: string; shortLabel: string; description: string; defaultType: RandomizeType }
+> = {
+  all: {
+    label: 'All Elements',
+    shortLabel: 'All',
+    description: 'Complete QR matrix, eyes, pupils & colors',
+    defaultType: 'both',
+  },
+  matrix: {
+    label: 'QR / Matrix Shape',
+    shortLabel: 'QR Shape',
+    description: 'Data module pattern & pixel curvature',
+    defaultType: 'shape',
+  },
+  foreground: {
+    label: 'Foreground',
+    shortLabel: 'Foreground',
+    description: 'Module colors & gradient tones',
+    defaultType: 'color',
+  },
+  background: {
+    label: 'Background',
+    shortLabel: 'Background',
+    description: 'Canvas backdrop color',
+    defaultType: 'color',
+  },
+  eyes: {
+    label: 'Corner Eyes',
+    shortLabel: 'Corner Eye',
+    description: 'Finder frame contour shape & outer color',
+    defaultType: 'both',
+  },
+  eyeColor: {
+    label: 'Corner Eye Color',
+    shortLabel: 'Corner Eye Color',
+    description: 'Finder frame outer ring color',
+    defaultType: 'color',
+  },
+  pupil: {
+    label: 'Pupil',
+    shortLabel: 'Pupil',
+    description: 'Inner finder center dot shape & color',
+    defaultType: 'both',
+  },
+  pupilColor: {
+    label: 'Pupil Color',
+    shortLabel: 'Pupil Color',
+    description: 'Inner finder center dot color',
+    defaultType: 'color',
+  },
+  logo: {
+    label: 'Logo / Center Element',
+    shortLabel: 'Logo',
+    description: 'Center badge style, background & border',
+    defaultType: 'both',
+  },
+  frame: {
+    label: 'Frame / Corner Style',
+    shortLabel: 'Frame',
+    description: 'Outer corner curve boundary (sharp/smooth)',
+    defaultType: 'shape',
+  },
+};
+
+/**
+ * Returns formatted button label according to selected target and type.
+ * Exactly matches specification examples:
+ * - Default: "Randomize All"
+ * - Pupil + Color: "Pupil · Color"
+ * - Pupil + Shape: "Pupil · Shape"
+ * - Pupil + Both: "Pupil · Both"
+ * - Background: "Background · Color"
+ * - QR Shape: "QR Shape · Shape"
+ */
+export function getRandomizeButtonLabel(target: RandomizeTarget, type: RandomizeType): string {
+  if (target === 'all') {
+    if (type === 'both') return 'Randomize All';
+    if (type === 'shape') return 'All · Shape';
+    if (type === 'color') return 'All · Color';
+  }
+
+  const shortName = RANDOMIZE_TARGET_INFO[target]?.shortLabel || 'All';
+  const typeName = type === 'both' ? 'Both' : type === 'shape' ? 'Shape' : 'Color';
+  return `${shortName} · ${typeName}`;
+}
+
+/**
+ * Executes Smart Randomization on ONLY the targeted element and type,
+ * preserving ALL other user configurations and enforcing optical readability.
+ */
+export function executeSmartRandomize(
+  current: QrStyleOptions,
+  target: RandomizeTarget,
+  type: RandomizeType,
+  saturationPreference?: SaturationPreference
+): { updated: QrStyleOptions; message: string } {
+  const pref = saturationPreference || current.bgSaturationPreference || 'low';
+
+  // 1. ALL
+  if (target === 'all') {
+    if (type === 'both') {
+      const updated = getRandomAllOptions(current, pref);
+      return {
+        updated,
+        message: 'Randomized All: Matrix, Eyes, Pupils, and Colors ✓',
+      };
+    }
+
+    if (type === 'shape') {
+      // Randomize only shapes, retaining ALL colors
+      const newPattern = getRandomItem(PATTERN_STYLES_POOL, current.patternStyle);
+      const newEyeStyle = getRandomItem(EYE_STYLES_POOL, current.eyeStyle);
+      const newPupilStyle = getRandomItem(
+        PUPIL_STYLES_POOL.filter((p) => p !== 'auto'),
+        current.pupilStyle
+      );
+      const newCornerStyle: QrCornerStyle = current.cornerStyle === 'smooth' ? 'sharp' : 'smooth';
+
+      const updated: QrStyleOptions = {
+        ...current,
+        patternStyle: newPattern,
+        eyeStyle: newEyeStyle,
+        pupilStyle: newPupilStyle,
+        cornerStyle: newCornerStyle,
+      };
+
+      return {
+        updated,
+        message: 'Randomized All Shapes: Pattern, Corner Eyes & Pupil ✓',
+      };
+    }
+
+    if (type === 'color') {
+      // Randomize only colors, retaining ALL shapes
+      const useGradient = Math.random() > 0.45;
+      const fgPool = Math.random() > 0.3 ? DARK_FG_COLORS : VIBRANT_FG_COLORS;
+      const newFgColor = getRandomItem(fgPool, current.fgColor);
+      const newFgColorEnd = useGradient
+        ? getRandomItem(VIBRANT_FG_COLORS.concat(DARK_FG_COLORS), newFgColor)
+        : newFgColor;
+      const newBgColor = getRandomBg(current.bgColor, newFgColor, pref);
+
+      const useCustomEyes = Math.random() > 0.4;
+      let newEyeOuterColor = newFgColor;
+      let newEyeInnerColor = newFgColor;
+
+      if (useCustomEyes) {
+        newEyeOuterColor =
+          getRandomItem(
+            DARK_FG_COLORS.concat(VIBRANT_FG_COLORS).filter(
+              (c) => getContrastRatio(c, newBgColor) >= 3.0
+            ),
+            newBgColor
+          ) || newFgColor;
+        newEyeInnerColor = getRandomPupil(newBgColor, newEyeOuterColor);
+      }
+
+      const updated: QrStyleOptions = {
+        ...current,
+        colorMode: useGradient ? 'linear-gradient' : 'solid',
+        fgColor: newFgColor,
+        fgColorEnd: newFgColorEnd,
+        bgColor: newBgColor,
+        transparentBg: false,
+        customEyeColors: useCustomEyes,
+        eyeOuterColor: newEyeOuterColor,
+        eyeInnerColor: newEyeInnerColor,
+        bgSaturationPreference: pref,
+      };
+
+      return {
+        updated,
+        message: 'Randomized All Colors: Foreground, Background & Eyes ✓',
+      };
+    }
+  }
+
+  // 2. QR / MATRIX SHAPE
+  if (target === 'matrix') {
+    const newPattern = getRandomItem(PATTERN_STYLES_POOL, current.patternStyle);
+    const patternNames: Record<PatternStyle, string> = {
+      liquid: 'Liquid Flow',
+      rounded: 'Rounded',
+      dots: 'Dots',
+      'soft-rounded': 'Soft Rounded',
+      square: 'Square',
+    };
+    return {
+      updated: {
+        ...current,
+        patternStyle: newPattern,
+      },
+      message: `Randomized QR Shape: ${patternNames[newPattern]} ✓`,
+    };
+  }
+
+  // 3. FOREGROUND
+  if (target === 'foreground') {
+    // Current BG stays fixed. Find a high-contrast FG color
+    const validFgPool = DARK_FG_COLORS.concat(VIBRANT_FG_COLORS).filter((c) => {
+      if (c.toLowerCase() === current.fgColor.toLowerCase()) return false;
+      return getContrastRatio(c, current.bgColor) >= 3.2;
+    });
+
+    const newFg =
+      validFgPool.length > 0
+        ? getRandomItem(validFgPool)
+        : getContrastRatio('#000000', current.bgColor) >= 3.0
+        ? '#000000'
+        : '#FFFFFF';
+
+    const newFgEnd =
+      current.colorMode !== 'solid'
+        ? getRandomItem(
+            DARK_FG_COLORS.concat(VIBRANT_FG_COLORS).filter(
+              (c) => getContrastRatio(c, current.bgColor) >= 3.0
+            ),
+            newFg
+          ) || newFg
+        : newFg;
+
+    return {
+      updated: {
+        ...current,
+        fgColor: newFg,
+        fgColorEnd: newFgEnd,
+      },
+      message: `Randomized Foreground Color (${newFg}) ✓`,
+    };
+  }
+
+  // 4. BACKGROUND
+  if (target === 'background') {
+    const newBg = getRandomBg(current.bgColor, current.fgColor, pref);
+
+    // Scanability safeguard: if custom eye colors are active, verify they contrast with new background
+    let adjustedEyeOuter = current.eyeOuterColor;
+    let adjustedEyeInner = current.eyeInnerColor;
+
+    if (current.customEyeColors) {
+      if (getContrastRatio(adjustedEyeOuter, newBg) < 2.8) {
+        adjustedEyeOuter = current.fgColor;
+      }
+      if (getContrastRatio(adjustedEyeInner, newBg) < 2.5) {
+        adjustedEyeInner = getRandomPupil(newBg, adjustedEyeOuter);
+      }
+    }
+
+    return {
+      updated: {
+        ...current,
+        bgColor: newBg,
+        transparentBg: false,
+        eyeOuterColor: adjustedEyeOuter,
+        eyeInnerColor: adjustedEyeInner,
+        bgSaturationPreference: pref,
+      },
+      message: `Randomized Background Color (${newBg}) ✓`,
+    };
+  }
+
+  // 5. CORNER EYES (Frame)
+  if (target === 'eyes') {
+    const newEyeStyle =
+      type === 'shape' || type === 'both'
+        ? getRandomItem(EYE_STYLES_POOL, current.eyeStyle)
+        : current.eyeStyle;
+
+    let newEyeOuterColor = current.eyeOuterColor;
+    let customEyes = current.customEyeColors;
+
+    if (type === 'color' || type === 'both') {
+      customEyes = true;
+      const validColors = DARK_FG_COLORS.concat(VIBRANT_FG_COLORS).filter(
+        (c) =>
+          getContrastRatio(c, current.bgColor) >= 3.0 &&
+          c.toLowerCase() !== current.eyeOuterColor.toLowerCase()
+      );
+      newEyeOuterColor =
+        validColors.length > 0 ? getRandomItem(validColors) : current.fgColor;
+    }
+
+    return {
+      updated: {
+        ...current,
+        eyeStyle: newEyeStyle,
+        eyeOuterColor: newEyeOuterColor,
+        customEyeColors: customEyes,
+      },
+      message:
+        type === 'both'
+          ? `Randomized Corner Eye Shape (${newEyeStyle}) & Color (${newEyeOuterColor}) ✓`
+          : type === 'shape'
+          ? `Randomized Corner Eye Shape (${newEyeStyle}) ✓`
+          : `Randomized Corner Eye Color (${newEyeOuterColor}) ✓`,
+    };
+  }
+
+  // 6. CORNER EYE COLOR
+  if (target === 'eyeColor') {
+    const validColors = DARK_FG_COLORS.concat(VIBRANT_FG_COLORS).filter(
+      (c) =>
+        getContrastRatio(c, current.bgColor) >= 3.0 &&
+        c.toLowerCase() !== current.eyeOuterColor.toLowerCase()
+    );
+    const newEyeOuterColor =
+      validColors.length > 0 ? getRandomItem(validColors) : current.fgColor;
+
+    return {
+      updated: {
+        ...current,
+        eyeOuterColor: newEyeOuterColor,
+        customEyeColors: true,
+      },
+      message: `Randomized Corner Eye Color (${newEyeOuterColor}) ✓`,
+    };
+  }
+
+  // 7. PUPIL
+  if (target === 'pupil') {
+    const newPupilStyle =
+      type === 'shape' || type === 'both'
+        ? getRandomItem(
+            PUPIL_STYLES_POOL.filter((p) => p !== 'auto'),
+            current.pupilStyle
+          )
+        : current.pupilStyle;
+
+    let newPupilColor = current.eyeInnerColor;
+    let customEyes = current.customEyeColors;
+
+    if (type === 'color' || type === 'both') {
+      customEyes = true;
+      newPupilColor = getRandomPupil(current.bgColor, current.eyeInnerColor);
+    }
+
+    return {
+      updated: {
+        ...current,
+        pupilStyle: newPupilStyle,
+        eyeInnerColor: newPupilColor,
+        customEyeColors: customEyes,
+      },
+      message:
+        type === 'both'
+          ? `Randomized Pupil Shape (${newPupilStyle}) & Color (${newPupilColor}) ✓`
+          : type === 'shape'
+          ? `Randomized Pupil Shape (${newPupilStyle}) ✓`
+          : `Randomized Pupil Color (${newPupilColor}) ✓`,
+    };
+  }
+
+  // 8. PUPIL COLOR
+  if (target === 'pupilColor') {
+    const newPupilColor = getRandomPupil(current.bgColor, current.eyeInnerColor);
+    return {
+      updated: {
+        ...current,
+        eyeInnerColor: newPupilColor,
+        customEyeColors: true,
+      },
+      message: `Randomized Pupil Color (${newPupilColor}) ✓`,
+    };
+  }
+
+  // 9. LOGO
+  if (target === 'logo') {
+    const logoType = current.logo.type === 'none' ? 'ehsaan' : current.logo.type;
+    const borderRadii = [0, 8, 16, 24, 50];
+    const newBorderRadius =
+      type === 'shape' || type === 'both'
+        ? getRandomItem(borderRadii, current.logo.borderRadius)
+        : current.logo.borderRadius;
+
+    const sizes = [0.18, 0.2, 0.22, 0.24];
+    const newSize =
+      type === 'shape' || type === 'both'
+        ? getRandomItem(sizes, current.logo.sizeRatio)
+        : current.logo.sizeRatio;
+
+    const paddings = [2, 4, 6, 8];
+    const newPadding =
+      type === 'shape' || type === 'both'
+        ? getRandomItem(paddings, current.logo.padding)
+        : current.logo.padding;
+
+    const bgOptions: Array<'white' | 'match' | 'custom'> = ['white', 'match', 'custom'];
+    const newBgType =
+      type === 'color' || type === 'both'
+        ? getRandomItem(bgOptions, current.logo.background as any)
+        : current.logo.background;
+
+    const newCustomBgColor =
+      newBgType === 'custom'
+        ? getRandomItem(DARK_FG_COLORS.concat(VIBRANT_FG_COLORS), current.logo.customBgColor)
+        : current.logo.customBgColor;
+
+    return {
+      updated: {
+        ...current,
+        errorCorrection:
+          current.errorCorrection === 'L' || current.errorCorrection === 'M'
+            ? 'H'
+            : current.errorCorrection,
+        logo: {
+          ...current.logo,
+          type: logoType,
+          sizeRatio: newSize,
+          borderRadius: newBorderRadius,
+          padding: newPadding,
+          background: newBgType,
+          customBgColor: newCustomBgColor,
+        },
+      },
+      message:
+        type === 'both'
+          ? `Randomized Logo Shape (${newBorderRadius}% radius) & Background ✓`
+          : type === 'shape'
+          ? `Randomized Logo Shape (${newBorderRadius}% radius, ${(newSize * 100).toFixed(0)}% size) ✓`
+          : `Randomized Logo Background (${newBgType}) ✓`,
+    };
+  }
+
+  // 10. FRAME / CORNER STYLE
+  if (target === 'frame') {
+    const newCornerStyle: QrCornerStyle =
+      current.cornerStyle === 'smooth' ? 'sharp' : 'smooth';
+    return {
+      updated: {
+        ...current,
+        cornerStyle: newCornerStyle,
+      },
+      message: `Randomized QR Corner Frame: ${newCornerStyle === 'smooth' ? 'Smooth' : 'Sharp'} Corners ✓`,
+    };
+  }
+
+  // Default fallback to all
+  return {
+    updated: getRandomAllOptions(current, pref),
+    message: 'Randomized All ✓',
+  };
+}
+
 

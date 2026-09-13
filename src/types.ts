@@ -167,18 +167,60 @@ export interface SavedQrDesign {
   id: string;
   name: string;
   timestamp: number;
-  qrType: QrType;
-  formData: Partial<QrFormData>;
+  qrType?: QrType;
+  formData?: Partial<QrFormData>;
   style: QrStyleOptions;
   previewThumbnail?: string;
 }
 
+export type ReadabilityLevel = 'excellent' | 'good' | 'moderate' | 'risky' | 'poor';
+
 export interface ReadabilityReport {
-  score: 'excellent' | 'good' | 'warning' | 'danger';
-  contrastRatio: number;
+  overallScore: number; // 0 - 100
+  level: ReadabilityLevel;
+  confidence: 'High' | 'Moderate' | 'Low';
+  
+  // Component breakdown scores (0 - 100)
+  contrastScore: number;
+  localContrastScore: number;
+  moduleClarityScore: number;
+  finderIntegrityScore: number;
+  quietZoneScore: number;
+  logoImpactScore: number;
+
+  // Specific measured metrics
+  logoCoveragePercent: number; // e.g. 8.4%
+  contrastRatio: number; // e.g. 7.2
+  minRegionalContrastRatio: number; // e.g. 5.1
+  modulePixelSize: number; // px per module at export
+  estimatedMatrixModules: number; // e.g. 29x29
   isDarkBg: boolean;
+
+  // Issues & suggestions
   warnings: string[];
   recommendations: string[];
+
+  // Backward compatibility alias
+  score: 'excellent' | 'good' | 'warning' | 'danger';
 }
 
 export type CustomizationTabKey = 'colors' | 'patterns' | 'eyes' | 'logo' | 'quality';
+
+export type RandomizeTarget =
+  | 'all'
+  | 'matrix'
+  | 'foreground'
+  | 'background'
+  | 'eyes'
+  | 'eyeColor'
+  | 'pupil'
+  | 'pupilColor'
+  | 'logo'
+  | 'frame';
+
+export type RandomizeType = 'both' | 'shape' | 'color';
+
+export interface RandomizeConfig {
+  target: RandomizeTarget;
+  type: RandomizeType;
+}

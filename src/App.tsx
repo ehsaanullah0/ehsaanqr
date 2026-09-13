@@ -6,20 +6,25 @@ import {
   AppTheme,
   SavedQrDesign,
   CustomizationTabKey,
+  RandomizeTarget,
+  RandomizeType,
 } from './types';
 import { DEFAULT_FORM_DATA, buildPayload, validatePayload } from './utils/qrPayloads';
 import { analyzeReadability } from './utils/contrast';
 import { renderQrToCanvas } from './utils/qrRenderer';
+import { generateTemplateThumbnail } from './utils/templateCode';
 import { Header } from './components/Header';
 import { TypeSelector } from './components/TypeSelector';
 import { ContentForm } from './components/ContentForm';
 import { CustomizationPanel } from './components/CustomizationPanel';
 import { LivePreviewCard } from './components/LivePreviewCard';
+import { ReadabilityDashboard } from './components/ReadabilityDashboard';
 import { TestQrModal } from './components/TestQrModal';
 import { RecentDesignsModal } from './components/RecentDesignsModal';
 import { MobileFloatingNav } from './components/MobileFloatingNav';
 import { Toast } from './components/Toast';
 import { Footer } from './components/Footer';
+import { OpenSourceShowcase } from './components/OpenSourceShowcase';
 import { Sparkles, ShieldCheck, ExternalLink } from 'lucide-react';
 
 const STORAGE_THEME_KEY = 'ehsaan_qr_theme';
@@ -54,13 +59,13 @@ const INITIAL_STYLE: QrStyleOptions = {
 };
 
 export default function App() {
-  // Theme state: defaults to dark theme
+  // Theme state: defaults to material expressive theme
   const [theme, setTheme] = useState<AppTheme>(() => {
     const saved = localStorage.getItem(STORAGE_THEME_KEY);
     if (saved === 'light' || saved === 'dark' || saved === 'material') {
       return saved;
     }
-    return 'dark';
+    return 'material';
   });
 
   // Active QR type
@@ -74,6 +79,41 @@ export default function App() {
 
   // Active Customization Tab (synchronized across desktop in-panel tabs and mobile/tablet floating nav)
   const [activeCustomTab, setActiveCustomTab] = useState<CustomizationTabKey>('colors');
+
+  // Smart Randomize Controller Persistent State
+  const [selectedRandomizeTarget, setSelectedRandomizeTarget] = useState<RandomizeTarget>(() => {
+    try {
+      const saved = localStorage.getItem('ehsaan_qr_rand_target');
+      return (saved as RandomizeTarget) || 'all';
+    } catch {
+      return 'all';
+    }
+  });
+
+  const [selectedRandomizeType, setSelectedRandomizeType] = useState<RandomizeType>(() => {
+    try {
+      const saved = localStorage.getItem('ehsaan_qr_rand_type');
+      return (saved as RandomizeType) || 'both';
+    } catch {
+      return 'both';
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ehsaan_qr_rand_target', selectedRandomizeTarget);
+    } catch {
+      // ignore
+    }
+  }, [selectedRandomizeTarget]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ehsaan_qr_rand_type', selectedRandomizeType);
+    } catch {
+      // ignore
+    }
+  }, [selectedRandomizeType]);
 
   // Saved designs in local storage
   const [savedDesigns, setSavedDesigns] = useState<SavedQrDesign[]>(() => {
@@ -112,6 +152,27 @@ export default function App() {
     }
   }, [savedDesigns]);
 
+  // Self-healing thumbnail generator for any saved templates missing preview
+  useEffect(() => {
+    const missing = savedDesigns.filter((d) => !d.previewThumbnail);
+    if (missing.length === 0) return;
+
+    let isMounted = true;
+    missing.forEach((item) => {
+      generateTemplateThumbnail(item.style).then((thumb) => {
+        if (isMounted && thumb) {
+          setSavedDesigns((latest) =>
+            latest.map((d) => (d.id === item.id ? { ...d, previewThumbnail: thumb } : d))
+          );
+        }
+      });
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   // Handle form data change
   const handleFormChange = <K extends keyof QrFormData>(
     key: K,
@@ -135,79 +196,106 @@ export default function App() {
 
   // Analyze readability
   const readability = useMemo(() => {
-    return analyzeReadability(styleOptions);
-  }, [styleOptions]);
+    return analyzeReadability(styleOptions, currentPayload);
+  }, [styleOptions, currentPayload]);
 
-  // Save current design locally
+  // Save current design template locally (styling only, no user data)
   const handleSaveDesign = async () => {
     let thumbnail: string | undefined;
+    const samplePayload = 'https://ehsaan.io';
     try {
       const offscreen = document.createElement('canvas');
-      await renderQrToCanvas(offscreen, currentPayload, {
+      await renderQrToCanvas(offscreen, samplePayload, {
         ...styleOptions,
         size: 120,
       });
       thumbnail = offscreen.toDataURL('image/png');
     } catch (e) {
-      console.warn('Could not generate thumbnail', e);
+      console.warn('Could not generate template thumbnail', e);
     }
 
-    const typeNames: Record<QrType, string> = {
-      url: 'Website QR',
-      text: 'Text QR',
-      wifi: 'Wi-Fi QR',
-      email: 'Email QR',
-      phone: 'Phone QR',
-      sms: 'SMS QR',
-      whatsapp: 'WhatsApp QR',
-      vcard: 'Contact Card',
-      upi: 'UPI Payment QR',
-      calendar: 'Event Invite QR',
+    const patternLabels: Record<string, string> = {
+      liquid: 'Liquid Flow',
+      rounded: 'Rounded',
+      dots: 'Dots',
+      'soft-rounded': 'Soft Rounded',
+      square: 'Square',
     };
 
+    const patternName = patternLabels[styleOptions.patternStyle] || 'Custom';
+    const colorModeName =
+      styleOptions.colorMode === 'solid'
+        ? 'Solid'
+        : styleOptions.colorMode === 'linear-gradient'
+        ? 'Linear Gradient'
+        : 'Radial Gradient';
+
     const newDesign: SavedQrDesign = {
-      id: 'design-' + Date.now(),
-      name: `${typeNames[selectedType]} - ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+      id: 'template-' + Date.now(),
+      name: `${patternName} (${colorModeName}) - ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
       timestamp: Date.now(),
-      qrType: selectedType,
-      formData: { [selectedType]: formData[selectedType] },
       style: { ...styleOptions },
       previewThumbnail: thumbnail,
     };
 
     setSavedDesigns((prev) => [newDesign, ...prev.slice(0, 24)]);
-    setToastMessage('Design saved locally ✓');
+    setToastMessage('Design template saved ✓ (Click "Code" under Templates to transfer)');
   };
 
-  // Load a saved design
-  const handleLoadDesign = (design: SavedQrDesign) => {
-    setSelectedType(design.qrType);
-    if (design.formData) {
-      setFormData((prev) => ({
-        ...prev,
-        ...design.formData,
-      }));
+  // Import templates from code (single or bundle)
+  const handleImportDesigns = (imported: SavedQrDesign[], applyFirst = false) => {
+    setSavedDesigns((prev) => {
+      const existingIds = new Set(prev.map((d) => d.id));
+      const fresh = imported.filter((item) => !existingIds.has(item.id));
+      return [...fresh, ...prev];
+    });
+
+    // Asynchronously generate and persist thumbnails for any imported designs missing one
+    imported.forEach((item) => {
+      if (!item.previewThumbnail) {
+        generateTemplateThumbnail(item.style).then((thumb) => {
+          if (thumb) {
+            setSavedDesigns((latest) =>
+              latest.map((d) => (d.id === item.id ? { ...d, previewThumbnail: thumb } : d))
+            );
+          }
+        });
+      }
+    });
+
+    if (applyFirst && imported.length > 0) {
+      handleLoadDesign(imported[0]);
+    } else {
+      setToastMessage(
+        imported.length === 1
+          ? `Template "${imported[0].name}" saved to Templates ✓`
+          : `${imported.length} templates imported to Templates ✓`
+      );
     }
-    setStyleOptions(design.style);
-    setToastMessage(`Loaded "${design.name}" ✓`);
   };
 
-  // Duplicate design
+  // Apply a saved design template (preserves user data & current QR type)
+  const handleLoadDesign = (design: SavedQrDesign) => {
+    setStyleOptions({ ...design.style });
+    setToastMessage(`Applied "${design.name}" template ✓`);
+  };
+
+  // Duplicate design template
   const handleDuplicateDesign = (design: SavedQrDesign) => {
     const copy: SavedQrDesign = {
       ...design,
-      id: 'design-' + Date.now(),
+      id: 'template-' + Date.now(),
       name: `${design.name} (Copy)`,
       timestamp: Date.now(),
     };
     setSavedDesigns((prev) => [copy, ...prev]);
-    setToastMessage('Design duplicated ✓');
+    setToastMessage('Template duplicated ✓');
   };
 
-  // Delete design
+  // Delete design template
   const handleDeleteDesign = (id: string) => {
     setSavedDesigns((prev) => prev.filter((d) => d.id !== id));
-    setToastMessage('Design deleted');
+    setToastMessage('Template deleted');
   };
 
   // Clear all saved
@@ -273,7 +361,7 @@ export default function App() {
         </div>
 
         {/* Top Hero Section: Main QR Code Preview & Instant Export */}
-        <section aria-label="Main QR Code Preview" className="w-full">
+        <section aria-label="Main QR Code Preview" className="w-full space-y-4">
           <LivePreviewCard
             payload={currentPayload}
             options={styleOptions}
@@ -281,6 +369,24 @@ export default function App() {
             onShowToast={setToastMessage}
             onOpenScanner={() => setIsScannerOpen(true)}
             onSaveDesign={handleSaveDesign}
+            onOptionsChange={(newOpts) =>
+              setStyleOptions((prev) => ({
+                ...prev,
+                ...newOpts,
+              }))
+            }
+            selectedRandomizeTarget={selectedRandomizeTarget}
+            selectedRandomizeType={selectedRandomizeType}
+            onRandomizeTargetChange={setSelectedRandomizeTarget}
+            onRandomizeTypeChange={setSelectedRandomizeType}
+          />
+
+          {/* Intelligent Readability Health Dashboard */}
+          <ReadabilityDashboard
+            report={readability}
+            options={styleOptions}
+            onOpenScanner={() => setIsScannerOpen(true)}
+            onShowToast={setToastMessage}
             onOptionsChange={(newOpts) =>
               setStyleOptions((prev) => ({
                 ...prev,
@@ -331,9 +437,19 @@ export default function App() {
                 onChange={setStyleOptions}
                 activeTab={activeCustomTab}
                 onTabChange={setActiveCustomTab}
+                selectedRandomizeTarget={selectedRandomizeTarget}
+                selectedRandomizeType={selectedRandomizeType}
+                onRandomizeTargetChange={setSelectedRandomizeTarget}
+                onRandomizeTypeChange={setSelectedRandomizeType}
+                onShowToast={setToastMessage}
               />
             </div>
           </div>
+        </section>
+
+        {/* Showcase Ehsaan QR Open Source Project */}
+        <section className="pt-2">
+          <OpenSourceShowcase onShowToast={setToastMessage} />
         </section>
       </main>
 
@@ -365,6 +481,10 @@ export default function App() {
         onDuplicateDesign={handleDuplicateDesign}
         onDeleteDesign={handleDeleteDesign}
         onClearAll={handleClearAllSaved}
+        onImportDesigns={handleImportDesigns}
+        onShowToast={setToastMessage}
+        currentStyle={styleOptions}
+        onSaveCurrentAsTemplate={handleSaveDesign}
       />
 
       {/* Micro-interaction Toast */}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Info, MessageSquare, X } from 'lucide-react';
+import { ShieldCheck, Info, MessageSquare, X, Github, ExternalLink } from 'lucide-react';
 import { EhsaanFlameIcon } from './EhsaanLogo';
 
 export const Footer: React.FC = () => {
@@ -34,7 +34,18 @@ export const Footer: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-semibold text-zinc-700 dark:text-zinc-200">
+          <div className="flex flex-wrap items-center gap-3.5 sm:gap-4 text-xs font-semibold text-zinc-700 dark:text-zinc-200">
+            <a
+              href="https://github.com/ehsaanullah0/ehsaanqr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+              title="View Ehsaan QR on GitHub"
+            >
+              <Github className="w-3.5 h-3.5" />
+              <span>GitHub</span>
+            </a>
+            <span className="text-zinc-400 dark:text-zinc-600">•</span>
             <a
               href="https://ehsaan.odoo.com"
               target="_blank"
@@ -112,6 +123,21 @@ export const Footer: React.FC = () => {
                 <p>
                   Engineered with pixel-precise SVG exports, high error correction resilience, and real ISO/IEC 18004 barcode validation.
                 </p>
+                <div className="pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                  <p className="font-semibold text-zinc-800 dark:text-zinc-200 mb-1">
+                    Open Source Repository:
+                  </p>
+                  <a
+                    href="https://github.com/ehsaanullah0/ehsaanqr"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400 hover:underline font-mono text-[11px]"
+                  >
+                    <Github className="w-3.5 h-3.5" />
+                    github.com/ehsaanullah0/ehsaanqr
+                    <ExternalLink className="w-3 h-3 ml-0.5" />
+                  </a>
+                </div>
               </div>
             )}
 
