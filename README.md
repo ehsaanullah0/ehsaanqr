@@ -1,20 +1,182 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# 🗜️ EHSAAN COMPRESS
 
-# Run and deploy your AI Studio app
+<p align="center">
+<img width="200" height="200" src="https://github.com/user-attachments/assets/5e9482b0-4af5-44c6-95b4-d38c92f610f0" />
+</p>
 
-This contains everything you need to run your app locally.
+### **Compress smarter. Keep it clean.**
 
-View your app in AI Studio: https://ai.studio/apps/29f133ed-769d-4f39-b408-19db38eea8dc
+A simple, fast, and privacy-friendly image compression tool built to make reducing image file sizes effortless.
 
-## Run Locally
+**Made for everyday uploads.
+Built for smaller files.
+Designed to keep things simple.**
 
-**Prerequisites:**  Node.js
+---
+
+## ◈ PART OF EHSAAN
+
+There Are Things That Is the growing collection of small digital tools under the **EHSAAN** project.
+
+Different tools.  
+Same philosophy.
+
+**Make useful things. Make them feel good to use.**
+
+> [!NOTE]
+> **More things from EHSAAN:**
+> 
+> 🏠 [**EHSAAN ULLAH**](https://github.com/ehsaanullah0/fertenix) — Portfolio for the web dev work.
+>
+>  ⚡ [ **EHSAAN WEBSITE**](https://ehsaan.odoo.com/) — The main home of the EHSAAN project and everything around it.
+> 
+> 🗜️ [**EHSAAN COMPRESS**](https://ehsaancompress.ai.studio/) — Compress images without the unnecessary fuss.
+>
+> 💥 [**EHSAAN QR**](https://ehsaanqr.ai.studio/) — Generate stunning QR codes for nearly anything.
+>
+> 🔗 [**EHSAAN COLOUR STUDIO**](https://github.com/ehsaanullah0/colour-studio) — Explore, create, and work with colours.
+> 
+> 📌 [**NIAGARA RELEASE**](https://github.com/ehsaanullah0/niagara-premium) — A Morph patch for the original apk.
+
+---
+
+## 🚀 THE TOOL
+
+**EHSAAN COMPRESS** is a browser-based image compressor that helps you reduce image file size without unnecessary complexity.
+
+Whether you're preparing an image for a government website, online form, application, or simply trying to save storage — drop your image in and compress it.
+
+🔗 **[ehsaancompress.ai.studio](https://ehsaancompress.ai.studio/)**
+
+---
+
+## ✨ WHAT IT CAN DO
+
+* 🖼️ **Image Compression** — Reduce image file size quickly
+* 🎯 **Quality Control** — Choose how aggressively to compress
+* 📐 **Maximum Dimensions** — Resize oversized images when needed
+* 📊 **File Size Comparison** — See the difference before and after compression
+* 👀 **Preview** — Check your image before exporting
+* 📦 **Easy Export** — Download the compressed image in seconds
+* 🔒 **Privacy Friendly** — Designed around browser-based processing
+
+---
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+<img width="1285" height="391" src="https://github.com/user-attachments/assets/babb32fc-fcaf-4e1c-acad-c0a6b6f4c21c" />
+
+<img width="1229" height="445" src="https://github.com/user-attachments/assets/4b79f39b-c428-4881-9ceb-ce1e1b008d09" />
+
+<img width="1257" height="466" src="https://github.com/user-attachments/assets/46eb7f04-ab35-4f16-b4e4-7ce164c4afba" />
+
+<img width="1291" height="521" src="https://github.com/user-attachments/assets/6db420b6-11ad-4dd6-be98-ca3772300e47" />
+
+
+## 💡 MADE FOR REAL-WORLD UPLOADS
+
+Government portals and online forms often come with annoying file-size limits.
+
+EHSAAN COMPRESS makes the process simple:
+
+**Choose image → Compress → Check size → Download → Upload**
+
+No complicated software.
+No unnecessary workflow.
+
+Just get the file small enough and move on.
+
+---
+
+## 🎨 THE EHSAAN STYLE
+
+EHSAAN COMPRESS is part of the **EHSAAN** digital project.
+
+The idea is simple:
+
+> **Useful tools should feel simple.**
+
+Clean interfaces.
+Minimal distractions.
+Useful controls.
+No unnecessary clutter.
+
+---
+
+## 🛠️ BUILT WITH
+
+* HTML
+* CSS
+* JavaScript
+* Browser-based image processing
+* Google AI Studio
+
+---
+
+## 🔐 PRIVACY
+
+EHSAAN COMPRESS is designed with a **local-first approach**.
+
+Images can be processed directly in the browser rather than requiring a traditional image-upload server.
+
+That means your images don't need to become part of some mysterious cloud storage cupboard just to be compressed.
+
+---
+
+## 🌐 LIVE
+
+### **EHSAAN COMPRESS**
+
+**Compress your images.
+Keep control of your files.**
+
+🔗 **https://ehsaancompress.ai.studio/**
+
+---
+
+# 💛 SUPPORT THE DEVELOPMENT
+
+<img width="250" height="250" alt="ehsaan-qr-1024x1024 (6)" src="https://github.com/user-attachments/assets/2161ae6a-e3ea-4ecc-a845-a40903c67e2b" />
+</p>
+
+<p align="center">
+  <sub>If you find something useful here, a ⭐ is always appreciated.</sub>
+</p>
+
+## 📌 PROJECT
+
+Part of the **EHSAAN** collection of personal web projects, experiments, and useful digital tools.
+
+Built with curiosity.
+Improved through experimentation.
+Made to be useful.
+
+---
+
+<p align="center">
+## ✦ FINDING GOOD RESOURCES SHOULDN'T BE HARD.
+
+<p align="center">
+  <a href="https://ehsaan.odoo.com/" target="_blank">
+<img width="130" height="130" alt="cropped_circle_image" src="https://github.com/user-attachments/assets/336454db-ef7d-4003-b33a-db16a945ae3c" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="mailto:worsmon@gmail.com">
+    <img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
+  </a>
+  &nbsp;
+  <a href="https://github.com/worsmon-org">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+  </a>
+  &nbsp;
+  <a href="https://ehsaan.odoo.com/">
+    <img src="https://img.shields.io/badge/Website-0A84FF?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Website">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/ehsaanullah0/niagara-premium/releases/tag/v.10.21">
+    <img src="https://img.shields.io/badge/Release-Niagara.pro-c9b58a?style=for-the-badge" />
+  </a>
+   
