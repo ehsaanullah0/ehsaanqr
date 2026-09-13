@@ -11,76 +11,60 @@
 A playful QR code generator for creating  
 **beautiful • customizable • randomized • scannable** QR codes.
 
-<br>
-
-<div align="center">
-
-# 📌 EHSAAN QR GENERATOR
-
 ### [**CLICK HERE FOR THE PRODUCT**](https://ehsaanqr.ai.studio/)
 
+# ✦ Personal Website · Portfolio · Creative Space
+
+<p>
+  <strong>A little corner of the internet built by Ehsaan ULLAH.</strong><br>
+  Projects, experiments, useful discoveries, random ideas & things worth keeping.
+</p>
+
+<br>
+
+<p>
+  <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Android/android2.svg">&nbsp;
+  <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/AndroidStudio/androidstudio2.svg">&nbsp;
+  <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Kotlin/kotlin2.svg">&nbsp;
+  <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/LicenceGPLv3/licencegplv32.svg">
+</p>
+
+<br>
+
+<a href="https://ehsaan.odoo.com">
+  <img src="https://img.shields.io/badge/🌐%20LIVE%20WEBSITE-EhSaan.odoo.com-E7AC08?style=for-the-badge&logo=googlechrome&logoColor=white" />
+</a>
+&nbsp;
+<a href="https://github.com/worsmon-org/ehsaan-website">
+  <img src="https://img.shields.io/badge/💻%20SOURCE%20CODE-GitHub-181717?style=for-the-badge&logo=github&logoColor=white" />
+</a>
+
 </div>
 
- ### **MORE FROM EHSAAN**
-
- 🗜️ **[EHSAAN COMPRESS](https://ehsaancompress.ai.studio/)**  
- Compress images without the unnecessary fuss.
-
- 🎨 **[EHSAAN COLOUR STUDIO](https://ehsaancolour.ai.studio/)**  
- Explore, create, and play with color.
-
-◈ **[EHSAAN GITHUB](https://github.com/ehsaanullah0/fertenix/)**  
-The main home of the EHSAAN project.
-
-<div align="center">
-
-<table>
-<tr>
-
-<td align="center" width="160">
-
-<img src="https://img.shields.io/badge/🎨-DESIGN-E7AC08?style=for-the-badge&labelColor=111111">
-
 <br>
 
-<sub><b>Customizable</b></sub>
+---
 
-</td>
+> [!NOTE]
+> **More things from EHSAAN:**
+> 
+> 🏠 [**EHSAAN ULLAH**](https://github.com/ehsaanullah0/fertenix) — Portfolio for the web dev work.
+>
+>  ⚡ [ **EHSAAN WEBSITE**](https://ehsaan.odoo.com/) — The main home of the EHSAAN project and everything around it.
+> 
+> 🗜️ [**EHSAAN COMPRESS**](https://ehsaancompress.ai.studio/) — Compress images without the unnecessary fuss.
+>
+> 💥 [**EHSAAN QR**](https://ehsaanqr.ai.studio/) — Generate stunning QR codes for nearly anything.
+>
+> 🔗 [**EHSAAN COLOUR STUDIO**](https://github.com/ehsaanullah0/colour-studio) — Explore, create, and work with colours.
+> 
+> 📌 [**NIAGARA RELEASE**](https://github.com/ehsaanullah0/niagara-premium) — A Morph patch for the original apk.
 
-<td align="center" width="160">
+---
 
-<img src="https://img.shields.io/badge/🎲-STYLE-8B5CF6?style=for-the-badge&labelColor=111111">
+# ☢ POWER APKs by EHSAAN
 
-<br>
-
-<sub><b>Randomized</b></sub>
-
-</td>
-
-<td align="center" width="160">
-
-<img src="https://img.shields.io/badge/◈-SHAPES-22C55E?style=for-the-badge&labelColor=111111">
-
-<br>
-
-<sub><b>Creative</b></sub>
-
-</td>
-
-<td align="center" width="160">
-
-<img src="https://img.shields.io/badge/✓-SCAN-38BDF8?style=for-the-badge&labelColor=111111">
-
-<br>
-
-<sub><b>Scanability</b></sub>
-
-</td>
-
-</tr>
-</table>
-
-</div>
+> **Experimental releases, modified apps & things I'm playing around with.**
 
 ## **Most QR generators give you this:**
 
@@ -89,7 +73,7 @@ The main home of the EHSAAN project.
 
 ---
 
-## **BUT EHSAAN QR asks:**
+# **BUT EHSAAN QR asks:**
 
 > **What if QR codes didn't all have to look the same?**
 
