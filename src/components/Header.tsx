@@ -8,6 +8,7 @@ interface HeaderProps {
   onThemeChange: (theme: AppTheme) => void;
   onOpenHistory: () => void;
   onOpenScanner: () => void;
+  onOpenChangelog: () => void;
   savedCount: number;
 }
 
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   onThemeChange,
   onOpenHistory,
   onOpenScanner,
+  onOpenChangelog,
   savedCount,
 }) => {
   return (
@@ -44,6 +46,18 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <QrCode className="w-3.5 h-3.5 text-red-500 shrink-0" />
             <span className="hidden sm:inline">Test QR</span>
+          </button>
+
+          {/* Changelog button (directly beside Test QR) */}
+          <button
+            id="header-changelog-btn"
+            onClick={onOpenChangelog}
+            className="hidden lg:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-medium border border-[#E9B553]/40 dark:border-[#E9B553]/30 text-zinc-800 dark:text-zinc-200 bg-amber-50/40 dark:bg-[#E9B553]/10 hover:bg-amber-100/60 dark:hover:bg-[#E9B553]/20 hover:border-[#E9B553] transition-colors focus:outline-none focus:ring-2 focus:ring-[#E9B553]/40"
+            title="View Changelog & Release v1.0.8"
+            aria-label="View changelog and releases"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-[#E9B553] shrink-0" />
+            <span className="font-semibold">Changelog</span>
           </button>
 
           {/* Saved Templates button */}

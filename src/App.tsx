@@ -21,6 +21,7 @@ import { LivePreviewCard } from './components/LivePreviewCard';
 import { ReadabilityDashboard } from './components/ReadabilityDashboard';
 import { TestQrModal } from './components/TestQrModal';
 import { RecentDesignsModal } from './components/RecentDesignsModal';
+import { ChangelogModal } from './components/ChangelogModal';
 import { MobileFloatingNav } from './components/MobileFloatingNav';
 import { Toast } from './components/Toast';
 import { Footer } from './components/Footer';
@@ -128,6 +129,7 @@ export default function App() {
   // UI Modals & Toasts
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Sync theme changes to DOM root
@@ -320,6 +322,7 @@ export default function App() {
         onThemeChange={setTheme}
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenScanner={() => setIsScannerOpen(true)}
+        onOpenChangelog={() => setIsChangelogOpen(true)}
         savedCount={savedDesigns.length}
       />
 
@@ -368,6 +371,7 @@ export default function App() {
             readability={readability}
             onShowToast={setToastMessage}
             onOpenScanner={() => setIsScannerOpen(true)}
+            onOpenChangelog={() => setIsChangelogOpen(true)}
             onSaveDesign={handleSaveDesign}
             onOptionsChange={(newOpts) =>
               setStyleOptions((prev) => ({
@@ -449,7 +453,10 @@ export default function App() {
 
         {/* Showcase Ehsaan QR Open Source Project */}
         <section className="pt-2">
-          <OpenSourceShowcase onShowToast={setToastMessage} />
+          <OpenSourceShowcase
+            onShowToast={setToastMessage}
+            onOpenChangelog={() => setIsChangelogOpen(true)}
+          />
         </section>
       </main>
 
@@ -469,6 +476,12 @@ export default function App() {
         onClose={() => setIsScannerOpen(false)}
         payload={currentPayload}
         options={styleOptions}
+        onOptionsChange={(newOpts) =>
+          setStyleOptions((prev) => ({
+            ...prev,
+            ...newOpts,
+          }))
+        }
         onShowToast={setToastMessage}
       />
 
@@ -485,6 +498,12 @@ export default function App() {
         onShowToast={setToastMessage}
         currentStyle={styleOptions}
         onSaveCurrentAsTemplate={handleSaveDesign}
+      />
+
+      {/* Changelog & Releases Modal */}
+      <ChangelogModal
+        isOpen={isChangelogOpen}
+        onClose={() => setIsChangelogOpen(false)}
       />
 
       {/* Micro-interaction Toast */}

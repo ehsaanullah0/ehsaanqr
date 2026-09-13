@@ -45,6 +45,7 @@ interface LivePreviewCardProps {
   readability: ReadabilityReport;
   onShowToast: (msg: string) => void;
   onOpenScanner: () => void;
+  onOpenChangelog?: () => void;
   onSaveDesign: () => void;
   onOptionsChange?: (opts: Partial<QrStyleOptions>) => void;
   selectedRandomizeTarget?: RandomizeTarget;
@@ -59,6 +60,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
   readability,
   onShowToast,
   onOpenScanner,
+  onOpenChangelog,
   onSaveDesign,
   onOptionsChange,
   selectedRandomizeTarget,
@@ -72,7 +74,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
   const [copiedPayload, setCopiedPayload] = useState(false);
   const [copiedImage, setCopiedImage] = useState(false);
   const [showExportSettings, setShowExportSettings] = useState(false);
-  const [exportRes, setExportRes] = useState<number>(options.size);
+  const [exportRes, setExportRes] = useState<number>(options.size || 1024);
   const [showPreDownloadCheck, setShowPreDownloadCheck] = useState(false);
   const [dontShowAgainPreDownload, setDontShowAgainPreDownload] = useState(false);
   const [bgSaturation, setBgSaturation] = useState<SaturationPreference>(
@@ -84,6 +86,10 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
       setBgSaturation(options.bgSaturationPreference);
     }
   }, [options.bgSaturationPreference]);
+
+  useEffect(() => {
+    setExportRes(options.size || 1024);
+  }, [options.size]);
 
   const handleRandomizeAll = () => {
     if (!onOptionsChange) return;
@@ -158,7 +164,14 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
 
   // Re-render canvas whenever payload or options change
   useEffect(() => {
-    if (!canvasRef.current || !payload) return;
+    if (!canvasRef.current) return;
+    if (!payload) {
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      }
+      return;
+    }
     renderQrToCanvas(canvasRef.current, payload, options);
   }, [payload, options]);
 
@@ -248,8 +261,10 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Readability Score & Status Pill */}
           <div
-            className={`flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border text-[11px] sm:text-xs font-bold ${
-              readability.level === 'excellent' || readability.level === 'good'
+            className={`flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border text-[11px] sm:text-xs font-bold transition-all ${
+              !payload
+                ? 'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400'
+                : readability.level === 'excellent' || readability.level === 'good'
                 ? 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
                 : readability.level === 'moderate'
                 ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400'
@@ -258,14 +273,20 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                 : 'bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-400'
             }`}
           >
-            {readability.level === 'excellent' || readability.level === 'good' ? (
-              <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+            {!payload ? (
+              <span>Enter content</span>
             ) : (
-              <AlertTriangle className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+              <>
+                {readability.level === 'excellent' || readability.level === 'good' ? (
+                  <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                ) : (
+                  <AlertTriangle className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+                )}
+                <span>
+                  {readability.overallScore}/100 • <span className="capitalize">{readability.level}</span>
+                </span>
+              </>
             )}
-            <span>
-              {readability.overallScore}/100 • <span className="capitalize">{readability.level}</span>
-            </span>
           </div>
 
           {/* Test QR Trigger Button */}
@@ -278,6 +299,19 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
             <QrCode className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>Test QR</span>
           </button>
+
+          {/* Changelog Trigger Button */}
+          {onOpenChangelog && (
+            <button
+              id="btn-changelog-top"
+              type="button"
+              onClick={onOpenChangelog}
+              className="hidden lg:flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full border border-[#E9B553]/40 dark:border-[#E9B553]/30 text-zinc-800 dark:text-zinc-200 bg-amber-50/40 dark:bg-[#E9B553]/10 hover:bg-amber-100/60 dark:hover:bg-[#E9B553]/20 hover:border-[#E9B553] text-[11px] sm:text-xs font-semibold transition-colors"
+            >
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#E9B553]" />
+              <span>Changelog</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -307,12 +341,25 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                 id="qr-code-canvas"
                 className={`w-full h-full object-contain ${
                   options.cornerStyle === 'smooth' ? 'rounded-2xl' : 'rounded-none'
-                }`}
+                } ${!payload ? 'hidden' : 'block'}`}
                 style={{
                   imageRendering: 'pixelated',
                   backgroundColor: options.transparentBg ? 'transparent' : options.bgColor,
                 }}
               />
+              {!payload && (
+                <div className="flex flex-col items-center justify-center p-4 text-center text-zinc-400 dark:text-zinc-500 select-none">
+                  <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 mb-2">
+                    <QrCode className="w-7 h-7 text-zinc-400 dark:text-zinc-500 stroke-[1.5]" />
+                  </div>
+                  <span className="text-xs font-semibold text-zinc-600 dark:text-zinc-300">
+                    Awaiting content
+                  </span>
+                  <span className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
+                    Enter details below to preview
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -497,11 +544,14 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                     <button
                       key={res}
                       type="button"
-                      onClick={() => setExportRes(res)}
-                      className={`py-1.5 rounded-md text-[11px] font-mono border ${
+                      onClick={() => {
+                        setExportRes(res);
+                        onOptionsChange?.({ size: res });
+                      }}
+                      className={`py-1.5 rounded-md text-[11px] font-mono border transition-all ${
                         exportRes === res
                           ? 'border-red-600 bg-red-50 dark:bg-red-950/40 text-red-600 font-bold'
-                          : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'
+                          : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300'
                       }`}
                     >
                       {res}px

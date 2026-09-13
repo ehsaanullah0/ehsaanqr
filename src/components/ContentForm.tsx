@@ -369,7 +369,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({
               onChange={(e) =>
                 onChange('whatsapp', { ...formData.whatsapp, message: e.target.value })
               }
-              placeholder="Hi! I found your contact on Ehsaan QR."
+              placeholder="Optional pre-filled chat message..."
               className="w-full p-3 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
             />
           </div>
@@ -391,8 +391,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                 onChange={(e) =>
                   onChange('vcard', { ...formData.vcard, firstName: e.target.value })
                 }
-                placeholder="Ehsaan"
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-sm"
+                placeholder="First name"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
             <div>
@@ -406,8 +406,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                 onChange={(e) =>
                   onChange('vcard', { ...formData.vcard, lastName: e.target.value })
                 }
-                placeholder="Kareem"
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-sm"
+                placeholder="Last name"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
           </div>
@@ -424,8 +424,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                 onChange={(e) =>
                   onChange('vcard', { ...formData.vcard, organization: e.target.value })
                 }
-                placeholder="Ehsaan Tech"
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-sm"
+                placeholder="Company or organization"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
             <div>
@@ -439,8 +439,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                 onChange={(e) =>
                   onChange('vcard', { ...formData.vcard, title: e.target.value })
                 }
-                placeholder="Product Architect"
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-sm"
+                placeholder="Job title"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
           </div>
@@ -458,7 +458,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                   onChange('vcard', { ...formData.vcard, phone: e.target.value })
                 }
                 placeholder="+1 555 123 4567"
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-sm"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
             <div>
@@ -472,8 +472,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                 onChange={(e) =>
                   onChange('vcard', { ...formData.vcard, email: e.target.value })
                 }
-                placeholder="ehsaan@example.com"
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-sm"
+                placeholder="email@example.com"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
           </div>
@@ -489,8 +489,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
               onChange={(e) =>
                 onChange('vcard', { ...formData.vcard, url: e.target.value })
               }
-              placeholder="https://ehsaan.odoo.com"
-              className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-sm"
+              placeholder="https://example.com"
+              className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
             />
           </div>
 
@@ -506,8 +506,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                 onChange={(e) =>
                   onChange('vcard', { ...formData.vcard, street: e.target.value })
                 }
-                placeholder="100 Innovation Way"
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-xs"
+                placeholder="Street address"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-xs focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
             <div>
@@ -521,8 +521,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                 onChange={(e) =>
                   onChange('vcard', { ...formData.vcard, city: e.target.value })
                 }
-                placeholder="San Francisco"
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-xs"
+                placeholder="City"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-xs focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
             <div>
@@ -536,8 +536,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                 onChange={(e) =>
                   onChange('vcard', { ...formData.vcard, country: e.target.value })
                 }
-                placeholder="United States"
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-xs"
+                placeholder="Country"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-xs focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
           </div>
@@ -560,7 +560,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                   onChange={(e) =>
                     onChange('upi', { ...formData.upi, pa: e.target.value })
                   }
-                  placeholder="merchant@okhdfcbank"
+                  placeholder="username@bank (e.g. name@okhdfcbank)"
                   className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
                 />
               </div>
@@ -580,7 +580,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                 onChange={(e) =>
                   onChange('upi', { ...formData.upi, pn: e.target.value })
                 }
-                placeholder="Ehsaan Studio"
+                placeholder="Payee or Business Name"
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
@@ -615,7 +615,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                 onChange={(e) =>
                   onChange('upi', { ...formData.upi, tn: e.target.value })
                 }
-                placeholder="Invoice #4920"
+                placeholder="Payment reference or note"
                 className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
@@ -637,8 +637,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
               onChange={(e) =>
                 onChange('calendar', { ...formData.calendar, title: e.target.value })
               }
-              placeholder="Product Launch Keynote"
-              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-sm"
+              placeholder="Event title"
+              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
             />
           </div>
 
@@ -656,8 +656,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                   location: e.target.value,
                 })
               }
-              placeholder="Online / Main Auditorium"
-              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-sm"
+              placeholder="Location or meeting link"
+              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
             />
           </div>
 
@@ -676,7 +676,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                     startDateTime: e.target.value,
                   })
                 }
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-xs"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
 
@@ -694,7 +694,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                     endDateTime: e.target.value,
                   })
                 }
-                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-xs"
+                className="w-full px-3 py-2 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-xs focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
               />
             </div>
           </div>
@@ -713,8 +713,8 @@ export const ContentForm: React.FC<ContentFormProps> = ({
                   description: e.target.value,
                 })
               }
-              placeholder="Meeting agenda and dial-in details..."
-              className="w-full p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 text-xs"
+              placeholder="Meeting agenda and details..."
+              className="w-full p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/60 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 text-xs focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500"
             />
           </div>
         </div>

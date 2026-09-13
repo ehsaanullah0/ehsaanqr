@@ -33,6 +33,7 @@ interface TestQrModalProps {
   onClose: () => void;
   payload: string;
   options: QrStyleOptions;
+  onOptionsChange?: (opts: Partial<QrStyleOptions>) => void;
   onShowToast?: (msg: string) => void;
 }
 
@@ -41,6 +42,7 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
   onClose,
   payload,
   options,
+  onOptionsChange,
   onShowToast,
 }) => {
   const [activeMode, setActiveMode] = useState<'engine' | 'camera'>('engine');
@@ -56,8 +58,9 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
   const [isRunningMultiTest, setIsRunningMultiTest] = useState(false);
   const [multiTestStats, setMultiTestStats] = useState<MultiTestStats | null>(null);
 
-  // Download states in modal
+  // Download states in modal - strictly synced with options.size (1024px default)
   const [downloadFormat, setDownloadFormat] = useState<ExportFormat>('png');
+  const [downloadResolution, setDownloadResolution] = useState<number>(options.size || 1024);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
 
@@ -71,9 +74,16 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
   const animationFrameRef = useRef<number | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  // Sync resolution when options.size changes externally
+  useEffect(() => {
+    if (options.size) {
+      setDownloadResolution(options.size);
+    }
+  }, [options.size]);
+
   // Single test runner function
   const runSingleEngineTest = async (
-    renderSize: number = 512
+    renderSize: number = options.size || 1024
   ): Promise<{ success: boolean; timeMs: number; data?: string; engineUsed?: string }> => {
     const res = await decodeQrPayload(payload, options, renderSize);
     return {
@@ -92,7 +102,8 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
     setMultiTestStats(null);
     setEngineResult(null);
 
-    decodeQrPayload(payload, options, 512).then((res) => {
+    const testRes = options.size || 1024;
+    decodeQrPayload(payload, options, testRes).then((res) => {
       if (res.success && res.decodedText) {
         setEngineResult({
           success: true,
@@ -231,16 +242,24 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
     animationFrameRef.current = requestAnimationFrame(scanFrame);
   };
 
-  const handleDownload = async (fmt?: ExportFormat) => {
+  const handleSelectResolution = (res: number) => {
+    setDownloadResolution(res);
+    if (onOptionsChange) {
+      onOptionsChange({ size: res });
+    }
+  };
+
+  const handleDownload = async (fmt?: ExportFormat, res?: number) => {
     if (!payload) return;
     const targetFormat = fmt || downloadFormat;
+    const targetResolution = res || downloadResolution || options.size || 1024;
     setIsDownloading(true);
     try {
-      await exportQrCode(targetFormat, payload, options, options.size);
+      await exportQrCode(targetFormat, payload, options, targetResolution);
       triggerDownloadCelebration();
       setDownloadSuccess(true);
       if (onShowToast) {
-        onShowToast(`Downloaded verified ${targetFormat.toUpperCase()} QR code ✓`);
+        onShowToast(`Downloaded verified ${targetFormat.toUpperCase()} (${targetResolution}px) ✓`);
       }
       setTimeout(() => setDownloadSuccess(false), 3500);
     } catch (err) {
@@ -421,33 +440,57 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                   </div>
 
                   {/* Direct Download Action Card in Test Result */}
-                  <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/70 border border-zinc-200 dark:border-zinc-700/80 space-y-2.5">
+                  <div className="p-3.5 rounded-2xl bg-zinc-50 dark:bg-zinc-800/70 border border-zinc-200 dark:border-zinc-700/80 space-y-3">
                     <div className="flex items-center justify-between text-xs font-bold text-zinc-800 dark:text-zinc-200">
                       <span className="flex items-center gap-1.5">
                         <Download className="w-3.5 h-3.5 text-red-600" />
                         <span>Download Tested QR Code</span>
                       </span>
-                      <span className="text-[10px] text-zinc-500 font-normal">
-                        Ready to export
+                      <span className="text-[11px] font-mono text-zinc-500 font-semibold">
+                        {downloadResolution}px • {downloadFormat.toUpperCase()}
                       </span>
                     </div>
 
                     {/* Format Selector Pills */}
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {(['png', 'svg', 'pdf', 'jpg'] as ExportFormat[]).map((fmt) => (
-                        <button
-                          key={fmt}
-                          type="button"
-                          onClick={() => setDownloadFormat(fmt)}
-                          className={`py-1.5 px-2 rounded-lg text-xs font-bold uppercase transition-all ${
-                            downloadFormat === fmt
-                              ? 'bg-red-600 text-white shadow-xs'
-                              : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300'
-                          }`}
-                        >
-                          {fmt}
-                        </button>
-                      ))}
+                    <div className="space-y-1">
+                      <div className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">Format</div>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {(['png', 'svg', 'pdf', 'jpg'] as ExportFormat[]).map((fmt) => (
+                          <button
+                            key={fmt}
+                            type="button"
+                            onClick={() => setDownloadFormat(fmt)}
+                            className={`py-1.5 px-2 rounded-lg text-xs font-bold uppercase transition-all ${
+                              downloadFormat === fmt
+                                ? 'bg-red-600 text-white shadow-xs'
+                                : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300'
+                            }`}
+                          >
+                            {fmt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Resolution Selector Pills */}
+                    <div className="space-y-1">
+                      <div className="text-[10px] uppercase tracking-wider font-bold text-zinc-400">Resolution</div>
+                      <div className="grid grid-cols-4 gap-1.5">
+                        {[256, 512, 1024, 2048].map((res) => (
+                          <button
+                            key={res}
+                            type="button"
+                            onClick={() => handleSelectResolution(res)}
+                            className={`py-1.5 px-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
+                              downloadResolution === res
+                                ? 'border-2 border-red-600 bg-red-50 dark:bg-red-950/40 text-red-600'
+                                : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300'
+                            }`}
+                          >
+                            {res}px
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Direct Download Button */}
@@ -455,7 +498,7 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                       type="button"
                       id="btn-download-from-test-result"
                       disabled={isDownloading}
-                      onClick={() => handleDownload()}
+                      onClick={() => handleDownload(downloadFormat, downloadResolution)}
                       className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-white transition-all shadow-sm ${
                         downloadSuccess
                           ? 'bg-emerald-600 hover:bg-emerald-700'
@@ -465,7 +508,7 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                       {downloadSuccess ? (
                         <>
                           <Check className="w-4 h-4" />
-                          <span>Downloaded {downloadFormat.toUpperCase()} Successfully!</span>
+                          <span>Downloaded {downloadFormat.toUpperCase()} ({downloadResolution}px) Successfully!</span>
                         </>
                       ) : (
                         <>
@@ -473,7 +516,7 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                           <span>
                             {isDownloading
                               ? 'Exporting...'
-                              : `Download Verified QR (${downloadFormat.toUpperCase()})`}
+                              : `Download Verified QR (${downloadFormat.toUpperCase()} • ${downloadResolution}px)`}
                           </span>
                         </>
                       )}
@@ -501,12 +544,12 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                     </span>
                     <button
                       type="button"
-                      onClick={() => handleDownload('png')}
+                      onClick={() => handleDownload(downloadFormat, downloadResolution)}
                       disabled={isDownloading}
                       className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 font-semibold text-xs"
                     >
                       <Download className="w-3.5 h-3.5 text-zinc-500" />
-                      <span>Download PNG File</span>
+                      <span>Download {downloadFormat.toUpperCase()} ({downloadResolution}px)</span>
                     </button>
                   </div>
                 </div>
@@ -566,12 +609,12 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                   <div className="pt-2 border-t border-emerald-200/80 dark:border-emerald-800/80">
                     <button
                       type="button"
-                      onClick={() => handleDownload('png')}
+                      onClick={() => handleDownload(downloadFormat, downloadResolution)}
                       disabled={isDownloading}
                       className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-sm transition-all"
                     >
                       <Download className="w-4 h-4" />
-                      <span>Download Verified QR Code (PNG)</span>
+                      <span>Download Verified QR ({downloadFormat.toUpperCase()} • {downloadResolution}px)</span>
                     </button>
                   </div>
                 </div>
@@ -601,7 +644,7 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
         {/* Footer */}
         <div className="flex items-center justify-between p-3.5 sm:p-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
           <div className="text-[11px] text-zinc-500">
-            {engineResult?.success && '✓ Ready to print & deploy'}
+            {engineResult?.success && `✓ Synced: ${downloadResolution}px • ${downloadFormat.toUpperCase()}`}
           </div>
 
           <div className="flex items-center gap-2">
@@ -609,12 +652,12 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
               <button
                 type="button"
                 id="btn-footer-direct-download"
-                onClick={() => handleDownload()}
+                onClick={() => handleDownload(downloadFormat, downloadResolution)}
                 disabled={isDownloading}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition-all shadow-xs"
               >
                 <Download className="w-3.5 h-3.5" />
-                <span>Download ({downloadFormat.toUpperCase()})</span>
+                <span>Download ({downloadFormat.toUpperCase()} • {downloadResolution}px)</span>
               </button>
             )}
             <button

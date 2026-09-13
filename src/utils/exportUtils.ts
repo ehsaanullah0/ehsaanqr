@@ -40,7 +40,7 @@ export async function exportQrCode(
   customResolution?: number,
   baseFilename: string = 'ehsaan-qr'
 ): Promise<boolean> {
-  const exportResolution = customResolution || options.size;
+  const exportResolution = customResolution || options.size || 1024;
   const filename = `${baseFilename}-${exportResolution}x${exportResolution}.${format}`;
 
   if (format === 'svg') {
