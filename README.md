@@ -1,7 +1,7 @@
 # 🗜️ EHSAAN QR GENERATOR
 
 <p align="center">
-<img width="200" height="200" src="https://github.com/user-attachments/assets/5e9482b0-4af5-44c6-95b4-d38c92f610f0" />
+<img width="200" height="200" src="https://github.com/user-attachments/assets/b9cebf1b-2097-4f49-8967-338bdd794664" />
 </p>
 
 ### **Compress smarter. Keep it clean.**
