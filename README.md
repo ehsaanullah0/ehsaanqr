@@ -68,14 +68,16 @@ Same philosophy.
     <td align="center">
       <img width="300" height="300" alt="ehsaan-qr-512x512" src="https://github.com/user-attachments/assets/efeffe88-e6ec-4b41-917e-e650a1fd060a" />
     </td>
-    <td align="center">
-      <img width="300" height="300" alt="ehsaan-qr-1024x1024 (2)" src="https://github.com/user-attachments/assets/1f80c60a-13bf-42e0-bf6d-cd563e0c8c76" />
-    </td>
   </tr>
   <tr>
     <td align="center">
+      <img width="300" height="300" alt="ehsaan-qr-1024x1024 (2)" src="https://github.com/user-attachments/assets/1f80c60a-13bf-42e0-bf6d-cd563e0c8c76" />
+    </td>
+    <td align="center">
       <img width="300" height="300" alt="qr-url-2048px" src="https://github.com/user-attachments/assets/dae23645-b4a8-4049-bea7-acd196f33cd2" />
     </td>
+  </tr>
+  <tr>
     <td align="center">
       <img width="300" height="300" alt="ehsaan-qr-1024x1024" src="https://github.com/user-attachments/assets/1fe6080e-8f0b-44f5-a616-5af7d5c2fec8" />
     </td>
@@ -84,7 +86,6 @@ Same philosophy.
     </td>
   </tr>
 </table>
-
 </div>
 
 
