@@ -1,4 +1,4 @@
-# 🗜️ EHSAAN COMPRESS
+# 🗜️ EHSAAN QR GENERATOR
 
 <p align="center">
 <img width="200" height="200" src="https://github.com/user-attachments/assets/5e9482b0-4af5-44c6-95b4-d38c92f610f0" />
