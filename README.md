@@ -127,24 +127,24 @@ Whether you're preparing an image for a government website, online form, applica
 <img width="1133" height="745" alt="image" src="https://github.com/user-attachments/assets/c1080a7e-b0d9-4e2e-8614-26751385c1e9" />
 
 
-## 💡 MADE FOR REAL-WORLD UPLOADS
+## 💡 MADE FOR REAL-WORLD QR CODES
 
-Government portals and online forms often come with annoying file-size limits.
+QR codes are everywhere — websites, menus, payments, social profiles, contact details, and more.
 
-EHSAAN COMPRESS makes the process simple:
+**EHSAAN QR** makes creating them simple:
 
-**Choose image → Compress → Check size → Download → Upload**
+**Choose content → Customize → Randomize → Scan → Download**
 
 No complicated software.
 No unnecessary workflow.
 
-Just get the file small enough and move on.
+Just create a QR code that works **and looks good**.
 
 ---
 
 ## 🎨 THE EHSAAN STYLE
 
-EHSAAN COMPRESS is part of the **EHSAAN** digital project.
+EHSAAN QR is part of the **EHSAAN** digital project.
 
 The idea is simple:
 
@@ -153,7 +153,10 @@ The idea is simple:
 Clean interfaces.
 Minimal distractions.
 Useful controls.
+Creative customization.
 No unnecessary clutter.
+
+Because a QR code doesn't have to look boring just because it needs to be functional.
 
 ---
 
@@ -162,31 +165,33 @@ No unnecessary clutter.
 * HTML
 * CSS
 * JavaScript
-* Browser-based image processing
+* Browser-based QR generation
 * Google AI Studio
 
 ---
 
 ## 🔐 PRIVACY
 
-EHSAAN COMPRESS is designed with a **local-first approach**.
+**EHSAAN QR** is designed with a **local-first approach**.
 
-Images can be processed directly in the browser rather than requiring a traditional image-upload server.
+Your QR content can be processed directly in your browser without requiring a traditional server just to generate a QR code.
 
-That means your images don't need to become part of some mysterious cloud storage cupboard just to be compressed.
+Your data doesn't need to take a mysterious detour through the cloud just to become a square of pixels.
+
+**Create locally. Customize freely. Download directly.**
 
 ---
 
 ## 🌐 LIVE
 
-### **EHSAAN COMPRESS**
+### **EHSAAN QR**
 
-**Compress your images.
-Keep control of your files.**
+**Create QR codes.
+Customize them.
+Make them yours.**
 
-🔗 **https://ehsaancompress.ai.studio/**
+🔗 **https://ehsaanqr.ai.studio/**
 
----
 
 # 💛 SUPPORT THE DEVELOPMENT
 
