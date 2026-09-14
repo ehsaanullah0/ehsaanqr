@@ -4,6 +4,8 @@
 <img width="200" height="200" src="https://github.com/user-attachments/assets/b9cebf1b-2097-4f49-8967-338bdd794664" />
 
 # 🗜️ EHSAAN QR GENERATOR
+# Compress smarter. Keep it clean.
+# 🔗[**ehsaancompress.ai.studio**](https://ehsaancompress.ai.studio/)
 
 <p>
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Android/android2.svg">&nbsp;
@@ -11,8 +13,6 @@
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Kotlin/kotlin2.svg">&nbsp;
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/LicenceGPLv3/licencegplv32.svg">
 </p>
-
-# **Compress smarter. Keep it clean.**
 
 A simple, fast, and privacy-friendly image compression tool built to make reducing image file sizes effortless.
 
