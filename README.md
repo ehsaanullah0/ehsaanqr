@@ -127,3 +127,95 @@ This is a **GPL-licensed product**.
 * 👀 **Live Preview** — See your QR design as you customize it
 * 📱 **Scannability Protection** — Helps keep highly customized QR codes readable and scannable
 * 📐 **Flexible Export** — Generate QR codes in different sizes for digital or print use
+
+---
+
+<img width="1289" height="646" alt="image" src="https://github.com/user-attachments/assets/afc9cbde-ab7b-40ef-8cac-94e318e354d7" />
+
+<img width="1257" height="419" alt="image" src="https://github.com/user-attachments/assets/db7f210e-debc-41ba-9d83-61ec87c625be" />
+
+<img width="1253" height="243" alt="image" src="https://github.com/user-attachments/assets/f6daccb3-d5aa-4dfc-b088-ba83d2d06363" />
+
+<img width="1280" height="580" alt="image" src="https://github.com/user-attachments/assets/8a205fa1-c789-4e15-9197-58b8a0b5bdf0" />
+
+<img width="1286" height="571" alt="image" src="https://github.com/user-attachments/assets/d3b29d38-b693-491c-8780-ff0ae037137e" />
+
+<img width="1235" height="706" alt="image" src="https://github.com/user-attachments/assets/75ae3151-a9a1-4200-b724-4036397d4f61" />
+
+<img width="1182" height="712" alt="image" src="https://github.com/user-attachments/assets/b91a31a8-89e8-42fd-858a-285df2929842" />
+
+
+## 💡 MADE FOR REAL-WORLD QR CODES
+
+QR codes are everywhere — websites, menus, payments, social profiles, contact details, and more.
+
+**EHSAAN QR** makes creating them simple:
+
+**Choose content → Customize → Randomize → Scan → Download**
+
+No complicated software.
+No unnecessary workflow.
+
+Just create a QR code that works **and looks good**.
+
+---
+
+## 🎨 THE EHSAAN STYLE
+
+EHSAAN QR is part of the **EHSAAN** digital project.
+
+The idea is simple:
+
+> **Useful tools should feel simple.**
+
+Clean interfaces.
+Minimal distractions.
+Useful controls.
+Creative customization.
+No unnecessary clutter.
+
+Because a QR code doesn't have to look boring just because it needs to be functional.
+
+---
+
+# 💛 SUPPORT THE DEVELOPMENT
+
+  <img width="250" height="250" alt="Support" src="https://github.com/user-attachments/assets/42e2d89c-9449-4e18-8ee6-d7fe5960ac79" />
+</p>
+
+<p align="center">
+  <sub>If you find something useful here, a ⭐ is always appreciated.</sub>
+</p>
+
+<p align="center">
+## ✦ FINDING GOOD RESOURCES SHOULDN'T BE HARD.
+
+<p align="center">
+  <a href="https://ehsaan.odoo.com/" target="_blank">
+<img width="130" height="130" alt="cropped_circle_image" src="https://github.com/user-attachments/assets/336454db-ef7d-4003-b33a-db16a945ae3c" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="mailto:worsmon@gmail.com">
+    <img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
+  </a>
+  &nbsp;
+  <a href="https://github.com/worsmon-org">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+  </a>
+  &nbsp;
+  <a href="https://ehsaan.odoo.com/">
+    <img src="https://img.shields.io/badge/Website-0A84FF?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Website">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/ehsaanullah0/niagara-premium/releases/tag/v.10.21">
+    <img src="https://img.shields.io/badge/Release-Niagara.pro-c9b58a?style=for-the-badge" />
+  </a>
+</p>
+
+<p align="center">
+  <sub>Built with curiosity, too many tabs, and the occasional “let's see what happens.”</sub>
+</p>
