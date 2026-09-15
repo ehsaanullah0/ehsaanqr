@@ -1,0 +1,820 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  code, kbd, samp, pre {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Snappy button press micro-interaction */
+  button:not([disabled]):active {
+    transform: scale(0.98);
+  }
+}
+
+/* ==========================================================================
+   THEME STYLES
+   ========================================================================== */
+
+/* 1. Light Theme (Warm Cream & Deep Crimson Red Defaults) */
+html:not(.dark):not(.material):not(.minimal) body {
+  background-color: #FAF8F5;
+  color: #0F172A;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+}
+
+/* Light Theme: Replace all Yellow/Amber Accents with Deep Red (#B91C1C) */
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#E7AC08\],
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#D9A007\],
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#C59206\],
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#d49e07\],
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#c29006\],
+html:not(.dark):not(.material):not(.minimal) #main-download-qr-btn,
+html:not(.dark):not(.material):not(.minimal) [id*="roll-now-btn"],
+html:not(.dark):not(.material):not(.minimal) [id*="btn-improve-readability"] {
+  background-color: #B91C1C !important;
+  color: #FFFFFF !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#E7AC08\]:hover,
+html:not(.dark):not(.material):not(.minimal) .hover\:bg-\[\#D9A007\]:hover,
+html:not(.dark):not(.material):not(.minimal) .hover\:bg-\[\#E7AC08\]:hover,
+html:not(.dark):not(.material):not(.minimal) .hover\:bg-\[\#d49e07\]:hover,
+html:not(.dark):not(.material):not(.minimal) #main-download-qr-btn:hover,
+html:not(.dark):not(.material):not(.minimal) [id*="roll-now-btn"]:hover {
+  background-color: #991B1B !important;
+  color: #FFFFFF !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#E7AC08\]:active,
+html:not(.dark):not(.material):not(.minimal) .active\:bg-\[\#C59206\]:active,
+html:not(.dark):not(.material):not(.minimal) .active\:bg-\[\#c29006\]:active,
+html:not(.dark):not(.material):not(.minimal) #main-download-qr-btn:active,
+html:not(.dark):not(.material):not(.minimal) [id*="roll-now-btn"]:active {
+  background-color: #7F1D1D !important;
+  color: #FFFFFF !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#E7AC08\] *,
+html:not(.dark):not(.material):not(.minimal) #main-download-qr-btn *,
+html:not(.dark):not(.material):not(.minimal) [id*="roll-now-btn"] *,
+html:not(.dark):not(.material):not(.minimal) [id*="btn-improve-readability"] * {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Floating bottom nav bar active tab in Light Theme */
+html:not(.dark):not(.material):not(.minimal) [id*="floating-nav"].bg-\[\#E7AC08\],
+html:not(.dark):not(.material):not(.minimal) [id*="floating-nav"].bg-\[\#E7AC08\]:hover {
+  background-color: #B91C1C !important;
+  color: #FFFFFF !important;
+  border: 1px solid #991B1B !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) [id*="floating-nav"].bg-\[\#E7AC08\] * {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Light Theme: Soft Red Background Highlights (replacing amber tints) */
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#FFFBEA\],
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#FEF3C7\],
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#FFF7D9\],
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#FFFDF5\],
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#E7AC08\]\/15,
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#E7AC08\]\/10,
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#E7AC08\]\/20 {
+  background-color: #FEF2F2 !important;
+  border-color: #FECACA !important;
+  color: #991B1B !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#E7AC08\]\/15 *,
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#E7AC08\]\/10 * {
+  color: #991B1B !important;
+}
+
+/* Light Theme: Text Accents */
+html:not(.dark):not(.material):not(.minimal) .text-\[\#E7AC08\],
+html:not(.dark):not(.material):not(.minimal) .text-\[\#92400E\],
+html:not(.dark):not(.material):not(.minimal) .text-\[\#B45309\],
+html:not(.dark):not(.material):not(.minimal) .text-\[\#D97706\],
+html:not(.dark):not(.material):not(.minimal) .text-\[\#C59206\],
+html:not(.dark):not(.material):not(.minimal) .text-amber-500,
+html:not(.dark):not(.material):not(.minimal) .text-amber-600,
+html:not(.dark):not(.material):not(.minimal) .text-amber-700,
+html:not(.dark):not(.material):not(.minimal) .text-amber-800 {
+  color: #B91C1C !important;
+}
+
+/* Light Theme: Border Accents */
+html:not(.dark):not(.material):not(.minimal) .border-\[\#E7AC08\],
+html:not(.dark):not(.material):not(.minimal) .border-\[\#D9A007\],
+html:not(.dark):not(.material):not(.minimal) .border-\[\#C59206\],
+html:not(.dark):not(.material):not(.minimal) .border-\[\#d49e07\],
+html:not(.dark):not(.material):not(.minimal) .border-\[\#E7AC08\]\/50,
+html:not(.dark):not(.material):not(.minimal) .border-\[\#E7AC08\]\/40,
+html:not(.dark):not(.material):not(.minimal) .border-\[\#E7AC08\]\/30 {
+  border-color: #B91C1C !important;
+}
+
+/* Light Theme: Rings & Shadows */
+html:not(.dark):not(.material):not(.minimal) [class*="ring-\[\#E7AC08\]"],
+html:not(.dark):not(.material):not(.minimal) [class*="focus\:ring-\[\#E7AC08\]"]:focus {
+  --tw-ring-color: rgba(185, 28, 28, 0.35) !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) [class*="shadow-\[\#E7AC08\]"] {
+  box-shadow: 0 4px 14px 0 rgba(185, 28, 28, 0.22) !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) [class*="hover\:shadow-\[\#E7AC08\]"]:hover {
+  box-shadow: 0 6px 18px -2px rgba(185, 28, 28, 0.32) !important;
+}
+
+/* Light Theme: SVG Fills */
+html:not(.dark):not(.material):not(.minimal) .fill-\[\#E7AC08\] {
+  fill: #B91C1C !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) .fill-\[\#E7AC08\]\/30 {
+  fill: rgba(185, 28, 28, 0.25) !important;
+}
+
+/* Light Theme: Form Controls */
+html:not(.dark):not(.material):not(.minimal) input[type="range"] {
+  accent-color: #B91C1C !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) input[type="checkbox"],
+html:not(.dark):not(.material):not(.minimal) input[type="radio"] {
+  accent-color: #B91C1C !important;
+}
+
+/* Split randomize button divider */
+html:not(.dark):not(.material):not(.minimal) .bg-\[\#C59206\]\/80 {
+  background-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Modal header gradient accent line */
+html:not(.dark):not(.material):not(.minimal) .from-\[\#E7AC08\] {
+  --tw-gradient-from: #B91C1C !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) .via-amber-400 {
+  --tw-gradient-via: #DC2626 !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) .to-\[\#E7AC08\] {
+  --tw-gradient-to: #B91C1C !important;
+}
+
+/* Notice and Changelog action buttons in Light Theme */
+html:not(.dark):not(.material):not(.minimal) [data-theme-accent="notice-primary"] {
+  background-color: #B91C1C !important;
+  color: #FFFFFF !important;
+  border-color: #B91C1C !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) [data-theme-accent="notice-primary"]:hover {
+  background-color: #991B1B !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) [data-theme-accent="notice-secondary"] {
+  background-color: #FFFFFF !important;
+  color: #B91C1C !important;
+  border-color: #FECACA !important;
+}
+
+html:not(.dark):not(.material):not(.minimal) [data-theme-accent="notice-secondary"]:hover {
+  background-color: #FEF2F2 !important;
+}
+
+/* 2. Dark Theme (Deep Charcoal Slate & Crimson Red) */
+html.dark:not(.material):not(.minimal) body {
+  background-color: #111318;
+  color: #F8FAFC;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+}
+
+/* Dark Theme: Replace all Yellow/Amber Accents with Crimson Red (#DC2626 / #EF4444) */
+html.dark:not(.material):not(.minimal) .bg-\[\#E7AC08\],
+html.dark:not(.material):not(.minimal) .bg-\[\#D9A007\],
+html.dark:not(.material):not(.minimal) .bg-\[\#C59206\],
+html.dark:not(.material):not(.minimal) .bg-\[\#d49e07\],
+html.dark:not(.material):not(.minimal) .bg-\[\#c29006\],
+html.dark:not(.material):not(.minimal) #main-download-qr-btn,
+html.dark:not(.material):not(.minimal) [id*="roll-now-btn"],
+html.dark:not(.material):not(.minimal) [id*="btn-improve-readability"] {
+  background-color: #DC2626 !important;
+  color: #FFFFFF !important;
+}
+
+html.dark:not(.material):not(.minimal) .bg-\[\#E7AC08\]:hover,
+html.dark:not(.material):not(.minimal) .hover\:bg-\[\#D9A007\]:hover,
+html.dark:not(.material):not(.minimal) .hover\:bg-\[\#E7AC08\]:hover,
+html.dark:not(.material):not(.minimal) .hover\:bg-\[\#d49e07\]:hover,
+html.dark:not(.material):not(.minimal) #main-download-qr-btn:hover,
+html.dark:not(.material):not(.minimal) [id*="roll-now-btn"]:hover {
+  background-color: #EF4444 !important;
+  color: #FFFFFF !important;
+}
+
+html.dark:not(.material):not(.minimal) .bg-\[\#E7AC08\]:active,
+html.dark:not(.material):not(.minimal) .active\:bg-\[\#C59206\]:active,
+html.dark:not(.material):not(.minimal) .active\:bg-\[\#c29006\]:active,
+html.dark:not(.material):not(.minimal) #main-download-qr-btn:active,
+html.dark:not(.material):not(.minimal) [id*="roll-now-btn"]:active {
+  background-color: #B91C1C !important;
+  color: #FFFFFF !important;
+}
+
+html.dark:not(.material):not(.minimal) .bg-\[\#E7AC08\] *,
+html.dark:not(.material):not(.minimal) #main-download-qr-btn *,
+html.dark:not(.material):not(.minimal) [id*="roll-now-btn"] *,
+html.dark:not(.material):not(.minimal) [id*="btn-improve-readability"] * {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Floating bottom nav bar active tab in Dark Theme */
+html.dark:not(.material):not(.minimal) [id*="floating-nav"].bg-\[\#E7AC08\],
+html.dark:not(.material):not(.minimal) [id*="floating-nav"].bg-\[\#E7AC08\]:hover {
+  background-color: #DC2626 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #EF4444 !important;
+}
+
+html.dark:not(.material):not(.minimal) [id*="floating-nav"].bg-\[\#E7AC08\] * {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Dark Theme: Soft Red Background Highlights (replacing dark amber tints) */
+html.dark:not(.material):not(.minimal) .bg-amber-950\/30,
+html.dark:not(.material):not(.minimal) .bg-amber-950\/20,
+html.dark:not(.material):not(.minimal) .bg-amber-950\/40,
+html.dark:not(.material):not(.minimal) .dark\:bg-amber-950\/30,
+html.dark:not(.material):not(.minimal) .dark\:bg-amber-950\/20,
+html.dark:not(.material):not(.minimal) .dark\:bg-amber-950\/40,
+html.dark:not(.material):not(.minimal) .bg-\[\#E7AC08\]\/15,
+html.dark:not(.material):not(.minimal) .bg-\[\#E7AC08\]\/10,
+html.dark:not(.material):not(.minimal) .bg-\[\#E7AC08\]\/20,
+html.dark:not(.material):not(.minimal) .dark\:from-\[\#E7AC08\]\/10 {
+  background-color: rgba(185, 28, 28, 0.22) !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+  color: #FCA5A5 !important;
+}
+
+html.dark:not(.material):not(.minimal) .dark\:bg-amber-950\/30 *,
+html.dark:not(.material):not(.minimal) .dark\:bg-amber-950\/20 * {
+  color: #FCA5A5 !important;
+}
+
+/* Dark Theme: Text Accents */
+html.dark:not(.material):not(.minimal) .text-\[\#E7AC08\],
+html.dark:not(.material):not(.minimal) .dark\:text-\[\#E7AC08\],
+html.dark:not(.material):not(.minimal) .dark\:text-amber-100,
+html.dark:not(.material):not(.minimal) .dark\:text-amber-200,
+html.dark:not(.material):not(.minimal) .dark\:text-amber-300,
+html.dark:not(.material):not(.minimal) .dark\:text-amber-400,
+html.dark:not(.material):not(.minimal) .text-amber-400,
+html.dark:not(.material):not(.minimal) .text-amber-500,
+html.dark:not(.material):not(.minimal) .text-\[\#FBBF24\] {
+  color: #F87171 !important;
+}
+
+/* Dark Theme: Border Accents */
+html.dark:not(.material):not(.minimal) .border-\[\#E7AC08\],
+html.dark:not(.material):not(.minimal) .dark\:border-\[\#E7AC08\],
+html.dark:not(.material):not(.minimal) .border-\[\#E7AC08\]\/50,
+html.dark:not(.material):not(.minimal) .border-\[\#E7AC08\]\/40,
+html.dark:not(.material):not(.minimal) .border-\[\#E7AC08\]\/30,
+html.dark:not(.material):not(.minimal) .dark\:border-\[\#E7AC08\]\/30 {
+  border-color: rgba(239, 68, 68, 0.6) !important;
+}
+
+/* Dark Theme: Rings & Shadows */
+html.dark:not(.material):not(.minimal) [class*="ring-\[\#E7AC08\]"],
+html.dark:not(.material):not(.minimal) [class*="focus\:ring-\[\#E7AC08\]"]:focus {
+  --tw-ring-color: rgba(239, 68, 68, 0.45) !important;
+}
+
+html.dark:not(.material):not(.minimal) [class*="shadow-\[\#E7AC08\]"] {
+  box-shadow: 0 4px 16px 0 rgba(220, 38, 38, 0.3) !important;
+}
+
+html.dark:not(.material):not(.minimal) [class*="hover\:shadow-\[\#E7AC08\]"]:hover {
+  box-shadow: 0 6px 20px -2px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* Dark Theme: SVG Fills */
+html.dark:not(.material):not(.minimal) .fill-\[\#E7AC08\] {
+  fill: #EF4444 !important;
+}
+
+html.dark:not(.material):not(.minimal) .fill-\[\#E7AC08\]\/30 {
+  fill: rgba(239, 68, 68, 0.3) !important;
+}
+
+/* Dark Theme: Form Controls */
+html.dark:not(.material):not(.minimal) input[type="range"] {
+  accent-color: #EF4444 !important;
+}
+
+html.dark:not(.material):not(.minimal) input[type="checkbox"],
+html.dark:not(.material):not(.minimal) input[type="radio"] {
+  accent-color: #EF4444 !important;
+}
+
+/* Split randomize button divider */
+html.dark:not(.material):not(.minimal) .bg-\[\#C59206\]\/80 {
+  background-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Modal header gradient accent line in Dark Theme */
+html.dark:not(.material):not(.minimal) .from-\[\#E7AC08\] {
+  --tw-gradient-from: #DC2626 !important;
+}
+
+html.dark:not(.material):not(.minimal) .via-amber-400 {
+  --tw-gradient-via: #EF4444 !important;
+}
+
+html.dark:not(.material):not(.minimal) .to-\[\#E7AC08\] {
+  --tw-gradient-to: #DC2626 !important;
+}
+
+/* Notice and Changelog action buttons in Dark Theme */
+html.dark:not(.material):not(.minimal) [data-theme-accent="notice-primary"] {
+  background-color: #DC2626 !important;
+  color: #FFFFFF !important;
+  border-color: #DC2626 !important;
+}
+
+html.dark:not(.material):not(.minimal) [data-theme-accent="notice-primary"]:hover {
+  background-color: #EF4444 !important;
+}
+
+html.dark:not(.material):not(.minimal) [data-theme-accent="notice-secondary"] {
+  background-color: #18181B !important;
+  color: #F87171 !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
+
+html.dark:not(.material):not(.minimal) [data-theme-accent="notice-secondary"]:hover {
+  background-color: rgba(220, 38, 38, 0.15) !important;
+}
+
+/* 3. Minimal Theme (Pure Crisp High-Contrast Black & White Modernism) */
+html.minimal body {
+  background-color: #FAFAFA;
+  color: #09090B;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+}
+
+html.minimal header {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  border-bottom-color: #E4E4E7 !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* Neutral Surfaces */
+html.minimal .bg-\[\#FAF8F5\],
+html.minimal .bg-\[\#FAF8F5\]\/95,
+html.minimal .bg-\[\#FAF8F5\]\/80,
+html.minimal .bg-\[\#FAF8F5\]\/70,
+html.minimal .bg-\[\#FDFCF9\] {
+  background-color: #FFFFFF !important;
+}
+
+html.minimal .bg-\[\#F8F6F0\],
+html.minimal .bg-\[\#F8F6F0\]\/90,
+html.minimal .bg-\[\#F5F2EA\] {
+  background-color: #F4F4F5 !important;
+}
+
+html.minimal .border-\[\#EDE8DF\],
+html.minimal .border-\[\#DDD7CC\],
+html.minimal .border-\[\#CBD5E1\] {
+  border-color: #E4E4E7 !important;
+}
+
+html.minimal .text-\[\#0F172A\] {
+  color: #09090B !important;
+}
+
+html.minimal .text-\[\#64748B\] {
+  color: #52525B !important;
+}
+
+/* Replace all Gold/Amber Accents with Crisp High-Contrast Black & White */
+html.minimal .bg-\[\#E7AC08\]:not([id*="floating-nav"]),
+html.minimal .bg-\[\#D9A007\]:not([id*="floating-nav"]),
+html.minimal .bg-\[\#C59206\],
+html.minimal .bg-\[\#d49e07\],
+html.minimal .bg-\[\#c29006\],
+html.minimal .bg-amber-500,
+html.minimal .bg-amber-600,
+html.minimal .bg-amber-700 {
+  background-color: #09090B !important;
+  color: #FFFFFF !important;
+}
+
+/* Ensure Red Note button in Live QR Preview card stays striking red for attention across all themes */
+#btn-live-preview-red-note,
+html.minimal #btn-live-preview-red-note {
+  background-color: #DC2626 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #B91C1C !important;
+}
+
+#btn-live-preview-red-note:hover,
+html.minimal #btn-live-preview-red-note:hover {
+  background-color: #B91C1C !important;
+  color: #FFFFFF !important;
+}
+
+#btn-live-preview-red-note *,
+html.minimal #btn-live-preview-red-note * {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+}
+
+/* Minimal theme Changelog & Notice button styling: Pure high-contrast Black & White */
+html.minimal [data-theme-accent="notice-primary"] {
+  background-color: #09090B !important;
+  color: #FFFFFF !important;
+  border-color: #09090B !important;
+}
+
+html.minimal [data-theme-accent="notice-primary"]:hover {
+  background-color: #27272A !important;
+}
+
+html.minimal [data-theme-accent="notice-secondary"] {
+  background-color: #FFFFFF !important;
+  color: #09090B !important;
+  border-color: #D4D4D8 !important;
+}
+
+html.minimal [data-theme-accent="notice-secondary"]:hover {
+  background-color: #F4F4F5 !important;
+}
+
+/* Ensure ALL text and icons inside active black buttons are 100% crisp white */
+html.minimal .bg-\[\#E7AC08\]:not([id*="floating-nav"]) *,
+html.minimal .bg-\[\#D9A007\]:not([id*="floating-nav"]) *,
+html.minimal .bg-\[\#C59206\] *,
+html.minimal .bg-\[\#d49e07\] *,
+html.minimal .bg-\[\#c29006\] *,
+html.minimal #main-download-qr-btn *,
+html.minimal [id*="action-btn"] *,
+html.minimal [id*="dropdown-toggle"] *,
+html.minimal [id*="roll-now-btn"] *,
+html.minimal [id*="btn-improve-readability"] * {
+  color: #FFFFFF !important;
+  stroke: #FFFFFF !important;
+  fill: currentColor !important;
+}
+
+/* Bottom Navigation Bar in Minimal Theme: Use clean grey instead of dark black */
+html.minimal [id*="floating-nav"] {
+  transition: all 0.15s ease !important;
+}
+
+/* Active tab button in bottom nav: Use clean medium grey background (#E4E4E7) with dark slate (#18181B) icon & label */
+html.minimal [id*="floating-nav"].bg-\[\#E7AC08\],
+html.minimal [id*="floating-nav"].bg-\[\#E7AC08\]:hover {
+  background-color: #E4E4E7 !important;
+  color: #18181B !important;
+  border: 1px solid #D4D4D8 !important;
+}
+
+html.minimal [id*="floating-nav"].bg-\[\#E7AC08\] * {
+  color: #18181B !important;
+  stroke: #18181B !important;
+}
+
+/* Inactive tab buttons in bottom nav: Clean legible slate grey icons (#71717A) */
+html.minimal [id*="floating-nav"]:not(.bg-\[\#E7AC08\]) {
+  color: #71717A !important;
+}
+
+html.minimal [id*="floating-nav"]:not(.bg-\[\#E7AC08\]) * {
+  color: #71717A !important;
+  stroke: #71717A !important;
+}
+
+html.minimal [id*="floating-nav"]:not(.bg-\[\#E7AC08\]):hover {
+  color: #18181B !important;
+  background-color: #F4F4F5 !important;
+}
+
+html.minimal [id*="floating-nav"]:not(.bg-\[\#E7AC08\]):hover * {
+  color: #18181B !important;
+  stroke: #18181B !important;
+}
+
+/* Divider line inside split randomize button */
+html.minimal .bg-\[\#C59206\]\/80 {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Soft gold background tint replacements */
+html.minimal .bg-\[\#FFF7D9\],
+html.minimal .bg-\[\#FFFBEA\],
+html.minimal .bg-\[\#FEF3C7\],
+html.minimal .bg-\[\#FFFDF5\],
+html.minimal .bg-amber-50,
+html.minimal .bg-amber-100 {
+  background-color: #F4F4F5 !important;
+  border-color: #E4E4E7 !important;
+}
+
+html.minimal .bg-\[\#E7AC08\]\/15,
+html.minimal .bg-\[\#E7AC08\]\/10,
+html.minimal .bg-\[\#E7AC08\]\/20 {
+  background-color: #E4E4E7 !important;
+  color: #09090B !important;
+}
+
+html.minimal .bg-\[\#E7AC08\]\/15 *,
+html.minimal .bg-\[\#E7AC08\]\/10 * {
+  color: #09090B !important;
+}
+
+/* Text overrides: No gold text in minimal mode */
+html.minimal .text-\[\#E7AC08\],
+html.minimal .text-\[\#92400E\],
+html.minimal .text-\[\#B45309\],
+html.minimal .text-\[\#D97706\],
+html.minimal .text-\[\#C59206\],
+html.minimal .text-amber-500,
+html.minimal .text-amber-600,
+html.minimal .text-amber-700,
+html.minimal .text-amber-800,
+html.minimal .text-amber-900,
+html.minimal .text-amber-400,
+html.minimal .text-amber-300,
+html.minimal .text-amber-200 {
+  color: #09090B !important;
+}
+
+/* Border overrides */
+html.minimal .border-\[\#E7AC08\],
+html.minimal .border-\[\#D9A007\],
+html.minimal .border-\[\#C59206\],
+html.minimal .border-\[\#d49e07\],
+html.minimal .border-\[\#E7AC08\]\/50,
+html.minimal .border-\[\#E7AC08\]\/40,
+html.minimal .border-\[\#E7AC08\]\/30 {
+  border-color: #09090B !important;
+}
+
+html.minimal .border-amber-200,
+html.minimal .border-amber-300,
+html.minimal .border-amber-400 {
+  border-color: #E4E4E7 !important;
+}
+
+/* Button Hover & Active States in Minimal */
+html.minimal .hover\:bg-\[\#D9A007\]:hover,
+html.minimal .hover\:bg-\[\#E7AC08\]:hover,
+html.minimal .hover\:bg-\[\#d49e07\]:hover {
+  background-color: #27272A !important;
+  color: #FFFFFF !important;
+}
+
+html.minimal .hover\:bg-\[\#FFFBEA\]:hover,
+html.minimal .hover\:bg-\[\#FEF3C7\]:hover,
+html.minimal .hover\:bg-\[\#FFF7D9\]:hover {
+  background-color: #E4E4E7 !important;
+}
+
+html.minimal .hover\:border-\[\#E7AC08\]:hover,
+html.minimal .hover\:border-\[\#D9A007\]:hover {
+  border-color: #09090B !important;
+}
+
+html.minimal .active\:bg-\[\#C59206\]:active,
+html.minimal .active\:bg-\[\#c29006\]:active {
+  background-color: #18181B !important;
+}
+
+/* Remove golden shadows & glows */
+html.minimal [class*="shadow-\[\#E7AC08\]"],
+html.minimal [class*="shadow-amber"] {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04) !important;
+}
+
+html.minimal [class*="hover\:shadow-\[\#E7AC08\]"]:hover {
+  box-shadow: 0 6px 12px -2px rgba(0, 0, 0, 0.12) !important;
+}
+
+html.minimal [class*="ring-\[\#E7AC08\]"],
+html.minimal [class*="ring-amber"] {
+  --tw-ring-color: rgba(0, 0, 0, 0.25) !important;
+}
+
+html.minimal [class*="focus\:ring-\[\#E7AC08\]"]:focus {
+  --tw-ring-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+html.minimal input[type="range"] {
+  accent-color: #09090B !important;
+}
+
+html.minimal input[type="checkbox"],
+html.minimal input[type="radio"] {
+  accent-color: #09090B !important;
+}
+
+/* 4. Google Material Expressive Theme (Exclusive Warm Yellow & Gold Tone Theme) */
+html.material body {
+  background-color: #FAF8F5;
+  background-image: 
+    radial-gradient(at 15% 10%, rgba(231, 172, 8, 0.14) 0px, transparent 40%),
+    radial-gradient(at 85% 15%, rgba(245, 158, 11, 0.10) 0px, transparent 45%),
+    radial-gradient(at 50% 90%, rgba(251, 191, 36, 0.12) 0px, transparent 45%),
+    radial-gradient(at 80% 80%, rgba(217, 119, 6, 0.08) 0px, transparent 45%);
+  background-attachment: fixed;
+  color: #1a1c22;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.15s ease;
+}
+
+html.material header {
+  background-color: rgba(253, 251, 247, 0.94) !important;
+  border-bottom-color: rgba(231, 172, 8, 0.25) !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 1px 3px 0 rgba(231, 172, 8, 0.06);
+}
+
+html.material .bg-white {
+  background-color: #ffffff !important;
+  border-color: rgba(231, 172, 8, 0.22) !important;
+  box-shadow: 0 4px 20px -2px rgba(231, 172, 8, 0.08), 0 1px 4px 0 rgba(0, 0, 0, 0.03) !important;
+}
+
+html.material .bg-zinc-50,
+html.material .bg-zinc-100\/70 {
+  background-color: #FFFDF7 !important;
+}
+
+html.material .border-zinc-200,
+html.material .border-zinc-200\/80,
+html.material .border-zinc-200\/90 {
+  border-color: #EDE8DF !important;
+}
+
+html.material .text-zinc-900 {
+  color: #181c24 !important;
+}
+
+html.material .text-zinc-700 {
+  color: #3b4252 !important;
+}
+
+html.material .text-zinc-500 {
+  color: #5c6479 !important;
+}
+
+/* Material Theme: Signature Warm Yellow/Gold Actions */
+html.material .bg-\[\#E7AC08\],
+html.material .bg-\[\#D9A007\],
+html.material .bg-\[\#C59206\],
+html.material .bg-\[\#d49e07\],
+html.material .bg-\[\#c29006\],
+html.material #main-download-qr-btn,
+html.material [id*="roll-now-btn"],
+html.material [id*="btn-improve-readability"] {
+  background-color: #E7AC08 !important;
+  color: #0F172A !important;
+}
+
+html.material .bg-\[\#E7AC08\]:hover,
+html.material .hover\:bg-\[\#D9A007\]:hover,
+html.material .hover\:bg-\[\#E7AC08\]:hover,
+html.material .hover\:bg-\[\#d49e07\]:hover,
+html.material #main-download-qr-btn:hover,
+html.material [id*="roll-now-btn"]:hover {
+  background-color: #D9A007 !important;
+  color: #0F172A !important;
+}
+
+html.material .bg-\[\#E7AC08\]:active,
+html.material .active\:bg-\[\#C59206\]:active,
+html.material .active\:bg-\[\#c29006\]:active,
+html.material #main-download-qr-btn:active,
+html.material [id*="roll-now-btn"]:active {
+  background-color: #C59206 !important;
+  color: #0F172A !important;
+}
+
+html.material .bg-\[\#E7AC08\] *,
+html.material #main-download-qr-btn *,
+html.material [id*="roll-now-btn"] *,
+html.material [id*="btn-improve-readability"] * {
+  color: #0F172A !important;
+  stroke: #0F172A !important;
+}
+
+/* Material Theme: Floating Navigation Active Tab */
+html.material [id*="floating-nav"].bg-\[\#E7AC08\],
+html.material [id*="floating-nav"].bg-\[\#E7AC08\]:hover {
+  background-color: #E7AC08 !important;
+  color: #0F172A !important;
+  border: 1px solid #D9A007 !important;
+}
+
+html.material [id*="floating-nav"].bg-\[\#E7AC08\] * {
+  color: #0F172A !important;
+  stroke: #0F172A !important;
+}
+
+/* Material Theme: Form Controls */
+html.material input[type="range"] {
+  accent-color: #E7AC08 !important;
+}
+
+html.material input[type="checkbox"],
+html.material input[type="radio"] {
+  accent-color: #E7AC08 !important;
+}
+
+/* Material Theme: Focus Rings & Warm Gold Glow */
+html.material [class*="ring-\[\#E7AC08\]"],
+html.material [class*="focus\:ring-\[\#E7AC08\]"]:focus {
+  --tw-ring-color: rgba(231, 172, 8, 0.35) !important;
+}
+
+html.material [class*="shadow-\[\#E7AC08\]"] {
+  box-shadow: 0 4px 14px 0 rgba(231, 172, 8, 0.25) !important;
+}
+
+html.material [class*="hover\:shadow-\[\#E7AC08\]"]:hover {
+  box-shadow: 0 6px 18px -2px rgba(231, 172, 8, 0.35) !important;
+}
+
+/* Global Form accent & focus tint */
+input[type="range"] {
+  accent-color: #E7AC08;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+input[type="checkbox"], input[type="radio"] {
+  accent-color: #E7AC08;
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   SMOOTH & SNAPPY ANIMATIONS
+   ========================================================================== */
+.snappy-transition {
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.snappy-hover {
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.15s ease;
+}
+
+.snappy-hover:hover {
+  transform: translateY(-1px);
+}
+
+.snappy-hover:active {
+  transform: translateY(0px) scale(0.985);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(150, 150, 150, 0.3);
+  border-radius: 9999px;
+  transition: background 0.15s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 150, 150, 0.5);
+}
