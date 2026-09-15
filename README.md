@@ -180,7 +180,7 @@ Because a QR code doesn't have to look boring just because it needs to be functi
 
 # 💛 SUPPORT THE DEVELOPMENT
 
-  <img width="250" height="250" alt="Support" src="https://github.com/user-attachments/assets/42e2d89c-9449-4e18-8ee6-d7fe5960ac79" />
+<img width="250" height="250" alt="ehsaan-qr-1024x1024 (1)" src="https://github.com/user-attachments/assets/7139284e-c5e5-424a-bd52-aa71ccc392a8" />
 </p>
 
 <p align="center">
@@ -201,7 +201,7 @@ Because a QR code doesn't have to look boring just because it needs to be functi
     <img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
   </a>
   &nbsp;
-  <a href="https://github.com/worsmon-org">
+  <a href="https://github.com/ehsaanullah0">
     <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
   </a>
   &nbsp;
