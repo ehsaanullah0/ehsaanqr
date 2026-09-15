@@ -4,8 +4,8 @@
 <img width="200" height="200" src="https://github.com/user-attachments/assets/b9cebf1b-2097-4f49-8967-338bdd794664" />
 
 # 🗜️ EHSAAN QR GENERATOR
-# Compress smarter. Keep it clean.
-# 🔗[**ehsaancompress.ai.studio**](https://ehsaancompress.ai.studio/)
+# MAKE QR LINK TO YOUR PERSONALITY
+# 🔗[**ehsaanqr.ai.studio**](https://ehsaanqr.ai.studio/)
 
 <p>
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Android/android2.svg">&nbsp;
