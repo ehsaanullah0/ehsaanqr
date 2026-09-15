@@ -36,18 +36,21 @@ Same philosophy.
 
 > [!NOTE]
 > **More things from EHSAAN:**
->
+> 
 > 🏠 [**EHSAAN ULLAH**](https://github.com/ehsaanullah0/fertenix) — Portfolio for the web dev work.
 >
-> ⚡ [**EHSAAN WEBSITE**](https://ehsaan.odoo.com/) — The main home of the EHSAAN project and everything around it.
->
+>  ⚡ [ **EHSAAN WEBSITE**](https://ehsaan.odoo.com/) — The main home of the EHSAAN project and everything around it.
+> 
 > 🗜️ [**EHSAAN COMPRESS**](https://ehsaancompress.ai.studio/) — Compress images without the unnecessary fuss.
 >
 > 💥 [**EHSAAN QR**](https://ehsaanqr.ai.studio/) — Generate stunning QR codes for nearly anything.
 >
+> ⭕ [**EHSAAN FILES** ](https://ehsaanfiles.ai.studio/) — transfer files with encryption.
+> 
 > 🔗 [**EHSAAN COLOUR STUDIO**](https://github.com/ehsaanullah0/colour-studio) — Explore, create, and work with colours.
->
+> 
 > 📌 [**NIAGARA RELEASE**](https://github.com/ehsaanullah0/niagara-premium) — A Morph patch for the original apk.
+
 
 ---
 
