@@ -1,11 +1,12 @@
-
 <div align="center">
 
 <img width="200" height="200" src="https://github.com/user-attachments/assets/b9cebf1b-2097-4f49-8967-338bdd794664" />
 
 # 🗜️ EHSAAN QR GENERATOR
+
 # MAKE QR LINK TO YOUR PERSONALITY
-# 🔗[**ehsaanqr.ai.studio**](https://ehsaanqr.ai.studio/)
+
+# 🔗 [**ehsaanqr.ai.studio**](https://ehsaanqr.ai.studio/)
 
 <p>
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Android/android2.svg">&nbsp;
@@ -14,10 +15,10 @@
   <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/LicenceGPLv3/licencegplv32.svg">
 </p>
 
-A simple, fast, and privacy-friendly image compression tool built to make reducing image file sizes effortless.
+A simple, fast, and privacy-friendly QR code generator built to make creating customized QR codes effortless.
 
-**Made for everyday uploads.
-Built for smaller files.
+**Made for everyday QR codes.
+Built for creativity.
 Designed to keep things simple.**
 
 </div>
@@ -56,20 +57,23 @@ Same philosophy.
 
 <img width="300" height="300" alt="EHSAAN QR" src="https://github.com/user-attachments/assets/e9c3fd12-5cbf-45d1-84ec-f3bc5537dd71" />
 
+</div>
+
+<div align="center">
+
 ## **But EHSAAN QR Gives You This**
 
-<p align="center">
-  <a href="https://youtu.be/AiCvuBxdJsg" target="_blank">
-    <img
-      width="500"
-      src="https://github.com/user-attachments/assets/bf633cc6-a8ed-4fca-b7b1-1aef2df991d3"
-      alt="Watch EHSAAN QR Demo Video"
-    />
-  </a>
-  
+<a href="https://youtu.be/AiCvuBxdJsg" target="_blank">
+  <img
+    width="500"
+    src="https://github.com/user-attachments/assets/bf633cc6-a8ed-4fca-b7b1-1aef2df991d3"
+    alt="Watch EHSAAN QR Demo Video"
+  />
+</a>
+
 ### **The possibilities are endless.**
 
-<table>
+<table align="center">
   <tr>
     <td align="center">
       <img width="300" height="300" alt="db (1)" src="https://github.com/user-attachments/assets/99bfe38a-8f5d-4db2-aa1c-b81ea036f8fa" />
@@ -98,13 +102,19 @@ Same philosophy.
   </tr>
 </table>
 
+</div>
+
+---
+
 ## 🚀 THE TOOL
 
-**EHSAAN QR** is a best qr code generaator for those peoples who want customization in qr codes.
+**EHSAAN QR** is a customizable QR code generator for people who want more control over how their QR codes look.
 
-Whether you're making qr codes for your personal or business use it just works this is GPL LICENCED PRODUCT.
+Whether you're making QR codes for personal or business use, it just works.
 
-# 🔗[**ehsaanqr.ai.studio**](https://ehsaanqr.ai.studio/)
+This is a **GPL-licensed product**.
+
+# 🔗 [**ehsaanqr.ai.studio**](https://ehsaanqr.ai.studio/)
 
 ---
 
@@ -117,134 +127,3 @@ Whether you're making qr codes for your personal or business use it just works t
 * 👀 **Live Preview** — See your QR design as you customize it
 * 📱 **Scannability Protection** — Helps keep highly customized QR codes readable and scannable
 * 📐 **Flexible Export** — Generate QR codes in different sizes for digital or print use
-* 🔒 **Privacy Friendly** — Designed around browser-based processing
-
----
-
-
-<img width="1289" height="646" alt="image" src="https://github.com/user-attachments/assets/afc9cbde-ab7b-40ef-8cac-94e318e354d7" />
-
-<img width="1257" height="419" alt="image" src="https://github.com/user-attachments/assets/db7f210e-debc-41ba-9d83-61ec87c625be" />
-
-<img width="1253" height="243" alt="image" src="https://github.com/user-attachments/assets/f6daccb3-d5aa-4dfc-b088-ba83d2d06363" />
-
-<img width="1280" height="580" alt="image" src="https://github.com/user-attachments/assets/8a205fa1-c789-4e15-9197-58b8a0b5bdf0" />
-
-<img width="1194" height="752" alt="image" src="https://github.com/user-attachments/assets/4e65b4fb-daa0-435e-8054-c544faa19ae9" />
-
-<img width="1133" height="745" alt="image" src="https://github.com/user-attachments/assets/c1080a7e-b0d9-4e2e-8614-26751385c1e9" />
-
-
-## 💡 MADE FOR REAL-WORLD QR CODES
-
-QR codes are everywhere — websites, menus, payments, social profiles, contact details, and more.
-
-**EHSAAN QR** makes creating them simple:
-
-**Choose content → Customize → Randomize → Scan → Download**
-
-No complicated software.
-No unnecessary workflow.
-
-Just create a QR code that works **and looks good**.
-
----
-
-## 🎨 THE EHSAAN STYLE
-
-EHSAAN QR is part of the **EHSAAN** digital project.
-
-The idea is simple:
-
-> **Useful tools should feel simple.**
-
-Clean interfaces.
-Minimal distractions.
-Useful controls.
-Creative customization.
-No unnecessary clutter.
-
-Because a QR code doesn't have to look boring just because it needs to be functional.
-
----
-
-## 🛠️ BUILT WITH
-
-* HTML
-* CSS
-* JavaScript
-* Browser-based QR generation
-* Google AI Studio
-
----
-
-## 🔐 PRIVACY
-
-**EHSAAN QR** is designed with a **local-first approach**.
-
-Your QR content can be processed directly in your browser without requiring a traditional server just to generate a QR code.
-
-Your data doesn't need to take a mysterious detour through the cloud just to become a square of pixels.
-
-**Create locally. Customize freely. Download directly.**
-
----
-
-## 🌐 LIVE
-
-### **EHSAAN QR**
-
-**Create QR codes.
-Customize them.
-Make them yours.**
-
-🔗 **https://ehsaanqr.ai.studio/**
-
-
-# 💛 SUPPORT THE DEVELOPMENT
-
-<img width="250" height="250" alt="ehsaan-qr-1024x1024 (6)" src="https://github.com/user-attachments/assets/2161ae6a-e3ea-4ecc-a845-a40903c67e2b" />
-</p>
-
-<p align="center">
-  <sub>If you find something useful here, a ⭐ is always appreciated.</sub>
-</p>
-
-## 📌 PROJECT
-
-Part of the **EHSAAN** collection of personal web projects, experiments, and useful digital tools.
-
-Built with curiosity.
-Improved through experimentation.
-Made to be useful.
-
----
-
-<p align="center">
-## ✦ FINDING GOOD RESOURCES SHOULDN'T BE HARD.
-
-<p align="center">
-  <a href="https://ehsaan.odoo.com/" target="_blank">
-<img width="130" height="130" alt="cropped_circle_image" src="https://github.com/user-attachments/assets/336454db-ef7d-4003-b33a-db16a945ae3c" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="mailto:worsmon@gmail.com">
-    <img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
-  </a>
-  &nbsp;
-  <a href="https://github.com/worsmon-org">
-    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
-  </a>
-  &nbsp;
-  <a href="https://ehsaan.odoo.com/">
-    <img src="https://img.shields.io/badge/Website-0A84FF?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Website">
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/ehsaanullah0/niagara-premium/releases/tag/v.10.21">
-    <img src="https://img.shields.io/badge/Release-Niagara.pro-c9b58a?style=for-the-badge" />
-  </a>
-   
