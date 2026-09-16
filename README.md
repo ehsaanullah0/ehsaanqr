@@ -78,7 +78,7 @@ Same philosophy.
 
 ## **But EHSAAN QR Gives You This**
 
-<a href="https://youtu.be/AiCvuBxdJsg" target="_blank">
+<a href="https://youtu.be/3nfh-KudZfk" target="_blank">
   <img
     width="500"
     src="https://github.com/user-attachments/assets/bf633cc6-a8ed-4fca-b7b1-1aef2df991d3"
