@@ -23,7 +23,19 @@ Designed to keep things simple.**
 
 </div>
 
----
+<div align="center">
+
+# WHAT'S NEW ~ 📌 V1.1.4
+
+<img width="599" height="360" alt="EHSAAN QR V1.1.4" src="https://github.com/user-attachments/assets/428d1e37-7a24-4ca6-be7e-e40b03bfe919" />
+
+### ✨ New in V1.1.4
+
+🎨 **New QR Shapes** · 🖼️ **QR Frames** · 🧩 **Shapes Section**
+🎯 **Better Customization** · 📱 **Scanability First**
+
+</div>
+
 
 ## ◈ PART OF EHSAAN
 
@@ -144,8 +156,6 @@ This is a **GPL-licensed product**.
 <img width="1280" height="580" alt="image" src="https://github.com/user-attachments/assets/8a205fa1-c789-4e15-9197-58b8a0b5bdf0" />
 
 <img width="1286" height="571" alt="image" src="https://github.com/user-attachments/assets/d3b29d38-b693-491c-8780-ff0ae037137e" />
-
-<img width="1210" height="700" alt="image" src="https://github.com/user-attachments/assets/0bc82359-9bbc-46ec-bfaa-263951b2e8fd" />
 
 <img width="1182" height="712" alt="image" src="https://github.com/user-attachments/assets/b91a31a8-89e8-42fd-858a-285df2929842" />
 
