@@ -212,6 +212,9 @@ Because a QR code doesn't have to look boring just because it needs to be functi
 </p>
 
 <p align="center">
+**EHSAAN ULLAH**
+
+<p align="center">
   <a href="mailto:worsmon@gmail.com">
     <img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
   </a>
