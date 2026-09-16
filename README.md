@@ -135,6 +135,8 @@ This is a **GPL-licensed product**.
 
 <img width="1289" height="646" alt="image" src="https://github.com/user-attachments/assets/afc9cbde-ab7b-40ef-8cac-94e318e354d7" />
 
+<img width="1265" height="699" alt="image" src="https://github.com/user-attachments/assets/345522ab-806a-46fd-8426-30fbc4e42a99" />
+
 <img width="1257" height="419" alt="image" src="https://github.com/user-attachments/assets/db7f210e-debc-41ba-9d83-61ec87c625be" />
 
 <img width="1253" height="243" alt="image" src="https://github.com/user-attachments/assets/f6daccb3-d5aa-4dfc-b088-ba83d2d06363" />
@@ -143,7 +145,7 @@ This is a **GPL-licensed product**.
 
 <img width="1286" height="571" alt="image" src="https://github.com/user-attachments/assets/d3b29d38-b693-491c-8780-ff0ae037137e" />
 
-<img width="1235" height="706" alt="image" src="https://github.com/user-attachments/assets/75ae3151-a9a1-4200-b724-4036397d4f61" />
+<img width="1210" height="700" alt="image" src="https://github.com/user-attachments/assets/0bc82359-9bbc-46ec-bfaa-263951b2e8fd" />
 
 <img width="1182" height="712" alt="image" src="https://github.com/user-attachments/assets/b91a31a8-89e8-42fd-858a-285df2929842" />
 
