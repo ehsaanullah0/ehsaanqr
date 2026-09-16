@@ -13,12 +13,16 @@ export type QrType =
 export type PatternStyle =
   | 'square'
   | 'rounded'
+  | 'circle'
   | 'dots'
-  | 'soft-rounded'
-  | 'liquid'
   | 'diamond'
-  | 'chamfer'
-  | 'squircle';
+  | 'hexagon'
+  | 'octagon'
+  | 'squircle'
+  | 'pill'
+  | 'leaf'
+  | 'flower'
+  | 'liquid';
 
 export type QrCornerStyle = 'sharp' | 'smooth';
 
@@ -132,14 +136,26 @@ export interface QrFormData {
   calendar: CalendarData;
 }
 
+export type LogoType =
+  | 'none'
+  | 'url'
+  | 'phone'
+  | 'whatsapp'
+  | 'wifi'
+  | 'email'
+  | 'upi'
+  | 'payment'
+  | 'custom';
+
 export interface LogoConfig {
-  type: 'none' | 'ehsaan' | 'custom';
+  type: LogoType;
   customUrl?: string;
   sizeRatio: number; // e.g. 0.22 (22% of QR width)
   padding: number; // padding in px
   background: 'white' | 'match' | 'custom' | 'transparent';
   customBgColor: string;
   borderRadius: number; // px or %
+  autoAdapt?: boolean; // When true, automatically matches logo to active category
 }
 
 export interface QrStyleOptions {

@@ -58,6 +58,8 @@ interface LivePreviewCardProps {
   selectedRandomizeType?: RandomizeType;
   onRandomizeTargetChange?: (target: RandomizeTarget) => void;
   onRandomizeTypeChange?: (type: RandomizeType) => void;
+  lockedTargets?: RandomizeTarget[];
+  onLockedTargetsChange?: (locks: RandomizeTarget[]) => void;
   theme?: AppTheme;
 }
 
@@ -74,6 +76,8 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
   selectedRandomizeType,
   onRandomizeTargetChange,
   onRandomizeTypeChange,
+  lockedTargets,
+  onLockedTargetsChange,
   theme,
 }) => {
   const isMinimal = theme === 'minimal' || (typeof document !== 'undefined' && document.documentElement.classList.contains('minimal'));
@@ -424,6 +428,8 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                   selectedType={selectedRandomizeType || 'both'}
                   onTargetChange={onRandomizeTargetChange || (() => {})}
                   onTypeChange={onRandomizeTypeChange || (() => {})}
+                  lockedTargets={lockedTargets}
+                  onLockedTargetsChange={onLockedTargetsChange}
                   idPrefix="preview-rand"
                   compact
                   className="w-full"

@@ -12,6 +12,8 @@ import {
   Image as ImageIcon,
   Dices,
   Info,
+  Lock,
+  Unlock,
 } from 'lucide-react';
 import {
   QrStyleOptions,
@@ -35,6 +37,8 @@ interface SmartRandomizeControllerProps {
   selectedType: RandomizeType;
   onTargetChange: (target: RandomizeTarget) => void;
   onTypeChange: (type: RandomizeType) => void;
+  lockedTargets?: RandomizeTarget[];
+  onLockedTargetsChange?: (locks: RandomizeTarget[]) => void;
   idPrefix?: string;
   className?: string;
   compact?: boolean;
@@ -66,6 +70,8 @@ export const SmartRandomizeController: React.FC<SmartRandomizeControllerProps> =
   selectedType,
   onTargetChange,
   onTypeChange,
+  lockedTargets,
+  onLockedTargetsChange,
   idPrefix = 'smart-rand',
   className = '',
   compact = false,
@@ -74,6 +80,50 @@ export const SmartRandomizeController: React.FC<SmartRandomizeControllerProps> =
   const containerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popoverRef = useRef<HTMLDivElement>(null);
+
+  const [internalLocks, setInternalLocks] = useState<RandomizeTarget[]>(() => {
+    try {
+      const saved = localStorage.getItem('ehsaan_qr_rand_locks');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [];
+  });
+
+  const currentLocks = lockedTargets !== undefined ? lockedTargets : internalLocks;
+
+  const handleToggleLock = (targetId: RandomizeTarget) => {
+    const nextLocks = currentLocks.includes(targetId)
+      ? currentLocks.filter((t) => t !== targetId)
+      : [...currentLocks, targetId];
+
+    if (onLockedTargetsChange) {
+      onLockedTargetsChange(nextLocks);
+    } else {
+      setInternalLocks(nextLocks);
+      try {
+        localStorage.setItem('ehsaan_qr_rand_locks', JSON.stringify(nextLocks));
+      } catch {}
+    }
+
+    const targetLabel = RANDOMIZE_TARGET_INFO[targetId]?.shortLabel || targetId;
+    if (nextLocks.includes(targetId)) {
+      onShowToast(`Locked ${targetLabel} (won't randomize with "All") 🔒`);
+    } else {
+      onShowToast(`Unlocked ${targetLabel} 🔓`);
+    }
+  };
+
+  const handleUnlockAll = () => {
+    if (onLockedTargetsChange) {
+      onLockedTargetsChange([]);
+    } else {
+      setInternalLocks([]);
+      try {
+        localStorage.setItem('ehsaan_qr_rand_locks', JSON.stringify([]));
+      } catch {}
+    }
+    onShowToast('All category locks cleared 🔓');
+  };
 
   const [coords, setCoords] = useState<PopoverCoords>({
     left: 12,
@@ -194,7 +244,8 @@ export const SmartRandomizeController: React.FC<SmartRandomizeControllerProps> =
       options,
       selectedTarget,
       selectedType,
-      saturationPreference
+      saturationPreference,
+      currentLocks
     );
     onOptionsChange(updated);
     onShowToast(message);
@@ -325,20 +376,37 @@ export const SmartRandomizeController: React.FC<SmartRandomizeControllerProps> =
           </div>
         </div>
 
-        {/* Quick Reset to All */}
-        {selectedTarget !== 'all' && (
-          <button
-            type="button"
-            id={`${idPrefix}-reset-all`}
-            onClick={() => {
-              handleSelectTarget('all');
-              handleSelectType('both');
-            }}
-            className="text-[10px] font-semibold text-[#B45309] dark:text-amber-400 hover:underline px-1.5 py-0.5 rounded cursor-pointer"
-          >
-            Reset to All
-          </button>
-        )}
+        {/* Quick Actions in Header */}
+        <div className="flex items-center gap-1.5">
+          {currentLocks.length > 0 && (
+            <button
+              type="button"
+              id={`${idPrefix}-unlock-all`}
+              onClick={handleUnlockAll}
+              title="Click to unlock all categories"
+              className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-800 dark:text-amber-300 bg-amber-100/90 dark:bg-amber-950/70 hover:bg-amber-200 dark:hover:bg-amber-900 px-1.5 py-0.5 rounded cursor-pointer transition-colors border border-amber-300/60 dark:border-amber-700/50"
+            >
+              <Lock className="w-2.5 h-2.5" />
+              <span>{currentLocks.length} locked</span>
+              <span className="text-[9px] opacity-75 underline ml-0.5">clear</span>
+            </button>
+          )}
+
+          {/* Quick Reset to All */}
+          {selectedTarget !== 'all' && (
+            <button
+              type="button"
+              id={`${idPrefix}-reset-all`}
+              onClick={() => {
+                handleSelectTarget('all');
+                handleSelectType('both');
+              }}
+              className="text-[10px] font-semibold text-[#B45309] dark:text-amber-400 hover:underline px-1.5 py-0.5 rounded cursor-pointer"
+            >
+              Reset to All
+            </button>
+          )}
+        </div>
       </div>
 
       {/* 2. Scrollable Middle Content (flex-1 overflow-y-auto) */}
@@ -367,6 +435,7 @@ export const SmartRandomizeController: React.FC<SmartRandomizeControllerProps> =
           >
             {targetList.map((item) => {
               const isSelected = selectedTarget === item.id;
+              const isLocked = currentLocks.includes(item.id);
               return (
                 <button
                   key={item.id}
@@ -378,11 +447,13 @@ export const SmartRandomizeController: React.FC<SmartRandomizeControllerProps> =
                   className={`w-full group relative flex flex-col justify-between p-2 sm:p-2.5 rounded-xl text-left transition-all cursor-pointer border ${
                     isSelected
                       ? 'bg-[#FFFBEA] dark:bg-amber-950/40 border-[#E7AC08] shadow-2xs ring-1 ring-[#E7AC08]/30'
+                      : isLocked
+                      ? 'bg-amber-50/40 dark:bg-amber-950/20 hover:bg-amber-50/70 dark:hover:bg-amber-950/40 border-amber-200/80 dark:border-amber-800/40 text-[#334155] dark:text-zinc-300'
                       : 'bg-white dark:bg-zinc-800/40 hover:bg-[#FAF8F5] dark:hover:bg-zinc-800/80 border-[#EDE8DF] dark:border-zinc-800 text-[#334155] dark:text-zinc-300'
                   }`}
                 >
                   <div className="w-full">
-                    {/* Top Row: Radio/Check Indicator + Icon + Label + Badge */}
+                    {/* Top Row: Radio/Check Indicator + Icon + Label + Badge + Lock Toggle */}
                     <div className="flex items-center justify-between gap-1.5 w-full">
                       <div className="flex items-center gap-1.5 min-w-0">
                         {/* Consistent radio indicator */}
@@ -419,16 +490,50 @@ export const SmartRandomizeController: React.FC<SmartRandomizeControllerProps> =
                         </span>
                       </div>
 
-                      {/* Badge */}
-                      <span
-                        className={`text-[9px] px-1.5 py-0.5 rounded font-medium shrink-0 leading-none ${
-                          isSelected
-                            ? 'bg-[#FEF3C7] dark:bg-amber-900/60 text-[#92400E] dark:text-amber-200'
-                            : 'bg-[#EDE8DF] dark:bg-zinc-700/60 text-[#64748B] dark:text-zinc-400'
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
+                      {/* Right side: Badge and Minimal Lock Button */}
+                      <div className="flex items-center gap-1 shrink-0">
+                        <span
+                          className={`text-[9px] px-1.5 py-0.5 rounded font-medium shrink-0 leading-none ${
+                            isLocked
+                              ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-900 dark:text-amber-300 font-semibold'
+                              : isSelected
+                              ? 'bg-[#FEF3C7] dark:bg-amber-900/60 text-[#92400E] dark:text-amber-200'
+                              : 'bg-[#EDE8DF] dark:bg-zinc-700/60 text-[#64748B] dark:text-zinc-400'
+                          }`}
+                        >
+                          {isLocked ? 'Locked' : item.badge}
+                        </span>
+
+                        {item.id !== 'all' && (
+                          <button
+                            type="button"
+                            id={`${idPrefix}-lock-${item.id}`}
+                            aria-label={isLocked ? `Unlock ${item.label}` : `Lock ${item.label}`}
+                            aria-pressed={isLocked}
+                            title={
+                              isLocked
+                                ? `Locked: Won't randomize with "All" (Click to unlock)`
+                                : `Lock ${item.label} to prevent it from randomizing`
+                            }
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleToggleLock(item.id);
+                            }}
+                            className={`p-1 rounded-md transition-all cursor-pointer ${
+                              isLocked
+                                ? 'bg-amber-500 text-zinc-950 hover:bg-amber-600 shadow-2xs ring-1 ring-amber-600/50'
+                                : 'text-zinc-400 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-200 hover:bg-zinc-200/60 dark:hover:bg-zinc-700'
+                            }`}
+                          >
+                            {isLocked ? (
+                              <Lock className="w-3 h-3 stroke-[2.5]" />
+                            ) : (
+                              <Unlock className="w-3 h-3 stroke-[1.75]" />
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {/* Description: Natural wrap without clipping */}
@@ -546,6 +651,11 @@ export const SmartRandomizeController: React.FC<SmartRandomizeControllerProps> =
           <Info className="w-3.5 h-3.5 text-[#E7AC08] shrink-0" />
           <span className="truncate">
             Ready: <strong className="text-[#0F172A] dark:text-zinc-100 font-bold">{buttonLabel}</strong>
+            {currentLocks.length > 0 && selectedTarget === 'all' && (
+              <span className="ml-1 text-[10px] text-amber-700 dark:text-amber-300 font-medium">
+                ({currentLocks.length} locked)
+              </span>
+            )}
           </span>
         </div>
 
@@ -584,7 +694,7 @@ export const SmartRandomizeController: React.FC<SmartRandomizeControllerProps> =
           id={`${idPrefix}-action-btn`}
           onClick={handleExecuteRandomize}
           className="flex-1 min-w-0 flex items-center justify-center gap-1.5 px-2 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-xs font-bold tracking-tight bg-[#E7AC08] hover:bg-[#D9A007] active:bg-[#C59206] text-[#0F172A] transition-colors focus:outline-none focus-visible:bg-[#D9A007] cursor-pointer"
-          title={`Click to roll: ${buttonLabel}`}
+          title={`Click to roll: ${buttonLabel}${currentLocks.length > 0 && selectedTarget === 'all' ? ` (${currentLocks.length} category locked)` : ''}`}
           aria-label={`Randomize action: ${buttonLabel}`}
         >
           <span
@@ -595,6 +705,15 @@ export const SmartRandomizeController: React.FC<SmartRandomizeControllerProps> =
             🎲
           </span>
           <span className="truncate whitespace-nowrap">{buttonLabel}</span>
+          {currentLocks.length > 0 && selectedTarget === 'all' && (
+            <span
+              className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-bold bg-amber-950/20 text-[#0F172A] shrink-0"
+              title={`${currentLocks.length} category locked against randomize`}
+            >
+              <Lock className="w-2.5 h-2.5 stroke-[2.5]" />
+              <span>{currentLocks.length}</span>
+            </span>
+          )}
         </button>
 
         {/* Small Arrow Divider */}

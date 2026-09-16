@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Yellow Hazard Diamond -->
+  <g transform="rotate(45 256 256)">
+    <rect x="86" y="86" width="340" height="340" rx="42" fill="#FFCC00" stroke="#111827" stroke-width="20" />
+    <rect x="106" y="106" width="300" height="300" rx="30" fill="none" stroke="#111827" stroke-width="12" />
+  </g>
+
+  <!-- Side Chevron Marks < and > -->
+  <path d="M 120 220 L 70 256 L 120 292" stroke="#111827" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <path d="M 392 220 L 442 256 L 392 292" stroke="#111827" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+
+  <!-- Crossed Bones in Background -->
+  <!-- Bone 1: Top-Left to Bottom-Right -->
+  <g stroke="#111827" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 90 350 L 422 410" stroke="#111827" stroke-width="24" />
+    <path d="M 80 410 L 432 350" stroke="#111827" stroke-width="24" />
+    
+    <!-- Bone Heads (Bottom-Left) -->
+    <circle cx="85" cy="345" r="22" fill="#FFFFFF" />
+    <circle cx="75" cy="385" r="22" fill="#FFFFFF" />
+    <circle cx="85" cy="415" r="22" fill="#FFFFFF" />
+    <circle cx="125" cy="425" r="22" fill="#FFFFFF" />
+
+    <!-- Bone Heads (Bottom-Right) -->
+    <circle cx="427" cy="345" r="22" fill="#FFFFFF" />
+    <circle cx="437" cy="385" r="22" fill="#FFFFFF" />
+    <circle cx="427" cy="415" r="22" fill="#FFFFFF" />
+    <circle cx="387" cy="425" r="22" fill="#FFFFFF" />
+  </g>
+
+  <!-- Skull Head (White) -->
+  <g stroke="#111827" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Cranium & Cheeks -->
+    <path d="M 160 210 C 145 140, 195 90, 256 90 C 317 90, 367 140, 352 210 C 352 260, 310 270, 305 315 L 207 315 C 202 270, 160 260, 160 210 Z" fill="#FFFFFF" />
+
+    <!-- Teeth notches at jaw base -->
+    <path d="M 225 315 L 225 300" stroke="#111827" stroke-width="14" />
+    <path d="M 256 315 L 256 300" stroke="#111827" stroke-width="14" />
+    <path d="M 287 315 L 287 300" stroke="#111827" stroke-width="14" />
+
+    <!-- Big Dark Eye Sockets -->
+    <ellipse cx="205" cy="205" rx="30" ry="24" fill="#111827" />
+    <ellipse cx="307" cy="205" rx="30" ry="24" fill="#111827" />
+
+    <!-- Inverted Heart Nose Cavity -->
+    <path d="M 256 240 L 244 262 C 240 270, 252 276, 256 270 C 260 276, 272 270, 268 262 Z" fill="#111827" stroke="none" />
+  </g>
+</svg>

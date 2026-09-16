@@ -120,7 +120,7 @@ export const Footer: React.FC = () => {
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-zinc-950 dark:hover:text-white transition-all shadow-2xs group cursor-pointer active:scale-98"
               title="Explore Ehsaan Compressor (ehsaancompress.ai.studio) in the Ehsaan Ecosystem"
             >
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#c82020]">
                 Ecosystem
               </span>
               <span className="text-zinc-300 dark:text-zinc-700">•</span>

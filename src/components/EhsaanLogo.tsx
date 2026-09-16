@@ -21,7 +21,7 @@ export const EhsaanFlameIcon: React.FC<{ size?: number; className?: string }> = 
       className={`shrink-0 transition-transform duration-200 ${className}`}
     >
       {/* Circular Green Background */}
-      <circle cx="256" cy="256" r="256" fill="#A7B96D" />
+      <circle cx="256" cy="256" r="248" fill="#9FB365" stroke="#879C4E" strokeWidth="8" />
 
       {/* Outer Red Flame Body */}
       <path
@@ -39,7 +39,7 @@ export const EhsaanFlameIcon: React.FC<{ size?: number; className?: string }> = 
            C 138 240, 140 190, 160 140
            C 175 105, 205 75, 235 60
            C 250 54, 265 54, 270 58 Z"
-        fill="#FF4B4B"
+        fill="#FF3E3E"
       />
 
       {/* Middle Orange Flame Body */}
@@ -53,7 +53,7 @@ export const EhsaanFlameIcon: React.FC<{ size?: number; className?: string }> = 
            C 335 295, 342 282, 348 270
            C 328 275, 305 282, 285 295
            C 272 265, 248 230, 212 205 Z"
-        fill="#FF903E"
+        fill="#FF8A1E"
       />
 
       {/* Inner Yellow Flame Core */}
@@ -64,7 +64,7 @@ export const EhsaanFlameIcon: React.FC<{ size?: number; className?: string }> = 
            C 298 430, 312 408, 312 385
            C 310 365, 295 352, 280 348
            C 255 340, 230 330, 215 350 Z"
-        fill="#FFCA4B"
+        fill="#FFD23F"
       />
 
       {/* Main Flame Black Outlines */}
@@ -83,7 +83,7 @@ export const EhsaanFlameIcon: React.FC<{ size?: number; className?: string }> = 
            C 95 275, 125 285, 148 275
            C 138 240, 140 190, 160 140
            C 175 105, 205 75, 235 60"
-        stroke="#000000"
+        stroke="#111827"
         strokeWidth="18"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -93,14 +93,14 @@ export const EhsaanFlameIcon: React.FC<{ size?: number; className?: string }> = 
       {/* Top Tip Hook Outline Accent */}
       <path
         d="M 218 74 C 235 60, 255 54, 270 58"
-        stroke="#000000"
+        stroke="#111827"
         strokeWidth="18"
         strokeLinecap="round"
         fill="none"
       />
 
       {/* Floating Black Dot Top-Left */}
-      <circle cx="197" cy="88" r="8.5" fill="#000000" />
+      <circle cx="197" cy="88" r="9" fill="#111827" />
 
       {/* Orange Flame Outline */}
       <path
@@ -113,8 +113,8 @@ export const EhsaanFlameIcon: React.FC<{ size?: number; className?: string }> = 
            C 335 295, 342 282, 348 270
            C 328 275, 305 282, 285 295
            C 272 265, 248 230, 212 205 Z"
-        stroke="#000000"
-        strokeWidth="17"
+        stroke="#111827"
+        strokeWidth="16"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
@@ -128,19 +128,19 @@ export const EhsaanFlameIcon: React.FC<{ size?: number; className?: string }> = 
            C 298 430, 312 408, 312 385
            C 310 365, 295 352, 280 348
            C 255 340, 230 330, 215 350 Z"
-        stroke="#000000"
-        strokeWidth="16"
+        stroke="#111827"
+        strokeWidth="15"
         strokeLinecap="round"
         strokeLinejoin="round"
         fill="none"
       />
 
       {/* Comic Accents on Lower-Right */}
-      <circle cx="336" cy="348" r="8" fill="#000000" />
+      <circle cx="336" cy="348" r="8.5" fill="#111827" />
       <path
         d="M 334 380 C 333 392, 328 405, 322 416"
-        stroke="#000000"
-        strokeWidth="16"
+        stroke="#111827"
+        strokeWidth="15"
         strokeLinecap="round"
         fill="none"
       />

@@ -19,9 +19,23 @@ interface ReleaseItem {
 
 const RELEASES: ReleaseItem[] = [
   {
-    version: 'v1.1.3',
+    version: 'v1.1.4',
     date: 'Latest Release',
     isLatest: true,
+    title: 'Monochrome Category Icons, Auto Icon Switch & Per-Category Randomize Locks',
+    highlights: [
+      'Selective Randomize Lock Mechanism: Added a minimal lock toggle to each category (Matrix shape, Eye frames, Pupils, Foreground/Background colors, Frame style) in the expanded randomize menu to freeze preferred styles while rolling everything else.',
+      'One-Click Lock Badges & Unlock All: Locked categories display an active lock badge with real-time lock count and a single-click clear shortcut in the popover header, persisted in browser storage.',
+      'Category Icons in Mono Colours: Clean, minimalist monochrome category icons across all QR types (URL, Phone, SMS, WhatsApp, Wi-Fi, Email, UPI) for balanced contrast and visual harmony.',
+      'Auto Category Icon Option (ON/OFF): Automatic category icon adaptation option with a dedicated ON/OFF toggle switch, with preference remembered across browser sessions.',
+      'Refined Default QR Code Style: Default design featuring warm amber cream background (#fbf3c7), deep solid black matrix (#000000), 45° chamfered cut-corner outer eyes (#881337), hexagon inner pupils (#881337), and fluid liquid pixel style for the current URL.',
+    ],
+    tagUrl: 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.4',
+  },
+  {
+    version: 'v1.1.3',
+    date: 'Previous Release',
+    isLatest: false,
     title: 'Progressive Web App (PWA) & Native Device Installation',
     highlights: [
       'One-Click Native App Installation: Install Ehsaan QR directly to your device via the browser\'s native PWA installation flow.',
@@ -152,8 +166,8 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
   const isMinimal = theme === 'minimal' || (typeof document !== 'undefined' && document.documentElement.classList.contains('minimal'));
   const [copiedEmail, setCopiedEmail] = useState(false);
   const latestRelease = RELEASES[0];
-  const latestReleaseUrl = latestRelease?.tagUrl || 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.3';
-  const latestVersion = latestRelease?.version || 'v1.1.3';
+  const latestReleaseUrl = latestRelease?.tagUrl || 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.4';
+  const latestVersion = latestRelease?.version || 'v1.1.4';
 
   const handleCopyEmail = async () => {
     try {
@@ -227,60 +241,29 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-6">
           {/* Important Development & Support Note */}
           <div
-            className={`p-4 sm:p-4.5 rounded-2xl border-2 shadow-xs flex flex-col justify-between space-y-3 ${
-              isMinimal
-                ? 'border-black dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800/90 text-zinc-950 dark:text-zinc-100'
-                : 'border-red-500/80 bg-red-50/80 dark:bg-red-950/40 text-red-950 dark:text-red-100'
-            }`}
+            id="changelog-important-notice"
+            className="p-4 sm:p-4.5 rounded-2xl border-2 border-red-500 dark:border-red-500 bg-red-50/90 dark:bg-red-950/40 text-red-950 dark:text-red-100 shadow-sm flex flex-col justify-between space-y-3 ring-1 ring-red-500/20"
           >
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shadow-2xs ${
-                      isMinimal
-                        ? 'bg-black text-white dark:bg-white dark:text-black'
-                        : 'bg-red-600 text-white'
-                    }`}
-                  >
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-600 text-white shadow-xs">
                     Important Notice
                   </span>
-                  <span
-                    className={`text-xs font-bold ${
-                      isMinimal
-                        ? 'text-zinc-950 dark:text-zinc-100'
-                        : 'text-red-900 dark:text-red-200'
-                    }`}
-                  >
+                  <span className="text-xs font-bold text-red-900 dark:text-red-200">
                     Development Status Update
                   </span>
                 </div>
-                <span
-                  className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-md ${
-                    isMinimal
-                      ? 'bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
-                      : 'bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300'
-                  }`}
-                >
+                <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300">
                   Through Dec 2026
                 </span>
               </div>
 
-              <p
-                className={`text-xs sm:text-[13px] leading-relaxed font-medium ${
-                  isMinimal
-                    ? 'text-zinc-800 dark:text-zinc-200'
-                    : 'text-red-950 dark:text-red-100'
-                }`}
-              >
+              <p className="text-xs sm:text-[13px] leading-relaxed font-medium text-red-950 dark:text-red-100">
                 The app reaches at level where every system works well and polished so the development is stopped till december 2026. Any bug report may fix with request on ~{' '}
                 <a
                   href="mailto:worsmon@proton.me?subject=EHSAAN%20QR%20Bug%20Report"
-                  className={`font-bold underline ${
-                    isMinimal
-                      ? 'text-black dark:text-white'
-                      : 'text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-100'
-                  }`}
+                  className="font-bold underline text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-100"
                 >
                   worsmon@proton.me
                 </a>
@@ -290,11 +273,7 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
             <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-red-200/60 dark:border-red-900/50">
               <a
                 href="mailto:worsmon@proton.me?subject=EHSAAN%20QR%20Bug%20Report"
-                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 ${
-                  isMinimal
-                    ? 'bg-black hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-black border-2 border-black dark:border-white shadow-xs'
-                    : 'bg-red-600 hover:bg-red-700 text-white shadow-2xs'
-                }`}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 bg-red-600 hover:bg-red-700 text-white shadow-xs"
               >
                 <Mail className="w-3.5 h-3.5" />
                 <span>Send Bug Report</span>

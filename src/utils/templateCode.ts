@@ -101,7 +101,14 @@ export function sanitizeStyleOptions(rawStyle: Partial<QrStyleOptions> | undefin
     bgColor: typeof safe.bgColor === 'string' && safe.bgColor.trim() ? safe.bgColor : '#FFFFFF',
     transparentBg: Boolean(safe.transparentBg),
     bgSaturationPreference: safe.bgSaturationPreference === 'high' ? 'high' : 'low',
-    patternStyle: safe.patternStyle || 'liquid',
+    patternStyle:
+      (safe.patternStyle as unknown as string) === 'chamfer'
+        ? 'octagon'
+        : (safe.patternStyle as unknown as string) === 'soft-rounded'
+        ? 'squircle'
+        : (safe.patternStyle as unknown as string) === 'dots'
+        ? 'circle'
+        : safe.patternStyle || 'square',
     cornerStyle: safe.cornerStyle || 'smooth',
     eyeStyle: safe.eyeStyle || 'rounded',
     pupilStyle: safe.pupilStyle || 'auto',
@@ -109,13 +116,24 @@ export function sanitizeStyleOptions(rawStyle: Partial<QrStyleOptions> | undefin
     eyeOuterColor: typeof safe.eyeOuterColor === 'string' && safe.eyeOuterColor.trim() ? safe.eyeOuterColor : '#000000',
     eyeInnerColor: typeof safe.eyeInnerColor === 'string' && safe.eyeInnerColor.trim() ? safe.eyeInnerColor : '#000000',
     logo: {
-      type: safe.logo?.type === 'ehsaan' || safe.logo?.type === 'custom' ? safe.logo.type : 'none',
+      type:
+        safe.logo?.type === 'url' ||
+        safe.logo?.type === 'phone' ||
+        safe.logo?.type === 'whatsapp' ||
+        safe.logo?.type === 'wifi' ||
+        safe.logo?.type === 'email' ||
+        safe.logo?.type === 'upi' ||
+        safe.logo?.type === 'payment' ||
+        safe.logo?.type === 'custom'
+          ? safe.logo.type
+          : 'none',
       customUrl: safe.logo?.customUrl || undefined,
       sizeRatio: typeof safe.logo?.sizeRatio === 'number' ? safe.logo.sizeRatio : 0.2,
       padding: typeof safe.logo?.padding === 'number' ? safe.logo.padding : 4,
       background: safe.logo?.background || 'transparent',
       customBgColor: safe.logo?.customBgColor || '#FFFFFF',
       borderRadius: typeof safe.logo?.borderRadius === 'number' ? safe.logo.borderRadius : 50,
+      autoAdapt: typeof safe.logo?.autoAdapt === 'boolean' ? safe.logo.autoAdapt : true,
     },
     size: typeof safe.size === 'number' ? safe.size : 1024,
     margin: typeof safe.margin === 'number' ? safe.margin : 2,

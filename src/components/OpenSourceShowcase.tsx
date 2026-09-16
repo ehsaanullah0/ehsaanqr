@@ -13,7 +13,7 @@ export const OpenSourceShowcase: React.FC<OpenSourceShowcaseProps> = ({
   const [copied, setCopied] = useState(false);
   const repoUrl = 'https://github.com/ehsaanullah0/ehsaanqr';
   const cleanUrl = 'github.com/ehsaanullah0/ehsaanqr';
-  const changelogUrl = 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.3';
+  const changelogUrl = 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.4';
 
   const handleCopyUrl = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -131,7 +131,7 @@ export const OpenSourceShowcase: React.FC<OpenSourceShowcaseProps> = ({
               className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold bg-white dark:bg-zinc-800/90 text-[#0F172A] dark:text-zinc-100 border border-[#E7AC08]/40 dark:border-[#E7AC08]/30 hover:bg-[#FFFBEA]/60 dark:hover:bg-[#E7AC08]/10 hover:border-[#E7AC08] transition-all cursor-pointer shadow-2xs group"
             >
               <Tag className="w-3.5 h-3.5 text-[#E7AC08]" />
-              <span>v1.1.3 Changelog</span>
+              <span>v1.1.4 Changelog</span>
             </button>
           ) : (
             <a
@@ -142,7 +142,7 @@ export const OpenSourceShowcase: React.FC<OpenSourceShowcaseProps> = ({
               className="inline-flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold bg-white dark:bg-zinc-800/90 text-[#0F172A] dark:text-zinc-100 border border-[#E7AC08]/40 dark:border-[#E7AC08]/30 hover:bg-[#FFFBEA]/60 dark:hover:bg-[#E7AC08]/10 hover:border-[#E7AC08] transition-all cursor-pointer shadow-2xs group"
             >
               <Tag className="w-3.5 h-3.5 text-[#E7AC08]" />
-              <span>v1.1.3 Changelog</span>
+              <span>v1.1.4 Changelog</span>
               <ExternalLink className="w-3 h-3 text-[#64748B]" />
             </a>
           )}

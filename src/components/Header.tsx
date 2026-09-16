@@ -150,11 +150,11 @@ export const Header: React.FC<HeaderProps> = ({
             id="header-changelog-btn"
             onClick={onOpenChangelog}
             className="hidden lg:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold border border-[#E7AC08]/50 dark:border-[#E7AC08]/30 text-[#92400E] dark:text-amber-300 bg-[#FFF7D9] dark:bg-[#E7AC08]/15 hover:bg-[#FEF3C7] dark:hover:bg-[#E7AC08]/25 hover:border-[#E7AC08] transition-colors focus:outline-hidden focus:ring-2 focus:ring-[#E7AC08]/40 shadow-2xs active:scale-98"
-            title="View Changelog & Release v1.1.2"
+            title="View Changelog & Release v1.1.4"
             aria-label="View changelog and releases"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#E7AC08] shrink-0" />
-            <span>v1.1.2</span>
+            <span>v1.1.4</span>
           </button>
 
           {/* Saved Templates button */}

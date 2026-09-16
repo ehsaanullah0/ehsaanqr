@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Flame Outer Layer (Yellow/Gold) -->
+  <path d="M 256 40 C 235 110, 185 160, 195 230 C 175 195, 140 220, 115 285 C 85 365, 140 435, 230 445 C 160 415, 185 320, 235 320 C 235 360, 270 410, 340 395 C 400 380, 425 315, 395 245 C 380 210, 345 200, 345 155 C 345 105, 305 70, 256 40 Z" fill="#FFC93C" stroke="#111827" stroke-width="18" stroke-linejoin="round" />
+
+  <!-- Flame Inner Core (Warm Orange) -->
+  <path d="M 256 160 C 240 200, 205 230, 215 285 C 195 260, 180 280, 175 320 C 170 365, 200 405, 256 410 C 220 385, 235 340, 260 340 C 275 365, 300 390, 335 375 C 365 360, 375 325, 355 280 C 345 255, 325 240, 320 210 C 315 180, 290 170, 256 160 Z" fill="#FF7A00" stroke="#111827" stroke-width="16" stroke-linejoin="round" />
+
+  <!-- Campfire Wood Log 1 (Back-Cross) -->
+  <g stroke="#111827" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 45 425 L 435 295 C 452 300, 465 318, 460 338 C 455 358, 435 370, 415 365 L 75 480 C 55 488, 38 472, 35 452 C 32 435, 40 425, 45 425 Z" fill="#BA8C63" />
+    <!-- Log End Cap -->
+    <ellipse cx="60" cy="455" rx="20" ry="25" fill="#D7B594" stroke="#111827" stroke-width="16" />
+    <circle cx="60" cy="455" r="4" fill="#111827" />
+    <path d="M 280 345 L 310 335" stroke="#111827" stroke-width="14" />
+    <path d="M 360 320 L 390 310" stroke="#111827" stroke-width="14" />
+  </g>
+
+  <!-- Campfire Wood Log 2 (Front-Cross) -->
+  <g stroke="#111827" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 467 425 L 77 295 C 60 300, 47 318, 52 338 C 57 358, 77 370, 97 365 L 437 480 C 457 488, 474 472, 477 452 C 480 435, 472 425, 467 425 Z" fill="#A07248" />
+    <!-- Log End Cap -->
+    <ellipse cx="452" cy="455" rx="20" ry="25" fill="#C49B74" stroke="#111827" stroke-width="16" />
+    <circle cx="452" cy="455" r="4" fill="#111827" />
+    <path d="M 232 345 L 202 335" stroke="#111827" stroke-width="14" />
+    <path d="M 152 320 L 122 310" stroke="#111827" stroke-width="14" />
+  </g>
+</svg>

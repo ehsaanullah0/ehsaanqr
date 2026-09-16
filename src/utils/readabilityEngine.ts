@@ -288,13 +288,32 @@ export function analyzeReadability(
       moduleClarityScore = 100;
       break;
     case 'rounded':
+      moduleClarityScore = 96;
+      break;
+    case 'octagon':
       moduleClarityScore = 95;
       break;
-    case 'soft-rounded':
-      moduleClarityScore = 93;
+    case 'squircle':
+      moduleClarityScore = 94;
       break;
+    case 'circle':
     case 'dots':
+      moduleClarityScore = 92;
+      break;
+    case 'pill':
+      moduleClarityScore = 91;
+      break;
+    case 'hexagon':
       moduleClarityScore = 90;
+      break;
+    case 'diamond':
+      moduleClarityScore = 89;
+      break;
+    case 'leaf':
+      moduleClarityScore = 89;
+      break;
+    case 'flower':
+      moduleClarityScore = 88;
       break;
     case 'liquid':
       moduleClarityScore = 88;

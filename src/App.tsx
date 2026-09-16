@@ -11,7 +11,7 @@ import {
 } from './types';
 import { DEFAULT_FORM_DATA, buildPayload, validatePayload } from './utils/qrPayloads';
 import { analyzeReadability } from './utils/contrast';
-import { renderQrToCanvas } from './utils/qrRenderer';
+import { renderQrToCanvas, getAutoLogoForCategory } from './utils/qrRenderer';
 import { generateTemplateThumbnail } from './utils/templateCode';
 import { Header } from './components/Header';
 import { TypeSelector } from './components/TypeSelector';
@@ -31,24 +31,26 @@ import { Sparkles, ShieldCheck, ExternalLink } from 'lucide-react';
 
 const STORAGE_THEME_KEY = 'ehsaan_qr_theme';
 const STORAGE_SAVED_KEY = 'ehsaan_qr_saved_designs';
+const STORAGE_AUTO_ADAPT_LOGO_KEY = 'ehsaan_qr_auto_adapt_logo';
 
 const INITIAL_STYLE: QrStyleOptions = {
   colorMode: 'solid',
   fgColor: '#000000', // Default custom FG black
   fgColorEnd: '#1F2937',
   gradientAngle: 135,
-  bgColor: '#FFFFFF',
+  bgColor: '#fbf3c7', // Warm amber cream default background
   transparentBg: false,
   bgSaturationPreference: 'low',
-  patternStyle: 'liquid', // Default Liquid Flow
+  patternStyle: 'liquid', // Fluid liquid pixel matrix
   cornerStyle: 'smooth',
-  eyeStyle: 'rounded',
-  pupilStyle: 'auto',
+  eyeStyle: 'cut-corner', // 45° chamfered outer eye shape
+  pupilStyle: 'hexagon', // Hexagon inner pupil
   customEyeColors: true,
-  eyeOuterColor: '#000000',
-  eyeInnerColor: '#000000',
+  eyeOuterColor: '#881337', // Deep crimson wine outer eye ring
+  eyeInnerColor: '#881337', // Deep crimson wine inner pupil
   logo: {
-    type: 'none',
+    type: 'url',
+    autoAdapt: true,
     sizeRatio: 0.2,
     padding: 4,
     background: 'transparent',
@@ -76,8 +78,40 @@ export default function App() {
   // Form Data
   const [formData, setFormData] = useState<QrFormData>(DEFAULT_FORM_DATA);
 
-  // Styling Options
-  const [styleOptions, setStyleOptions] = useState<QrStyleOptions>(INITIAL_STYLE);
+  // Styling Options (with persisted autoAdapt preference across refresh)
+  const [styleOptions, setStyleOptions] = useState<QrStyleOptions>(() => {
+    let autoAdapt = true;
+    try {
+      const saved = localStorage.getItem(STORAGE_AUTO_ADAPT_LOGO_KEY);
+      if (saved !== null) {
+        autoAdapt = saved === 'true';
+      }
+    } catch {
+      // fallback to true
+    }
+
+    const initialLogo = autoAdapt ? getAutoLogoForCategory('url') : 'none';
+
+    return {
+      ...INITIAL_STYLE,
+      logo: {
+        ...INITIAL_STYLE.logo,
+        autoAdapt,
+        type: initialLogo,
+      },
+    };
+  });
+
+  // Sync auto logo adaptation preference to localStorage
+  useEffect(() => {
+    try {
+      if (typeof styleOptions.logo.autoAdapt === 'boolean') {
+        localStorage.setItem(STORAGE_AUTO_ADAPT_LOGO_KEY, String(styleOptions.logo.autoAdapt));
+      }
+    } catch {
+      // ignore
+    }
+  }, [styleOptions.logo.autoAdapt]);
 
   // Active Customization Tab (synchronized across desktop in-panel tabs and mobile/tablet floating nav)
   const [activeCustomTab, setActiveCustomTab] = useState<CustomizationTabKey>('colors');
@@ -116,6 +150,24 @@ export default function App() {
       // ignore
     }
   }, [selectedRandomizeType]);
+
+  // Locked elements for Smart Randomize
+  const [lockedRandomizeTargets, setLockedRandomizeTargets] = useState<RandomizeTarget[]>(() => {
+    try {
+      const saved = localStorage.getItem('ehsaan_qr_rand_locks');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ehsaan_qr_rand_locks', JSON.stringify(lockedRandomizeTargets));
+    } catch {
+      // ignore
+    }
+  }, [lockedRandomizeTargets]);
 
   // Saved designs in local storage
   const [savedDesigns, setSavedDesigns] = useState<SavedQrDesign[]>(() => {
@@ -189,6 +241,25 @@ export default function App() {
     }));
   };
 
+  // Handle QR category selection with smart logo auto-adaptation
+  const handleSelectType = (newType: QrType) => {
+    setSelectedType(newType);
+    if (styleOptions.logo.autoAdapt !== false) {
+      const autoLogo = getAutoLogoForCategory(newType);
+      setStyleOptions((prev) => ({
+        ...prev,
+        logo: {
+          ...prev.logo,
+          type: autoLogo,
+        },
+        errorCorrection:
+          autoLogo !== 'none' && (prev.errorCorrection === 'L' || prev.errorCorrection === 'M')
+            ? 'Q'
+            : prev.errorCorrection,
+      }));
+    }
+  };
+
   // Build current payload
   const currentPayload = useMemo(() => {
     return buildPayload(selectedType, formData);
@@ -220,11 +291,18 @@ export default function App() {
     }
 
     const patternLabels: Record<string, string> = {
-      liquid: 'Liquid Flow',
-      rounded: 'Rounded',
-      dots: 'Dots',
-      'soft-rounded': 'Soft Rounded',
       square: 'Square',
+      rounded: 'Rounded',
+      circle: 'Circle',
+      dots: 'Circle',
+      diamond: 'Diamond',
+      hexagon: 'Hexagon',
+      octagon: 'Octagon',
+      squircle: 'Squircle',
+      pill: 'Pill',
+      leaf: 'Leaf',
+      flower: 'Flower',
+      liquid: 'Liquid Flow',
     };
 
     const patternName = patternLabels[styleOptions.patternStyle] || 'Custom';
@@ -370,14 +448,14 @@ export default function App() {
               href="https://ehsaancompress.ai.studio"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-zinc-200/90 dark:border-zinc-800 bg-white/90 dark:bg-zinc-900/90 hover:border-red-500/50 dark:hover:border-red-500/50 text-xs text-zinc-600 dark:text-zinc-300 hover:text-red-600 dark:hover:text-red-400 shadow-2xs backdrop-blur-xs transition-all group focus:outline-none focus:ring-2 focus:ring-red-500/30"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-zinc-800 bg-[#000000] hover:border-red-500/50 text-xs shadow-2xs backdrop-blur-xs transition-all group focus:outline-none focus:ring-2 focus:ring-red-500/30"
               title="Explore Ehsaan Compressor in the Ehsaan Ecosystem (ehsaancompress.ai.studio)"
             >
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#ffffff]">
                 Ecosystem
               </span>
-              <span className="text-zinc-300 dark:text-zinc-700">•</span>
-              <span className="font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 group-hover:text-red-600 dark:group-hover:text-red-400">
+              <span className="text-zinc-600">•</span>
+              <span className="font-semibold tracking-tight text-[#ffffff]">
                 Ehsaan Compressor
               </span>
               <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-red-500 transition-colors ml-0.5" />
@@ -405,6 +483,8 @@ export default function App() {
             selectedRandomizeType={selectedRandomizeType}
             onRandomizeTargetChange={setSelectedRandomizeTarget}
             onRandomizeTypeChange={setSelectedRandomizeType}
+            lockedTargets={lockedRandomizeTargets}
+            onLockedTargetsChange={setLockedRandomizeTargets}
             theme={theme}
           />
 
@@ -441,7 +521,7 @@ export default function App() {
           <div>
             <TypeSelector
               selectedType={selectedType}
-              onSelectType={setSelectedType}
+              onSelectType={handleSelectType}
             />
           </div>
 
@@ -462,12 +542,15 @@ export default function App() {
               <CustomizationPanel
                 options={styleOptions}
                 onChange={setStyleOptions}
+                selectedType={selectedType}
                 activeTab={activeCustomTab}
                 onTabChange={setActiveCustomTab}
                 selectedRandomizeTarget={selectedRandomizeTarget}
                 selectedRandomizeType={selectedRandomizeType}
                 onRandomizeTargetChange={setSelectedRandomizeTarget}
                 onRandomizeTypeChange={setSelectedRandomizeType}
+                lockedTargets={lockedRandomizeTargets}
+                onLockedTargetsChange={setLockedRandomizeTargets}
                 onShowToast={setToastMessage}
               />
             </div>

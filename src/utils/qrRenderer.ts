@@ -1,22 +1,111 @@
 import QRCode from 'qrcode';
-import { QrStyleOptions, EyeStyle, PatternStyle, PupilStyle } from '../types';
+import { QrStyleOptions, EyeStyle, PatternStyle, PupilStyle, LogoConfig, QrType, LogoType } from '../types';
 
-// The provided flame logo SVG as an encoded data URL for canvas and SVG embedding
-export const EHSAAN_FLAME_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <circle cx="256" cy="256" r="256" fill="#A7B96D" />
-  <path d="M 270 58 C 260 85, 248 115, 244 145 C 240 178, 252 205, 268 228 C 285 205, 320 185, 365 160 C 350 200, 335 250, 355 290 C 385 270, 410 260, 430 275 C 420 330, 385 395, 345 425 C 310 448, 270 455, 235 450 C 175 440, 115 395, 88 335 C 76 305, 75 275, 78 260 C 95 275, 125 285, 148 275 C 138 240, 140 190, 160 140 C 175 105, 205 75, 235 60 C 250 54, 265 54, 270 58 Z" fill="#FF4B4B" />
-  <path d="M 212 205 C 192 235, 170 275, 160 325 C 152 365, 165 405, 195 430 C 225 450, 265 452, 298 438 C 325 425, 345 398, 348 368 C 342 348, 335 330, 330 310 C 335 295, 342 282, 348 270 C 328 275, 305 282, 285 295 C 272 265, 248 230, 212 205 Z" fill="#FF903E" />
-  <path d="M 215 350 C 200 375, 195 405, 212 428 C 228 448, 258 452, 278 442 C 298 430, 312 408, 312 385 C 310 365, 295 352, 280 348 C 255 340, 230 330, 215 350 Z" fill="#FFCA4B" />
-  <path d="M 270 58 C 260 85, 248 115, 244 145 C 240 178, 252 205, 268 228 C 285 205, 320 185, 365 160 C 350 200, 335 250, 355 290 C 385 270, 410 260, 430 275 C 420 330, 385 395, 345 425 C 310 448, 270 455, 235 450 C 175 440, 115 395, 88 335 C 76 305, 75 275, 78 260 C 95 275, 125 285, 148 275 C 138 240, 140 190, 160 140 C 175 105, 205 75, 235 60" stroke="#000000" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-  <path d="M 218 74 C 235 60, 255 54, 270 58" stroke="#000000" stroke-width="18" stroke-linecap="round" fill="none" />
-  <circle cx="197" cy="88" r="8.5" fill="#000000" />
-  <path d="M 212 205 C 192 235, 170 275, 160 325 C 152 365, 165 405, 195 430 C 225 450, 265 452, 298 438 C 325 425, 345 398, 348 368 C 342 348, 335 330, 330 310 C 335 295, 342 282, 348 270 C 328 275, 305 282, 285 295 C 272 265, 248 230, 212 205 Z" stroke="#000000" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-  <path d="M 215 350 C 200 375, 195 405, 212 428 C 228 448, 258 452, 278 442 C 298 430, 312 408, 312 385 C 310 365, 295 352, 280 348 C 255 340, 230 330, 215 350 Z" stroke="#000000" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-  <circle cx="336" cy="348" r="8" fill="#000000" />
-  <path d="M 334 380 C 333 392, 328 405, 322 416" stroke="#000000" stroke-width="16" stroke-linecap="round" fill="none" />
+// Preset Logo SVG definitions and data URLs for canvas and SVG embedding
+export const URL_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <circle cx="256" cy="256" r="200" stroke="#111827" stroke-width="36" />
+  <line x1="56" y1="256" x2="456" y2="256" stroke="#111827" stroke-width="36" stroke-linecap="round" />
+  <ellipse cx="256" cy="256" rx="96" ry="200" stroke="#111827" stroke-width="36" />
 </svg>`;
 
-export const EHSAAN_FLAME_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(EHSAAN_FLAME_SVG)}`;
+export const PHONE_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <path d="M 160 76 C 146 76 132 86 122 100 L 88 144 C 70 168 66 200 82 230 C 120 304 184 368 258 406 C 288 422 320 418 344 400 L 388 366 C 402 356 412 342 412 328 C 412 310 386 268 360 242 C 344 226 322 226 306 240 L 278 264 C 230 238 192 200 166 152 L 190 124 C 204 108 204 86 188 70 L 174 80 C 168 76 164 76 160 76 Z" stroke="#111827" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+</svg>`;
+
+export const WHATSAPP_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Minimal Outlined Speech Bubble -->
+  <path d="M 256 60 C 148 60 60 148 60 256 C 60 296 72 334 94 366 L 68 448 L 154 424 C 184 442 218 452 256 452 C 364 452 452 364 452 256 C 452 148 364 60 256 60 Z" stroke="#111827" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <!-- Minimal Outlined Phone Receiver -->
+  <path d="M 182 176 C 174 176 166 182 160 192 C 148 214 146 252 186 308 C 226 364 264 368 286 356 C 296 350 302 340 302 330 L 290 298 C 286 288 274 282 264 286 L 246 294 C 222 276 206 258 194 234 L 208 218 C 214 208 212 196 204 190 L 182 176 Z" stroke="#111827" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+</svg>`;
+
+export const WIFI_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <path d="M 80 170 C 177 73 335 73 432 170" stroke="#111827" stroke-width="40" stroke-linecap="round" />
+  <path d="M 138 228 C 203 163 309 163 374 228" stroke="#111827" stroke-width="40" stroke-linecap="round" />
+  <path d="M 196 286 C 229 253 283 253 316 286" stroke="#111827" stroke-width="40" stroke-linecap="round" />
+  <circle cx="256" cy="374" r="32" fill="#111827" />
+</svg>`;
+
+export const EMAIL_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect x="56" y="116" width="400" height="280" rx="44" stroke="#111827" stroke-width="36" />
+  <path d="M 68 136 L 256 280 L 444 136" stroke="#111827" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" />
+</svg>`;
+
+export const UPI_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- Outlined frame badge -->
+  <rect x="52" y="100" width="408" height="312" rx="48" stroke="#111827" stroke-width="34" />
+  <!-- Minimalist Bold UPI letters + Fast forward chevrons -->
+  <path d="M 112 186 L 112 268 C 112 292 126 306 148 306 C 170 306 184 292 184 268 L 184 186" stroke="#111827" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <path d="M 216 306 L 216 186 L 248 186 C 270 186 284 198 284 218 C 284 238 270 250 248 250 L 216 250" stroke="#111827" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <line x1="316" y1="186" x2="316" y2="306" stroke="#111827" stroke-width="30" stroke-linecap="round" />
+  <path d="M 368 196 L 402 246 L 368 296" stroke="#111827" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  <path d="M 398 196 L 432 246 L 398 296" stroke="#111827" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+</svg>`;
+
+export const PAYMENT_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect x="56" y="116" width="400" height="280" rx="44" stroke="#111827" stroke-width="36" />
+  <line x1="56" y1="200" x2="456" y2="200" stroke="#111827" stroke-width="36" />
+  <rect x="106" y="270" width="76" height="52" rx="10" stroke="#111827" stroke-width="20" fill="none" />
+  <line x1="224" y1="296" x2="330" y2="296" stroke="#111827" stroke-width="28" stroke-linecap="round" />
+</svg>`;
+
+export const URL_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(URL_LOGO_SVG)}`;
+export const PHONE_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(PHONE_LOGO_SVG)}`;
+export const WHATSAPP_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(WHATSAPP_LOGO_SVG)}`;
+export const WIFI_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(WIFI_LOGO_SVG)}`;
+export const EMAIL_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(EMAIL_LOGO_SVG)}`;
+export const UPI_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(UPI_LOGO_SVG)}`;
+export const PAYMENT_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(PAYMENT_LOGO_SVG)}`;
+
+/**
+ * Maps a QR code data type category to the most appropriate center logo icon
+ */
+export function getAutoLogoForCategory(category: QrType): LogoType {
+  switch (category) {
+    case 'url':
+      return 'url';
+    case 'wifi':
+      return 'wifi';
+    case 'email':
+      return 'email';
+    case 'phone':
+    case 'sms':
+    case 'vcard':
+      return 'phone';
+    case 'whatsapp':
+      return 'whatsapp';
+    case 'upi':
+      return 'upi';
+    case 'text':
+    case 'calendar':
+    default:
+      return 'none';
+  }
+}
+
+export function getLogoSourceUrl(logo: LogoConfig): string | undefined {
+  if (!logo || logo.type === 'none') return undefined;
+  switch (logo.type) {
+    case 'url':
+      return URL_LOGO_DATA_URL;
+    case 'phone':
+      return PHONE_LOGO_DATA_URL;
+    case 'whatsapp':
+      return WHATSAPP_LOGO_DATA_URL;
+    case 'wifi':
+      return WIFI_LOGO_DATA_URL;
+    case 'email':
+      return EMAIL_LOGO_DATA_URL;
+    case 'upi':
+      return UPI_LOGO_DATA_URL;
+    case 'payment':
+      return PAYMENT_LOGO_DATA_URL;
+    case 'custom':
+      return logo.customUrl;
+    default:
+      return logo.customUrl;
+  }
+}
 
 interface EyeLocation {
   row: number;
@@ -110,49 +199,102 @@ function drawModule(
   size: number,
   pattern: PatternStyle
 ) {
+  const cx = x + size / 2;
+  const cy = y + size / 2;
+
   switch (pattern) {
+    case 'circle':
     case 'dots': {
-      const radius = size * 0.42;
+      const radius = size * 0.44;
       ctx.beginPath();
-      ctx.arc(x + size / 2, y + size / 2, radius, 0, Math.PI * 2);
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
       ctx.fill();
       break;
     }
-    case 'liquid':
     case 'rounded': {
-      const r = size * 0.35;
+      const r = size * 0.30;
       roundRect(ctx, x + 0.5, y + 0.5, size - 1, size - 1, r);
       ctx.fill();
       break;
     }
     case 'squircle': {
-      const r = size * 0.42;
+      const r = size * 0.45;
       roundRect(ctx, x + 0.5, y + 0.5, size - 1, size - 1, r);
       ctx.fill();
       break;
     }
-    case 'soft-rounded': {
-      const r = size * 0.2;
-      roundRect(ctx, x, y, size, size, r);
+    case 'pill': {
+      const pw = size * 0.88;
+      const ph = size * 0.72;
+      const px = x + (size - pw) / 2;
+      const py = y + (size - ph) / 2;
+      roundRect(ctx, px, py, pw, ph, ph / 2);
       ctx.fill();
       break;
     }
     case 'diamond': {
-      const cx = x + size / 2;
-      const cy = y + size / 2;
-      const pad = size * 0.05;
       ctx.beginPath();
-      ctx.moveTo(cx, y + pad);
-      ctx.lineTo(x + size - pad, cy);
-      ctx.lineTo(cx, y + size - pad);
-      ctx.lineTo(x + pad, cy);
+      ctx.moveTo(cx, y + size * 0.04);
+      ctx.lineTo(x + size * 0.96, cy);
+      ctx.lineTo(cx, y + size * 0.96);
+      ctx.lineTo(x + size * 0.04, cy);
       ctx.closePath();
       ctx.fill();
       break;
     }
-    case 'chamfer': {
-      const cut = size * 0.24;
-      drawCutCornerPolygonCanvas(ctx, x, y, size, cut);
+    case 'hexagon': {
+      const r = size * 0.48;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 2;
+        const px = cx + r * Math.cos(angle);
+        const py = cy + r * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case 'octagon': {
+      const c = size * 0.28;
+      ctx.beginPath();
+      ctx.moveTo(x + c, y);
+      ctx.lineTo(x + size - c, y);
+      ctx.lineTo(x + size, y + c);
+      ctx.lineTo(x + size, y + size - c);
+      ctx.lineTo(x + size - c, y + size);
+      ctx.lineTo(x + c, y + size);
+      ctx.lineTo(x, y + size - c);
+      ctx.lineTo(x, y + c);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case 'leaf': {
+      const r = size * 0.48;
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + size, y);
+      ctx.lineTo(x + size, y + size - r);
+      ctx.arcTo(x + size, y + size, x + size - r, y + size, r);
+      ctx.lineTo(x, y + size);
+      ctx.lineTo(x, y + r);
+      ctx.arcTo(x, y, x + r, y, r);
+      ctx.closePath();
+      ctx.fill();
+      break;
+    }
+    case 'flower': {
+      const pr = size * 0.22;
+      const d = size * 0.26;
+      ctx.beginPath();
+      ctx.arc(cx, cy - d, pr, 0, Math.PI * 2);
+      ctx.arc(cx + d, cy, pr, 0, Math.PI * 2);
+      ctx.arc(cx, cy + d, pr, 0, Math.PI * 2);
+      ctx.arc(cx - d, cy, pr, 0, Math.PI * 2);
+      ctx.arc(cx, cy, pr * 1.1, 0, Math.PI * 2);
+      ctx.fill();
       break;
     }
     case 'square':
@@ -1099,10 +1241,7 @@ export async function renderQrToCanvas(
     }
 
     // Draw the image
-    const logoSrc =
-      options.logo.type === 'ehsaan'
-        ? EHSAAN_FLAME_DATA_URL
-        : options.logo.customUrl;
+    const logoSrc = getLogoSourceUrl(options.logo);
 
     if (logoSrc) {
       try {
@@ -1239,29 +1378,50 @@ export function generateQrSvg(payload: string, options: QrStyleOptions): string 
           const bottom = isModuleActive(r + 1, c);
           const left = isModuleActive(r, c - 1);
           elements += getLiquidModuleSvg(x, y, modulePixelSize, top, right, bottom, left, fgRef);
-        } else if (options.patternStyle === 'dots') {
+        } else if (options.patternStyle === 'circle' || options.patternStyle === 'dots') {
           const cx = x + modulePixelSize / 2;
           const cy = y + modulePixelSize / 2;
-          const r0 = modulePixelSize * 0.42;
+          const r0 = modulePixelSize * 0.44;
           elements += `<circle cx="${cx.toFixed(2)}" cy="${cy.toFixed(2)}" r="${r0.toFixed(2)}" fill="${fgRef}" />\n`;
         } else if (options.patternStyle === 'rounded') {
-          const rx = modulePixelSize * 0.35;
+          const rx = modulePixelSize * 0.30;
           elements += `<rect x="${(x + 0.5).toFixed(2)}" y="${(y + 0.5).toFixed(2)}" width="${(modulePixelSize - 1).toFixed(2)}" height="${(modulePixelSize - 1).toFixed(2)}" rx="${rx.toFixed(2)}" fill="${fgRef}" />\n`;
         } else if (options.patternStyle === 'squircle') {
-          const rx = modulePixelSize * 0.42;
+          const rx = modulePixelSize * 0.45;
           elements += `<rect x="${(x + 0.5).toFixed(2)}" y="${(y + 0.5).toFixed(2)}" width="${(modulePixelSize - 1).toFixed(2)}" height="${(modulePixelSize - 1).toFixed(2)}" rx="${rx.toFixed(2)}" fill="${fgRef}" />\n`;
-        } else if (options.patternStyle === 'soft-rounded') {
-          const rx = modulePixelSize * 0.2;
-          elements += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${modulePixelSize.toFixed(2)}" height="${modulePixelSize.toFixed(2)}" rx="${rx.toFixed(2)}" fill="${fgRef}" />\n`;
+        } else if (options.patternStyle === 'pill') {
+          const pw = modulePixelSize * 0.88;
+          const ph = modulePixelSize * 0.72;
+          const px = x + (modulePixelSize - pw) / 2;
+          const py = y + (modulePixelSize - ph) / 2;
+          elements += `<rect x="${px.toFixed(2)}" y="${py.toFixed(2)}" width="${pw.toFixed(2)}" height="${ph.toFixed(2)}" rx="${(ph / 2).toFixed(2)}" fill="${fgRef}" />\n`;
         } else if (options.patternStyle === 'diamond') {
           const cx = x + modulePixelSize / 2;
           const cy = y + modulePixelSize / 2;
-          const pad = modulePixelSize * 0.05;
-          const p = `${cx.toFixed(2)},${(y + pad).toFixed(2)} ${(x + modulePixelSize - pad).toFixed(2)},${cy.toFixed(2)} ${cx.toFixed(2)},${(y + modulePixelSize - pad).toFixed(2)} ${(x + pad).toFixed(2)},${cy.toFixed(2)}`;
+          const p = `${cx.toFixed(2)},${(y + modulePixelSize * 0.04).toFixed(2)} ${(x + modulePixelSize * 0.96).toFixed(2)},${cy.toFixed(2)} ${cx.toFixed(2)},${(y + modulePixelSize * 0.96).toFixed(2)} ${(x + modulePixelSize * 0.04).toFixed(2)},${cy.toFixed(2)}`;
           elements += `<polygon points="${p}" fill="${fgRef}" />\n`;
-        } else if (options.patternStyle === 'chamfer') {
-          const cut = modulePixelSize * 0.24;
-          elements += getCutCornerPolygonSvg(x, y, modulePixelSize, cut, fgRef);
+        } else if (options.patternStyle === 'hexagon') {
+          const cx = x + modulePixelSize / 2;
+          const cy = y + modulePixelSize / 2;
+          const r0 = modulePixelSize * 0.48;
+          const pts = Array.from({ length: 6 }, (_, i) => {
+            const a = (Math.PI / 3) * i - Math.PI / 2;
+            return `${(cx + r0 * Math.cos(a)).toFixed(2)},${(cy + r0 * Math.sin(a)).toFixed(2)}`;
+          }).join(' ');
+          elements += `<polygon points="${pts}" fill="${fgRef}" />\n`;
+        } else if (options.patternStyle === 'octagon') {
+          const c = modulePixelSize * 0.28;
+          const pts = `${(x + c).toFixed(2)},${y.toFixed(2)} ${(x + modulePixelSize - c).toFixed(2)},${y.toFixed(2)} ${(x + modulePixelSize).toFixed(2)},${(y + c).toFixed(2)} ${(x + modulePixelSize).toFixed(2)},${(y + modulePixelSize - c).toFixed(2)} ${(x + modulePixelSize - c).toFixed(2)},${(y + modulePixelSize).toFixed(2)} ${(x + c).toFixed(2)},${(y + modulePixelSize).toFixed(2)} ${x.toFixed(2)},${(y + modulePixelSize - c).toFixed(2)} ${x.toFixed(2)},${(y + c).toFixed(2)}`;
+          elements += `<polygon points="${pts}" fill="${fgRef}" />\n`;
+        } else if (options.patternStyle === 'leaf') {
+          const r0 = modulePixelSize * 0.48;
+          elements += `<path d="M ${(x + r0).toFixed(2)} ${y.toFixed(2)} L ${(x + modulePixelSize).toFixed(2)} ${y.toFixed(2)} L ${(x + modulePixelSize).toFixed(2)} ${(y + modulePixelSize - r0).toFixed(2)} A ${r0.toFixed(2)} ${r0.toFixed(2)} 0 0 1 ${(x + modulePixelSize - r0).toFixed(2)} ${(y + modulePixelSize).toFixed(2)} L ${x.toFixed(2)} ${(y + modulePixelSize).toFixed(2)} L ${x.toFixed(2)} ${(y + r0).toFixed(2)} A ${r0.toFixed(2)} ${r0.toFixed(2)} 0 0 1 ${(x + r0).toFixed(2)} ${y.toFixed(2)} Z" fill="${fgRef}" />\n`;
+        } else if (options.patternStyle === 'flower') {
+          const cx = x + modulePixelSize / 2;
+          const cy = y + modulePixelSize / 2;
+          const pr = modulePixelSize * 0.22;
+          const d = modulePixelSize * 0.26;
+          elements += `<path d="M ${(cx + pr).toFixed(2)} ${(cy - d).toFixed(2)} A ${pr.toFixed(2)} ${pr.toFixed(2)} 0 1 0 ${(cx - pr).toFixed(2)} ${(cy - d).toFixed(2)} A ${pr.toFixed(2)} ${pr.toFixed(2)} 0 1 0 ${(cx + pr).toFixed(2)} ${(cy - d).toFixed(2)} Z M ${(cx + d + pr).toFixed(2)} ${cy.toFixed(2)} A ${pr.toFixed(2)} ${pr.toFixed(2)} 0 1 0 ${(cx + d - pr).toFixed(2)} ${cy.toFixed(2)} A ${pr.toFixed(2)} ${pr.toFixed(2)} 0 1 0 ${(cx + d + pr).toFixed(2)} ${cy.toFixed(2)} Z M ${(cx + pr).toFixed(2)} ${(cy + d).toFixed(2)} A ${pr.toFixed(2)} ${pr.toFixed(2)} 0 1 0 ${(cx - pr).toFixed(2)} ${(cy + d).toFixed(2)} A ${pr.toFixed(2)} ${pr.toFixed(2)} 0 1 0 ${(cx + pr).toFixed(2)} ${(cy + d).toFixed(2)} Z M ${(cx - d + pr).toFixed(2)} ${cy.toFixed(2)} A ${pr.toFixed(2)} ${pr.toFixed(2)} 0 1 0 ${(cx - d - pr).toFixed(2)} ${cy.toFixed(2)} A ${pr.toFixed(2)} ${pr.toFixed(2)} 0 1 0 ${(cx - d + pr).toFixed(2)} ${cy.toFixed(2)} Z M ${(cx + pr * 1.1).toFixed(2)} ${cy.toFixed(2)} A ${(pr * 1.1).toFixed(2)} ${(pr * 1.1).toFixed(2)} 0 1 0 ${(cx - pr * 1.1).toFixed(2)} ${cy.toFixed(2)} A ${(pr * 1.1).toFixed(2)} ${(pr * 1.1).toFixed(2)} 0 1 0 ${(cx + pr * 1.1).toFixed(2)} ${cy.toFixed(2)} Z" fill="${fgRef}" />\n`;
         } else {
           elements += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${modulePixelSize.toFixed(2)}" height="${modulePixelSize.toFixed(2)}" fill="${fgRef}" />\n`;
         }
@@ -1323,7 +1483,7 @@ export function generateQrSvg(payload: string, options: QrStyleOptions): string 
 
     const imgX = (targetSize - logoPixelSize) / 2;
     const imgY = (targetSize - logoPixelSize) / 2;
-    const logoSrc = options.logo.type === 'ehsaan' ? EHSAAN_FLAME_DATA_URL : options.logo.customUrl;
+    const logoSrc = getLogoSourceUrl(options.logo);
     if (logoSrc) {
       elements += `<image href="${logoSrc}" x="${imgX.toFixed(2)}" y="${imgY.toFixed(2)}" width="${logoPixelSize.toFixed(2)}" height="${logoPixelSize.toFixed(2)}" />\n`;
     }

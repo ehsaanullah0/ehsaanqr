@@ -7,6 +7,8 @@ import {
   ColorMode,
   ErrorCorrectionLevel,
   CustomizationTabKey,
+  LogoType,
+  QrType,
 } from '../types';
 import {
   Palette,
@@ -22,9 +24,26 @@ import {
   Sparkles,
   Dices,
   Shuffle,
+  Globe,
+  Phone,
+  MessageCircle,
+  Wifi,
+  Mail,
+  CreditCard,
+  QrCode,
+  Check,
 } from 'lucide-react';
-import { EhsaanFlameIcon } from './EhsaanLogo';
-import { resolvePupilShape } from '../utils/qrRenderer';
+import {
+  resolvePupilShape,
+  getAutoLogoForCategory,
+  URL_LOGO_DATA_URL,
+  PHONE_LOGO_DATA_URL,
+  WHATSAPP_LOGO_DATA_URL,
+  WIFI_LOGO_DATA_URL,
+  EMAIL_LOGO_DATA_URL,
+  UPI_LOGO_DATA_URL,
+  PAYMENT_LOGO_DATA_URL,
+} from '../utils/qrRenderer';
 import { SmartRandomizeController } from './SmartRandomizeController';
 import { ColorPickerField } from './ColorPickerField';
 import { ColorPalettePicker } from './ColorPalettePicker';
@@ -39,12 +58,15 @@ import { RandomizeTarget, RandomizeType } from '../types';
 interface CustomizationPanelProps {
   options: QrStyleOptions;
   onChange: (options: QrStyleOptions) => void;
+  selectedType?: QrType;
   activeTab?: CustomizationTabKey;
   onTabChange?: (tab: CustomizationTabKey) => void;
   selectedRandomizeTarget?: RandomizeTarget;
   selectedRandomizeType?: RandomizeType;
   onRandomizeTargetChange?: (target: RandomizeTarget) => void;
   onRandomizeTypeChange?: (type: RandomizeType) => void;
+  lockedTargets?: RandomizeTarget[];
+  onLockedTargetsChange?: (locks: RandomizeTarget[]) => void;
   onShowToast?: (msg: string) => void;
 }
 
@@ -98,6 +120,124 @@ const PRESET_COLOR_COMBOS: ColorPresetCombo[] = [
   { id: 'p-27', name: 'Night Indigo', outer: '#1E1B4B', inner: '#E9D5FF' },
   { id: 'p-28', name: 'Slate Steel Navy', outer: '#1E293B', inner: '#E0F2FE' },
 ];
+
+export const PATTERN_STYLES_LIST: Array<{
+  id: PatternStyle;
+  label: string;
+  desc: string;
+}> = [
+  { id: 'square', label: 'Square', desc: 'Sharp 90° box' },
+  { id: 'rounded', label: 'Rounded', desc: 'Smooth 30% curve' },
+  { id: 'circle', label: 'Circle', desc: 'Round dot' },
+  { id: 'diamond', label: 'Diamond', desc: '45° Rhombus' },
+  { id: 'hexagon', label: 'Hexagon', desc: '6-Sided polygon' },
+  { id: 'octagon', label: 'Octagon', desc: '8-Sided chamfer' },
+  { id: 'squircle', label: 'Squircle', desc: 'Superellipse' },
+  { id: 'pill', label: 'Pill', desc: 'Capsule stadium' },
+  { id: 'leaf', label: 'Leaf', desc: 'Dual curve' },
+  { id: 'flower', label: 'Flower', desc: '4-Petal clover' },
+  { id: 'liquid', label: 'Liquid', desc: 'Fluid droplet' },
+];
+
+export const PixelShapePreview: React.FC<{ styleId: PatternStyle }> = ({ styleId }) => {
+  return (
+    <div className="w-11 h-11 mb-2 flex items-center justify-center p-1.5 bg-[#FAF8F5] dark:bg-zinc-900 rounded-lg border border-[#EDE8DF] dark:border-zinc-700/80">
+      {styleId === 'square' && (
+        <div className="grid grid-cols-2 gap-1.5 w-6 h-6">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="w-2 h-2 bg-[#E7AC08]" />
+          ))}
+        </div>
+      )}
+      {styleId === 'rounded' && (
+        <div className="grid grid-cols-2 gap-1.5 w-6 h-6">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="w-2 h-2 bg-[#E7AC08] rounded-xs" />
+          ))}
+        </div>
+      )}
+      {(styleId === 'circle' || styleId === 'dots') && (
+        <div className="grid grid-cols-2 gap-1.5 w-6 h-6">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="w-2 h-2 bg-[#E7AC08] rounded-full" />
+          ))}
+        </div>
+      )}
+      {styleId === 'diamond' && (
+        <div className="grid grid-cols-2 gap-1.5 w-6 h-6">
+          {[0, 1, 2, 3].map((i) => (
+            <svg key={i} viewBox="0 0 16 16" className="w-2 h-2 fill-[#E7AC08] mx-auto">
+              <polygon points="8,0.5 15.5,8 8,15.5 0.5,8" />
+            </svg>
+          ))}
+        </div>
+      )}
+      {styleId === 'hexagon' && (
+        <div className="grid grid-cols-2 gap-1.5 w-6 h-6">
+          {[0, 1, 2, 3].map((i) => (
+            <svg key={i} viewBox="0 0 16 16" className="w-2.5 h-2.5 fill-[#E7AC08] mx-auto">
+              <polygon points="8,0.5 14.5,4.2 14.5,11.8 8,15.5 1.5,11.8 1.5,4.2" />
+            </svg>
+          ))}
+        </div>
+      )}
+      {styleId === 'octagon' && (
+        <div className="grid grid-cols-2 gap-1.5 w-6 h-6">
+          {[0, 1, 2, 3].map((i) => (
+            <svg key={i} viewBox="0 0 16 16" className="w-2.5 h-2.5 fill-[#E7AC08] mx-auto">
+              <polygon points="4.5,0.5 11.5,0.5 15.5,4.5 15.5,11.5 11.5,15.5 4.5,15.5 0.5,11.5 0.5,4.5" />
+            </svg>
+          ))}
+        </div>
+      )}
+      {styleId === 'squircle' && (
+        <div className="grid grid-cols-2 gap-1.5 w-6 h-6">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="w-2 h-2 bg-[#E7AC08] rounded-sm" />
+          ))}
+        </div>
+      )}
+      {styleId === 'pill' && (
+        <div className="grid grid-cols-2 gap-1.5 w-6 h-6 items-center">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="w-2.5 h-1.5 bg-[#E7AC08] rounded-full mx-auto" />
+          ))}
+        </div>
+      )}
+      {styleId === 'leaf' && (
+        <div className="grid grid-cols-2 gap-1.5 w-6 h-6">
+          {[0, 1, 2, 3].map((i) => (
+            <svg key={i} viewBox="0 0 16 16" className="w-2.5 h-2.5 fill-[#E7AC08] mx-auto">
+              <path d="M 7.5,0.5 L 15.5,0.5 L 15.5,8.5 A 7.5,7.5 0 0 1 8,15.5 L 0.5,15.5 L 0.5,8.5 A 7.5,7.5 0 0 1 7.5,0.5 Z" />
+            </svg>
+          ))}
+        </div>
+      )}
+      {styleId === 'flower' && (
+        <div className="grid grid-cols-2 gap-1.5 w-6 h-6">
+          {[0, 1, 2, 3].map((i) => (
+            <svg key={i} viewBox="0 0 16 16" className="w-2.5 h-2.5 fill-[#E7AC08] mx-auto">
+              <circle cx="8" cy="4" r="2.8" />
+              <circle cx="12" cy="8" r="2.8" />
+              <circle cx="8" cy="12" r="2.8" />
+              <circle cx="4" cy="8" r="2.8" />
+              <circle cx="8" cy="8" r="2.8" />
+            </svg>
+          ))}
+        </div>
+      )}
+      {styleId === 'liquid' && (
+        <div className="w-6 h-6 flex flex-col justify-between">
+          <div className="w-full h-2 bg-[#E7AC08] rounded-full" />
+          <div className="flex justify-between items-center">
+            <div className="w-2 h-2 bg-[#E7AC08] rounded-full" />
+            <div className="w-2 h-2 bg-[#E7AC08] rounded-tl-full rounded-br-full" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export const EYE_STYLES: Array<{
   id: EyeStyle;
@@ -277,12 +417,15 @@ const PupilShapeIcon: React.FC<{
 export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   options,
   onChange,
+  selectedType,
   activeTab: propActiveTab,
   onTabChange,
   selectedRandomizeTarget,
   selectedRandomizeType,
   onRandomizeTargetChange,
   onRandomizeTypeChange,
+  lockedTargets,
+  onLockedTargetsChange,
   onShowToast,
 }) => {
   const [internalTab, setInternalTab] = useState<TabKey>('colors');
@@ -319,7 +462,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   };
 
   const handleRandomizePattern = () => {
-    const choices: PatternStyle[] = ['square', 'rounded', 'dots', 'soft-rounded', 'liquid'];
+    const choices: PatternStyle[] = PATTERN_STYLES_LIST.map((i) => i.id);
     const filtered = choices.filter((p) => p !== options.patternStyle);
     const chosen = filtered[Math.floor(Math.random() * filtered.length)];
     if (chosen) update({ patternStyle: chosen });
@@ -468,6 +611,8 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
           selectedType={currentRandType}
           onTargetChange={handleTargetChange}
           onTypeChange={handleTypeChange}
+          lockedTargets={lockedTargets}
+          onLockedTargetsChange={onLockedTargetsChange}
           idPrefix="panel-rand"
         />
       </div>
@@ -778,13 +923,18 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
         {activeTab === 'patterns' && (
           <div className="space-y-6">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
-                  Module Pixel Style
-                </label>
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
+                    Module Pixel Style
+                  </label>
+                  <p className="text-[11px] text-[#64748B] dark:text-zinc-400">
+                    Choose distinctive geometric shapes for your QR code pixel matrix
+                  </p>
+                </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[11px] font-medium text-[#64748B] dark:text-zinc-400 capitalize hidden sm:inline">
-                    {options.patternStyle.replace('-', ' ')}
+                    {options.patternStyle === 'dots' ? 'Circle' : options.patternStyle.replace('-', ' ')}
                   </span>
                   <button
                     type="button"
@@ -797,18 +947,13 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                   </button>
                 </div>
               </div>
+
+              {/* Pattern Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-                {[
-                  { id: 'square', label: 'Classic Square', desc: 'Sharp 90° contrast' },
-                  { id: 'chamfer', label: 'Chamfer Pixel', desc: '45° beveled edges' },
-                  { id: 'diamond', label: 'Clean Diamond', desc: 'Crisp rhombus matrix' },
-                  { id: 'squircle', label: 'Smooth Squircle', desc: 'Modern superellipse' },
-                  { id: 'rounded', label: 'Rounded Modules', desc: 'Smooth curves' },
-                  { id: 'dots', label: 'Circular Dots', desc: 'Minimal matrix' },
-                  { id: 'soft-rounded', label: 'Soft Rounded', desc: 'Subtle squircle' },
-                  { id: 'liquid', label: 'Liquid Pixel', desc: 'Fluid droplet flow' },
-                ].map((item) => {
-                  const isSelected = options.patternStyle === item.id;
+                {PATTERN_STYLES_LIST.map((item) => {
+                  const isSelected =
+                    options.patternStyle === item.id ||
+                    (item.id === 'circle' && options.patternStyle === 'dots');
                   return (
                     <button
                       key={item.id}
@@ -818,58 +963,10 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                       className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
                         isSelected
                           ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
-                          : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
+                          : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/60 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
                       }`}
                     >
-                      {/* Visual miniature representation */}
-                      <div className="w-12 h-12 mb-2 flex items-center justify-center p-2 bg-[#FAF8F5] dark:bg-zinc-900 rounded-lg border border-[#EDE8DF] dark:border-zinc-700">
-                        {item.id === 'liquid' ? (
-                          <div className="w-full h-full flex flex-col justify-between">
-                            <div className="w-full h-3 bg-[#E7AC08] rounded-full" />
-                            <div className="flex justify-between items-center">
-                              <div className="w-3 h-3 bg-[#E7AC08] rounded-full" />
-                              <div className="w-3 h-3 bg-[#E7AC08] rounded-tl-full rounded-br-full" />
-                            </div>
-                          </div>
-                        ) : item.id === 'chamfer' ? (
-                          <div className="grid grid-cols-2 gap-1.5 w-full h-full items-center justify-center p-0.5">
-                            {[0, 1, 2, 3].map((i) => (
-                              <svg key={i} viewBox="0 0 16 16" className="w-3.5 h-3.5 fill-[#E7AC08] mx-auto">
-                                <polygon points="4,0 12,0 16,4 16,12 12,16 4,16 0,12 0,4" />
-                              </svg>
-                            ))}
-                          </div>
-                        ) : item.id === 'diamond' ? (
-                          <div className="grid grid-cols-2 gap-1.5 w-full h-full items-center justify-center p-0.5">
-                            {[0, 1, 2, 3].map((i) => (
-                              <svg key={i} viewBox="0 0 16 16" className="w-3.5 h-3.5 fill-[#E7AC08] mx-auto">
-                                <polygon points="8,0.5 15.5,8 8,15.5 0.5,8" />
-                              </svg>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                            {[0, 1, 2, 3].map((i) => (
-                              <div
-                                key={i}
-                                className="w-3 h-3 bg-[#E7AC08]"
-                                style={{
-                                  borderRadius:
-                                    item.id === 'square'
-                                      ? '0'
-                                      : item.id === 'dots'
-                                      ? '999px'
-                                      : item.id === 'squircle'
-                                      ? '5px'
-                                      : item.id === 'rounded'
-                                      ? '4px'
-                                      : '2px',
-                                }}
-                              />
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                      <PixelShapePreview styleId={item.id} />
                       <span className="text-xs font-bold leading-tight mb-0.5">
                         {item.label}
                       </span>
@@ -1145,84 +1242,199 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
         {/* TAB 4: CENTER LOGO */}
         {activeTab === 'logo' && (
           <div className="space-y-5">
+            {/* Auto-adaptation Toggle Banner */}
+            <div className="p-3.5 rounded-xl border border-amber-200/90 dark:border-amber-900/50 bg-amber-50/80 dark:bg-amber-950/25 flex items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-[#E7AC08]/20 dark:bg-[#E7AC08]/30 flex items-center justify-center text-[#92400E] dark:text-amber-300 shrink-0 mt-0.5">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-bold text-[#0F172A] dark:text-zinc-100">
+                      Auto-adapt Icon to Category
+                    </span>
+                    {options.logo.autoAdapt !== false && selectedType && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#E7AC08]/25 text-[#92400E] dark:text-amber-200 uppercase tracking-wider">
+                        Active: {selectedType}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-[#64748B] dark:text-zinc-400 mt-0.5 leading-snug">
+                    Automatically selects the center icon when switching QR categories (e.g. Wi-Fi, WhatsApp, Phone, UPI, URL).
+                  </p>
+                </div>
+              </div>
+
+              {/* Toggle Switch */}
+              <button
+                type="button"
+                id="toggle-auto-adapt-logo"
+                role="switch"
+                aria-checked={options.logo.autoAdapt !== false}
+                onClick={() => {
+                  const nextVal = options.logo.autoAdapt === false ? true : false;
+                  if (nextVal) {
+                    const autoLogo = selectedType ? getAutoLogoForCategory(selectedType) : 'none';
+                    update({
+                      logo: {
+                        ...options.logo,
+                        autoAdapt: true,
+                        type: autoLogo,
+                      },
+                      errorCorrection:
+                        autoLogo !== 'none' && (options.errorCorrection === 'L' || options.errorCorrection === 'M')
+                          ? 'Q'
+                          : options.errorCorrection,
+                    });
+                    onShowToast?.(
+                      selectedType
+                        ? `Auto-adapt enabled: set to ${selectedType.toUpperCase()} icon ✓`
+                        : 'Auto-adapt enabled ✓'
+                    );
+                  } else {
+                    update({
+                      logo: {
+                        ...options.logo,
+                        autoAdapt: false,
+                      },
+                    });
+                    onShowToast?.('Auto-adapt disabled: manual icon mode');
+                  }
+                }}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#E7AC08]/50 ${
+                  options.logo.autoAdapt !== false
+                    ? 'bg-[#E7AC08]'
+                    : 'bg-zinc-300 dark:bg-zinc-700'
+                }`}
+                title={
+                  options.logo.autoAdapt !== false
+                    ? 'Click to disable auto-adaptation'
+                    : 'Click to enable auto-adaptation'
+                }
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                    options.logo.autoAdapt !== false ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
             <div>
-              <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300 mb-2">
-                Center Logo Asset
-              </label>
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
+                  Center Logo Asset
+                </label>
+                {options.logo.autoAdapt !== false && (
+                  <span className="text-[10px] font-medium text-amber-700 dark:text-amber-400 bg-amber-100/80 dark:bg-amber-900/40 px-2 py-0.5 rounded">
+                    Category Auto-Sync Enabled
+                  </span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
                 {/* None */}
                 <button
                   type="button"
                   id="logo-type-none"
                   onClick={() => update({ logo: { ...options.logo, type: 'none' } })}
-                  className={`flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3 p-2 sm:p-3 rounded-xl border text-center sm:text-left transition-all ${
+                  className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all ${
                     options.logo.type === 'none'
-                      ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50'
-                      : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 hover:border-[#CBD5E1]'
+                      ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
+                      : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/60 hover:border-[#CBD5E1]'
                   }`}
                 >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg border border-dashed border-[#CBD5E1] flex items-center justify-center text-[#64748B] shrink-0">
-                    <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <div className="w-8 h-8 rounded-lg border border-dashed border-[#CBD5E1] dark:border-zinc-700 flex items-center justify-center text-[#64748B] dark:text-zinc-400 shrink-0">
+                    <X className="w-4 h-4" />
                   </div>
-                  <div>
-                    <span className="text-[11px] sm:text-xs font-bold block">No Logo</span>
-                    <span className="text-[9px] sm:text-[10px] text-[#64748B] hidden sm:block">Clean matrix</span>
+                  <div className="min-w-0">
+                    <span className="text-xs font-bold block truncate">No Logo</span>
+                    <span className="text-[10px] text-[#64748B] dark:text-zinc-500 block truncate">Clean matrix</span>
                   </div>
                 </button>
 
-                {/* Ehsaan Logo */}
-                <button
-                  type="button"
-                  id="logo-type-ehsaan"
-                  onClick={() => {
-                    update({
-                      logo: { ...options.logo, type: 'ehsaan' },
-                      // Automatically recommend/bump to High error correction
-                      errorCorrection: options.errorCorrection === 'L' || options.errorCorrection === 'M' ? 'H' : options.errorCorrection,
-                    });
-                  }}
-                  className={`flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3 p-2 sm:p-3 rounded-xl border text-center sm:text-left transition-all ${
-                    options.logo.type === 'ehsaan'
-                      ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50'
-                      : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 hover:border-[#CBD5E1]'
-                  }`}
-                >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center shrink-0">
-                    <EhsaanFlameIcon size={24} />
-                  </div>
-                  <div>
-                    <span className="text-[11px] sm:text-xs font-bold block">Ehsaan</span>
-                    <span className="text-[9px] sm:text-[10px] text-[#64748B] hidden sm:block">Brand mark</span>
-                  </div>
-                </button>
+                {/* Generic Monochrome Logos */}
+                {[
+                  { id: 'url' as LogoType, label: 'URL', sub: 'Website', dataUrl: URL_LOGO_DATA_URL },
+                  { id: 'phone' as LogoType, label: 'Phone', sub: 'Contact', dataUrl: PHONE_LOGO_DATA_URL },
+                  { id: 'whatsapp' as LogoType, label: 'WhatsApp', sub: 'Chat', dataUrl: WHATSAPP_LOGO_DATA_URL },
+                  { id: 'wifi' as LogoType, label: 'Wi-Fi', sub: 'Network', dataUrl: WIFI_LOGO_DATA_URL },
+                  { id: 'email' as LogoType, label: 'Email', sub: 'Mailbox', dataUrl: EMAIL_LOGO_DATA_URL },
+                  { id: 'upi' as LogoType, label: 'UPI', sub: 'Payment', dataUrl: UPI_LOGO_DATA_URL },
+                  { id: 'payment' as LogoType, label: 'Payment', sub: 'Card / POS', dataUrl: PAYMENT_LOGO_DATA_URL },
+                ].map((item) => {
+                  const isSelected = options.logo.type === item.id;
+                  const isAutoTarget =
+                    options.logo.autoAdapt !== false &&
+                    selectedType &&
+                    getAutoLogoForCategory(selectedType) === item.id;
+
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      id={`logo-type-${item.id}`}
+                      onClick={() => {
+                        update({
+                          logo: { ...options.logo, type: item.id },
+                          errorCorrection:
+                            options.errorCorrection === 'L' || options.errorCorrection === 'M'
+                              ? 'H'
+                              : options.errorCorrection,
+                        });
+                      }}
+                      className={`relative flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all ${
+                        isSelected
+                          ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
+                          : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/60 hover:border-[#CBD5E1]'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-lg p-1 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200/60 dark:border-zinc-700/60">
+                        <img
+                          src={item.dataUrl}
+                          alt={item.label}
+                          className="w-full h-full object-contain dark:invert"
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs font-bold block truncate">{item.label}</span>
+                          {isAutoTarget && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#E7AC08] shrink-0" title="Category Match" />
+                          )}
+                        </div>
+                        <span className="text-[10px] text-[#64748B] dark:text-zinc-500 block truncate">{item.sub}</span>
+                      </div>
+                    </button>
+                  );
+                })}
 
                 {/* Custom Upload */}
                 <button
                   type="button"
                   id="logo-type-custom"
                   onClick={() => fileInputRef.current?.click()}
-                  className={`flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3 p-2 sm:p-3 rounded-xl border text-center sm:text-left transition-all ${
+                  className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all ${
                     options.logo.type === 'custom'
-                      ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50'
-                      : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 hover:border-[#CBD5E1]'
+                      ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
+                      : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/60 hover:border-[#CBD5E1]'
                   }`}
                 >
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#FAF8F5] dark:bg-zinc-700 flex items-center justify-center shrink-0 overflow-hidden">
-                    {options.logo.customUrl ? (
+                  <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] dark:bg-zinc-700 flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200/60 dark:border-zinc-600/60">
+                    {options.logo.type === 'custom' && options.logo.customUrl ? (
                       <img
                         src={options.logo.customUrl}
                         alt="Logo"
                         className="w-full h-full object-contain"
                       />
                     ) : (
-                      <Upload className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#64748B] dark:text-zinc-300" />
+                      <Upload className="w-4 h-4 text-[#64748B] dark:text-zinc-300" />
                     )}
                   </div>
                   <div className="min-w-0">
-                    <span className="text-[11px] sm:text-xs font-bold block truncate">
+                    <span className="text-xs font-bold block truncate">
                       {options.logo.type === 'custom' ? 'Uploaded' : 'Upload'}
                     </span>
-                    <span className="text-[9px] sm:text-[10px] text-[#64748B] hidden sm:block">PNG, SVG</span>
+                    <span className="text-[10px] text-[#64748B] dark:text-zinc-500 block truncate">PNG, SVG</span>
                   </div>
                 </button>
                 <input
