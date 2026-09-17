@@ -25,11 +25,11 @@ Designed to keep things simple.**
 
 <div align="center">
 
-# WHAT'S NEW ~ 📌 V1.1.4
+# WHAT'S NEW ~ 📌 V1.1.5
 
-<img width="599" height="360" alt="EHSAAN QR V1.1.4" src="https://github.com/user-attachments/assets/428d1e37-7a24-4ca6-be7e-e40b03bfe919" />
+<img width="603" height="293" alt="image" src="https://github.com/user-attachments/assets/592c4108-ac90-42a2-a2a2-d76614918058" />
 
-### ✨ New in V1.1.4
+### ✨ New in V1.1.5
 
 🎨 **New QR Shapes** · 🖼️ **QR Frames** · 🧩 **Shapes Section**
 🎯 **Better Customization** · 📱 **Scanability First**
