@@ -43,6 +43,11 @@ import {
   EMAIL_LOGO_DATA_URL,
   UPI_LOGO_DATA_URL,
   PAYMENT_LOGO_DATA_URL,
+  TEXT_LOGO_DATA_URL,
+  SMS_LOGO_DATA_URL,
+  CALENDAR_LOGO_DATA_URL,
+  VCARD_LOGO_DATA_URL,
+  LOCATION_LOGO_DATA_URL,
 } from '../utils/qrRenderer';
 import { SmartRandomizeController } from './SmartRandomizeController';
 import { ColorPickerField } from './ColorPickerField';
@@ -111,7 +116,7 @@ const PRESET_COLOR_COMBOS: ColorPresetCombo[] = [
   { id: 'p-20', name: 'Powder Blue', outer: '#93C5FD', inner: '#0C1E3D' },
   { id: 'p-21', name: 'Ice Sky Blue', outer: '#7DD3FC', inner: '#08243D' },
   { id: 'p-22', name: 'Turquoise Aqua', outer: '#06B6D4', inner: '#03252A' },
-  { id: 'p-23', name: 'Mint Sage', outer: '#A7F3D0', inner: '#052B1E' },
+  { id: 'p-23', name: 'Matcha Cream', outer: '#D9F99D', inner: '#14532D' },
   { id: 'p-24', name: 'Spring Emerald', outer: '#4ADE80', inner: '#052E16' },
 
   // Row 5: Deep & Inverted Contrasts
@@ -778,6 +783,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                         update({
                           bgColor: combo.outer,
                           fgColor: combo.inner,
+                          fgColorEnd: combo.inner,
                           eyeOuterColor: combo.inner,
                           eyeInnerColor: combo.inner,
                           customEyeColors: true,
@@ -1242,25 +1248,42 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
         {/* TAB 4: CENTER LOGO */}
         {activeTab === 'logo' && (
           <div className="space-y-5">
-            {/* Auto-adaptation Toggle Banner */}
-            <div className="p-3.5 rounded-xl border border-amber-200/90 dark:border-amber-900/50 bg-amber-50/80 dark:bg-amber-950/25 flex items-center justify-between gap-3 shadow-2xs">
+            {/* Auto-adaptation Toggle Banner (Refined Light Theme Visual Readiness) */}
+            <div
+              className={`p-4 rounded-2xl transition-all duration-200 border flex items-center justify-between gap-3.5 shadow-2xs ${
+                Boolean(options.logo.autoAdapt)
+                  ? 'border-amber-300/90 dark:border-amber-700/60 bg-gradient-to-r from-amber-50/95 via-[#FFFDF7] to-amber-100/60 dark:from-amber-950/40 dark:to-amber-900/20 ring-1 ring-amber-300/30 shadow-xs'
+                  : 'border-[#EDE8DF] dark:border-zinc-800 bg-[#FAF8F5] dark:bg-zinc-900/50'
+              }`}
+            >
               <div className="flex items-start gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-[#E7AC08]/20 dark:bg-[#E7AC08]/30 flex items-center justify-center text-[#92400E] dark:text-amber-300 shrink-0 mt-0.5">
-                  <Sparkles className="w-4 h-4" />
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                    Boolean(options.logo.autoAdapt)
+                      ? 'bg-[#E7AC08] text-white shadow-2xs'
+                      : 'bg-[#EDE8DF] dark:bg-zinc-800 text-[#64748B] dark:text-zinc-400'
+                  }`}
+                >
+                  <Sparkles className="w-4.5 h-4.5" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold text-[#0F172A] dark:text-zinc-100">
+                    <span className="text-xs font-bold text-[#0F172A] dark:text-zinc-100 tracking-tight">
                       Auto-adapt Icon to Category
                     </span>
-                    {options.logo.autoAdapt !== false && selectedType && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#E7AC08]/25 text-[#92400E] dark:text-amber-200 uppercase tracking-wider">
+                    {Boolean(options.logo.autoAdapt) && selectedType ? (
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100/90 dark:bg-amber-900/50 text-[#92400E] dark:text-amber-200 border border-amber-200/80 dark:border-amber-700/50 uppercase tracking-wider">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#E7AC08] animate-pulse" />
                         Active: {selectedType}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-md bg-[#EDE8DF]/80 dark:bg-zinc-800 text-[#64748B] dark:text-zinc-400">
+                        Manual Mode
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-[#64748B] dark:text-zinc-400 mt-0.5 leading-snug">
-                    Automatically selects the center icon when switching QR categories (e.g. Wi-Fi, WhatsApp, Phone, UPI, URL).
+                  <p className="text-[11px] text-[#475569] dark:text-zinc-400 mt-1 leading-relaxed">
+                    Automatically pairs the center icon with your chosen QR category (e.g. Location, Wi-Fi, WhatsApp, Phone, UPI, URL).
                   </p>
                 </div>
               </div>
@@ -1270,9 +1293,15 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                 type="button"
                 id="toggle-auto-adapt-logo"
                 role="switch"
-                aria-checked={options.logo.autoAdapt !== false}
+                aria-checked={Boolean(options.logo.autoAdapt)}
                 onClick={() => {
-                  const nextVal = options.logo.autoAdapt === false ? true : false;
+                  const nextVal = !options.logo.autoAdapt;
+                  try {
+                    localStorage.setItem('ehsaan_qr_auto_adapt_logo', String(nextVal));
+                  } catch {
+                    // ignore
+                  }
+
                   if (nextVal) {
                     const autoLogo = selectedType ? getAutoLogoForCategory(selectedType) : 'none';
                     update({
@@ -1301,20 +1330,20 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                     onShowToast?.('Auto-adapt disabled: manual icon mode');
                   }
                 }}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#E7AC08]/50 ${
-                  options.logo.autoAdapt !== false
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#E7AC08]/50 focus:ring-offset-2 dark:focus:ring-offset-zinc-900 ${
+                  Boolean(options.logo.autoAdapt)
                     ? 'bg-[#E7AC08]'
                     : 'bg-zinc-300 dark:bg-zinc-700'
                 }`}
                 title={
-                  options.logo.autoAdapt !== false
+                  Boolean(options.logo.autoAdapt)
                     ? 'Click to disable auto-adaptation'
                     : 'Click to enable auto-adaptation'
                 }
               >
                 <span
                   className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                    options.logo.autoAdapt !== false ? 'translate-x-5' : 'translate-x-0'
+                    Boolean(options.logo.autoAdapt) ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
               </button>
@@ -1325,7 +1354,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                 <label className="text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
                   Center Logo Asset
                 </label>
-                {options.logo.autoAdapt !== false && (
+                {Boolean(options.logo.autoAdapt) && (
                   <span className="text-[10px] font-medium text-amber-700 dark:text-amber-400 bg-amber-100/80 dark:bg-amber-900/40 px-2 py-0.5 rounded">
                     Category Auto-Sync Enabled
                   </span>
@@ -1343,8 +1372,8 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                       : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/60 hover:border-[#CBD5E1]'
                   }`}
                 >
-                  <div className="w-8 h-8 rounded-lg border border-dashed border-[#CBD5E1] dark:border-zinc-700 flex items-center justify-center text-[#64748B] dark:text-zinc-400 shrink-0">
-                    <X className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-lg p-1.5 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-[#64748B] dark:text-zinc-400 shrink-0 border border-zinc-200/70 dark:border-zinc-700/70">
+                    <X className="w-4 h-4" strokeWidth={1.8} />
                   </div>
                   <div className="min-w-0">
                     <span className="text-xs font-bold block truncate">No Logo</span>
@@ -1352,19 +1381,24 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                   </div>
                 </button>
 
-                {/* Generic Monochrome Logos */}
+                {/* Dedicated Monochrome Preset Logos */}
                 {[
                   { id: 'url' as LogoType, label: 'URL', sub: 'Website', dataUrl: URL_LOGO_DATA_URL },
-                  { id: 'phone' as LogoType, label: 'Phone', sub: 'Contact', dataUrl: PHONE_LOGO_DATA_URL },
+                  { id: 'phone' as LogoType, label: 'Phone', sub: 'Handset', dataUrl: PHONE_LOGO_DATA_URL },
                   { id: 'whatsapp' as LogoType, label: 'WhatsApp', sub: 'Chat', dataUrl: WHATSAPP_LOGO_DATA_URL },
                   { id: 'wifi' as LogoType, label: 'Wi-Fi', sub: 'Network', dataUrl: WIFI_LOGO_DATA_URL },
                   { id: 'email' as LogoType, label: 'Email', sub: 'Mailbox', dataUrl: EMAIL_LOGO_DATA_URL },
-                  { id: 'upi' as LogoType, label: 'UPI', sub: 'Payment', dataUrl: UPI_LOGO_DATA_URL },
+                  { id: 'upi' as LogoType, label: 'UPI', sub: 'Fast pay', dataUrl: UPI_LOGO_DATA_URL },
                   { id: 'payment' as LogoType, label: 'Payment', sub: 'Card / POS', dataUrl: PAYMENT_LOGO_DATA_URL },
+                  { id: 'text' as LogoType, label: 'Text', sub: 'Plain text', dataUrl: TEXT_LOGO_DATA_URL },
+                  { id: 'sms' as LogoType, label: 'SMS', sub: 'Message', dataUrl: SMS_LOGO_DATA_URL },
+                  { id: 'calendar' as LogoType, label: 'Calendar', sub: 'Schedule', dataUrl: CALENDAR_LOGO_DATA_URL },
+                  { id: 'vcard' as LogoType, label: 'Contact', sub: 'vCard', dataUrl: VCARD_LOGO_DATA_URL },
+                  { id: 'location' as LogoType, label: 'Location', sub: 'Address pin', dataUrl: LOCATION_LOGO_DATA_URL },
                 ].map((item) => {
                   const isSelected = options.logo.type === item.id;
                   const isAutoTarget =
-                    options.logo.autoAdapt !== false &&
+                    Boolean(options.logo.autoAdapt) &&
                     selectedType &&
                     getAutoLogoForCategory(selectedType) === item.id;
 
@@ -1388,7 +1422,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                           : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/60 hover:border-[#CBD5E1]'
                       }`}
                     >
-                      <div className="w-8 h-8 rounded-lg p-1 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200/60 dark:border-zinc-700/60">
+                      <div className="w-8 h-8 rounded-lg p-1.5 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200/70 dark:border-zinc-700/70">
                         <img
                           src={item.dataUrl}
                           alt={item.label}
@@ -1419,15 +1453,15 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                       : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/60 hover:border-[#CBD5E1]'
                   }`}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-[#FAF8F5] dark:bg-zinc-700 flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200/60 dark:border-zinc-600/60">
+                  <div className="w-8 h-8 rounded-lg p-1.5 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200/70 dark:border-zinc-700/70 text-[#64748B] dark:text-zinc-300">
                     {options.logo.type === 'custom' && options.logo.customUrl ? (
                       <img
                         src={options.logo.customUrl}
                         alt="Logo"
-                        className="w-full h-full object-contain"
+                        className="w-full h-full object-contain rounded"
                       />
                     ) : (
-                      <Upload className="w-4 h-4 text-[#64748B] dark:text-zinc-300" />
+                      <Upload className="w-4 h-4" strokeWidth={1.8} />
                     )}
                   </div>
                   <div className="min-w-0">

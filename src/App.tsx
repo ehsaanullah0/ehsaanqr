@@ -49,8 +49,8 @@ const INITIAL_STYLE: QrStyleOptions = {
   eyeOuterColor: '#881337', // Deep crimson wine outer eye ring
   eyeInnerColor: '#881337', // Deep crimson wine inner pupil
   logo: {
-    type: 'url',
-    autoAdapt: true,
+    type: 'none',
+    autoAdapt: false,
     sizeRatio: 0.2,
     padding: 4,
     background: 'transparent',
@@ -72,25 +72,51 @@ export default function App() {
     return 'minimal';
   });
 
-  // Active QR type
-  const [selectedType, setSelectedType] = useState<QrType>('url');
+  // Active QR type (persisted across page refreshes)
+  const [selectedType, setSelectedType] = useState<QrType>(() => {
+    try {
+      const saved = localStorage.getItem('ehsaan_qr_selected_type');
+      if (
+        saved &&
+        ['url', 'text', 'email', 'phone', 'sms', 'wifi', 'whatsapp', 'vcard', 'upi', 'calendar', 'location'].includes(saved)
+      ) {
+        return saved as QrType;
+      }
+    } catch {
+      // fallback to url
+    }
+    return 'url';
+  });
 
   // Form Data
   const [formData, setFormData] = useState<QrFormData>(DEFAULT_FORM_DATA);
 
   // Styling Options (with persisted autoAdapt preference across refresh)
   const [styleOptions, setStyleOptions] = useState<QrStyleOptions>(() => {
-    let autoAdapt = true;
+    let autoAdapt = false;
     try {
       const saved = localStorage.getItem(STORAGE_AUTO_ADAPT_LOGO_KEY);
       if (saved !== null) {
         autoAdapt = saved === 'true';
       }
     } catch {
-      // fallback to true
+      // fallback to false
     }
 
-    const initialLogo = autoAdapt ? getAutoLogoForCategory('url') : 'none';
+    let initialType: QrType = 'url';
+    try {
+      const savedType = localStorage.getItem('ehsaan_qr_selected_type');
+      if (
+        savedType &&
+        ['url', 'text', 'email', 'phone', 'sms', 'wifi', 'whatsapp', 'vcard', 'upi', 'calendar', 'location'].includes(savedType)
+      ) {
+        initialType = savedType as QrType;
+      }
+    } catch {
+      // fallback
+    }
+
+    const initialLogo = autoAdapt ? getAutoLogoForCategory(initialType) : 'none';
 
     return {
       ...INITIAL_STYLE,
@@ -105,13 +131,24 @@ export default function App() {
   // Sync auto logo adaptation preference to localStorage
   useEffect(() => {
     try {
-      if (typeof styleOptions.logo.autoAdapt === 'boolean') {
+      if (typeof styleOptions.logo?.autoAdapt === 'boolean') {
         localStorage.setItem(STORAGE_AUTO_ADAPT_LOGO_KEY, String(styleOptions.logo.autoAdapt));
       }
     } catch {
       // ignore
     }
-  }, [styleOptions.logo.autoAdapt]);
+  }, [styleOptions.logo?.autoAdapt]);
+
+  // Sync selected QR category type to localStorage
+  useEffect(() => {
+    try {
+      if (selectedType) {
+        localStorage.setItem('ehsaan_qr_selected_type', selectedType);
+      }
+    } catch {
+      // ignore
+    }
+  }, [selectedType]);
 
   // Active Customization Tab (synchronized across desktop in-panel tabs and mobile/tablet floating nav)
   const [activeCustomTab, setActiveCustomTab] = useState<CustomizationTabKey>('colors');
@@ -244,7 +281,7 @@ export default function App() {
   // Handle QR category selection with smart logo auto-adaptation
   const handleSelectType = (newType: QrType) => {
     setSelectedType(newType);
-    if (styleOptions.logo.autoAdapt !== false) {
+    if (styleOptions.logo.autoAdapt === true) {
       const autoLogo = getAutoLogoForCategory(newType);
       setStyleOptions((prev) => ({
         ...prev,
@@ -359,7 +396,16 @@ export default function App() {
 
   // Apply a saved design template (preserves user data & current QR type)
   const handleLoadDesign = (design: SavedQrDesign) => {
-    setStyleOptions({ ...design.style });
+    setStyleOptions((prev) => ({
+      ...design.style,
+      logo: {
+        ...design.style.logo,
+        autoAdapt:
+          typeof design.style.logo?.autoAdapt === 'boolean'
+            ? design.style.logo.autoAdapt
+            : prev.logo.autoAdapt,
+      },
+    }));
     setToastMessage(`Applied "${design.name}" template ✓`);
   };
 

@@ -892,7 +892,20 @@ export function executeSmartRandomize(
 
   // 9. LOGO
   if (target === 'logo') {
-    const monoLogos: LogoType[] = ['url', 'phone', 'whatsapp', 'wifi', 'email', 'upi', 'payment'];
+    const monoLogos: LogoType[] = [
+      'url',
+      'phone',
+      'whatsapp',
+      'wifi',
+      'email',
+      'upi',
+      'payment',
+      'text',
+      'sms',
+      'calendar',
+      'vcard',
+      'location',
+    ];
     const logoType = current.logo.type === 'none' ? getRandomItem(monoLogos) : current.logo.type;
     const borderRadii = [0, 8, 16, 24, 50];
     const newBorderRadius =

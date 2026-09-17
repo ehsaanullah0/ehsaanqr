@@ -133,7 +133,7 @@ export function sanitizeStyleOptions(rawStyle: Partial<QrStyleOptions> | undefin
       background: safe.logo?.background || 'transparent',
       customBgColor: safe.logo?.customBgColor || '#FFFFFF',
       borderRadius: typeof safe.logo?.borderRadius === 'number' ? safe.logo.borderRadius : 50,
-      autoAdapt: typeof safe.logo?.autoAdapt === 'boolean' ? safe.logo.autoAdapt : true,
+      autoAdapt: typeof safe.logo?.autoAdapt === 'boolean' ? safe.logo.autoAdapt : false,
     },
     size: typeof safe.size === 'number' ? safe.size : 1024,
     margin: typeof safe.margin === 'number' ? safe.margin : 2,

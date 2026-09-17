@@ -2,51 +2,83 @@ import QRCode from 'qrcode';
 import { QrStyleOptions, EyeStyle, PatternStyle, PupilStyle, LogoConfig, QrType, LogoType } from '../types';
 
 // Preset Logo SVG definitions and data URLs for canvas and SVG embedding
-export const URL_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <circle cx="256" cy="256" r="200" stroke="#111827" stroke-width="36" />
-  <line x1="56" y1="256" x2="456" y2="256" stroke="#111827" stroke-width="36" stroke-linecap="round" />
-  <ellipse cx="256" cy="256" rx="96" ry="200" stroke="#111827" stroke-width="36" />
+// Cohesive, minimal-outline vector icon system (24x24 viewBox, stroke-width 2, optical balance)
+export const URL_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <circle cx="12" cy="12" r="10" />
+  <line x1="2" y1="12" x2="22" y2="12" />
+  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
 </svg>`;
 
-export const PHONE_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <path d="M 160 76 C 146 76 132 86 122 100 L 88 144 C 70 168 66 200 82 230 C 120 304 184 368 258 406 C 288 422 320 418 344 400 L 388 366 C 402 356 412 342 412 328 C 412 310 386 268 360 242 C 344 226 322 226 306 240 L 278 264 C 230 238 192 200 166 152 L 190 124 C 204 108 204 86 188 70 L 174 80 C 168 76 164 76 160 76 Z" stroke="#111827" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+export const PHONE_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
 </svg>`;
 
-export const WHATSAPP_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <!-- Minimal Outlined Speech Bubble -->
-  <path d="M 256 60 C 148 60 60 148 60 256 C 60 296 72 334 94 366 L 68 448 L 154 424 C 184 442 218 452 256 452 C 364 452 452 364 452 256 C 452 148 364 60 256 60 Z" stroke="#111827" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-  <!-- Minimal Outlined Phone Receiver -->
-  <path d="M 182 176 C 174 176 166 182 160 192 C 148 214 146 252 186 308 C 226 364 264 368 286 356 C 296 350 302 340 302 330 L 290 298 C 286 288 274 282 264 286 L 246 294 C 222 276 206 258 194 234 L 208 218 C 214 208 212 196 204 190 L 182 176 Z" stroke="#111827" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+export const WHATSAPP_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+  <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" stroke-width="1.8" />
 </svg>`;
 
-export const WIFI_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <path d="M 80 170 C 177 73 335 73 432 170" stroke="#111827" stroke-width="40" stroke-linecap="round" />
-  <path d="M 138 228 C 203 163 309 163 374 228" stroke="#111827" stroke-width="40" stroke-linecap="round" />
-  <path d="M 196 286 C 229 253 283 253 316 286" stroke="#111827" stroke-width="40" stroke-linecap="round" />
-  <circle cx="256" cy="374" r="32" fill="#111827" />
+export const WIFI_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+  <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+  <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+  <line x1="12" y1="20" x2="12.01" y2="20" stroke-width="3" />
 </svg>`;
 
-export const EMAIL_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <rect x="56" y="116" width="400" height="280" rx="44" stroke="#111827" stroke-width="36" />
-  <path d="M 68 136 L 256 280 L 444 136" stroke="#111827" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" />
+export const EMAIL_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="20" height="16" x="2" y="4" rx="2" />
+  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
 </svg>`;
 
-export const UPI_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <!-- Outlined frame badge -->
-  <rect x="52" y="100" width="408" height="312" rx="48" stroke="#111827" stroke-width="34" />
-  <!-- Minimalist Bold UPI letters + Fast forward chevrons -->
-  <path d="M 112 186 L 112 268 C 112 292 126 306 148 306 C 170 306 184 292 184 268 L 184 186" stroke="#111827" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-  <path d="M 216 306 L 216 186 L 248 186 C 270 186 284 198 284 218 C 284 238 270 250 248 250 L 216 250" stroke="#111827" stroke-width="30" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-  <line x1="316" y1="186" x2="316" y2="306" stroke="#111827" stroke-width="30" stroke-linecap="round" />
-  <path d="M 368 196 L 402 246 L 368 296" stroke="#111827" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none" />
-  <path d="M 398 196 L 432 246 L 398 296" stroke="#111827" stroke-width="26" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+export const UPI_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="20" height="16" x="2" y="4" rx="2.5" />
+  <path d="M6 8.5v3.5a1.5 1.5 0 0 0 3 0V8.5" />
+  <path d="M11.5 15.5v-7h2a1.5 1.5 0 0 1 0 3h-2" />
+  <line x1="16.5" y1="8.5" x2="16.5" y2="15.5" />
 </svg>`;
 
-export const PAYMENT_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
-  <rect x="56" y="116" width="400" height="280" rx="44" stroke="#111827" stroke-width="36" />
-  <line x1="56" y1="200" x2="456" y2="200" stroke="#111827" stroke-width="36" />
-  <rect x="106" y="270" width="76" height="52" rx="10" stroke="#111827" stroke-width="20" fill="none" />
-  <line x1="224" y1="296" x2="330" y2="296" stroke="#111827" stroke-width="28" stroke-linecap="round" />
+export const PAYMENT_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="20" height="14" x="2" y="5" rx="2" />
+  <line x1="2" y1="10" x2="22" y2="10" />
+  <line x1="6" y1="15" x2="10" y2="15" />
+</svg>`;
+
+export const TEXT_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+  <polyline points="14 2 14 8 20 8" />
+  <line x1="16" y1="13" x2="8" y2="13" />
+  <line x1="16" y1="17" x2="8" y2="17" />
+  <polyline points="10 9 9 9 8 9" />
+</svg>`;
+
+export const SMS_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  <line x1="8" y1="9" x2="16" y2="9" />
+  <line x1="8" y1="13" x2="14" y2="13" />
+</svg>`;
+
+export const CALENDAR_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="18" height="18" x="3" y="4" rx="2" />
+  <line x1="16" y1="2" x2="16" y2="6" />
+  <line x1="8" y1="2" x2="8" y2="6" />
+  <line x1="3" y1="10" x2="21" y2="10" />
+  <circle cx="8" cy="14" r="0.9" fill="#111827" stroke="none" />
+  <circle cx="12" cy="14" r="0.9" fill="#111827" stroke="none" />
+  <circle cx="16" cy="14" r="0.9" fill="#111827" stroke="none" />
+  <circle cx="8" cy="17.5" r="0.9" fill="#111827" stroke="none" />
+  <circle cx="12" cy="17.5" r="0.9" fill="#111827" stroke="none" />
+  <circle cx="16" cy="17.5" r="0.9" fill="#111827" stroke="none" />
+</svg>`;
+
+export const VCARD_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <rect width="18" height="18" x="3" y="3" rx="2.5" />
+  <circle cx="12" cy="9.5" r="2.8" />
+  <path d="M7 16.5c0-1.8 2.2-2.8 5-2.8s5 1 5 2.8" />
+</svg>`;
+
+export const LOCATION_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M20 10c0 5.2-7 11.5-8 12.3-.9-.8-8-7.1-8-12.3a8 8 0 0 1 16 0z" />
+  <circle cx="12" cy="10" r="3" />
 </svg>`;
 
 export const URL_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(URL_LOGO_SVG)}`;
@@ -56,6 +88,11 @@ export const WIFI_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIC
 export const EMAIL_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(EMAIL_LOGO_SVG)}`;
 export const UPI_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(UPI_LOGO_SVG)}`;
 export const PAYMENT_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(PAYMENT_LOGO_SVG)}`;
+export const TEXT_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(TEXT_LOGO_SVG)}`;
+export const SMS_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(SMS_LOGO_SVG)}`;
+export const CALENDAR_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(CALENDAR_LOGO_SVG)}`;
+export const VCARD_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(VCARD_LOGO_SVG)}`;
+export const LOCATION_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(LOCATION_LOGO_SVG)}`;
 
 /**
  * Maps a QR code data type category to the most appropriate center logo icon
@@ -64,20 +101,26 @@ export function getAutoLogoForCategory(category: QrType): LogoType {
   switch (category) {
     case 'url':
       return 'url';
+    case 'phone':
+      return 'phone';
+    case 'whatsapp':
+      return 'whatsapp';
     case 'wifi':
       return 'wifi';
     case 'email':
       return 'email';
-    case 'phone':
-    case 'sms':
-    case 'vcard':
-      return 'phone';
-    case 'whatsapp':
-      return 'whatsapp';
     case 'upi':
       return 'upi';
     case 'text':
+      return 'text';
+    case 'sms':
+      return 'sms';
     case 'calendar':
+      return 'calendar';
+    case 'vcard':
+      return 'vcard';
+    case 'location':
+      return 'location';
     default:
       return 'none';
   }
@@ -100,6 +143,16 @@ export function getLogoSourceUrl(logo: LogoConfig): string | undefined {
       return UPI_LOGO_DATA_URL;
     case 'payment':
       return PAYMENT_LOGO_DATA_URL;
+    case 'text':
+      return TEXT_LOGO_DATA_URL;
+    case 'sms':
+      return SMS_LOGO_DATA_URL;
+    case 'calendar':
+      return CALENDAR_LOGO_DATA_URL;
+    case 'vcard':
+      return VCARD_LOGO_DATA_URL;
+    case 'location':
+      return LOCATION_LOGO_DATA_URL;
     case 'custom':
       return logo.customUrl;
     default:
@@ -1248,6 +1301,8 @@ export async function renderQrToCanvas(
         const img = await loadImage(logoSrc);
         const imgX = logoCenterX - logoPixelSize / 2;
         const imgY = logoCenterY - logoPixelSize / 2;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, imgX, imgY, logoPixelSize, logoPixelSize);
       } catch (err) {
         console.warn('Failed to draw center logo onto QR canvas:', err);

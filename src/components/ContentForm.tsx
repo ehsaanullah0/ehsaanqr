@@ -16,6 +16,8 @@ import {
   Eye,
   EyeOff,
   Sparkles,
+  MapPin,
+  Navigation,
 } from 'lucide-react';
 
 interface ContentFormProps {
@@ -49,6 +51,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({
             {type === 'vcard' && 'Digital Business Card (vCard)'}
             {type === 'upi' && 'UPI Instant Payment'}
             {type === 'calendar' && 'Calendar Event Invite'}
+            {type === 'location' && 'Map Location'}
           </h2>
         </div>
 
@@ -717,6 +720,84 @@ export const ContentForm: React.FC<ContentFormProps> = ({
               className="w-full p-2.5 rounded-xl border border-[#EDE8DF] dark:border-zinc-700 bg-[#FDFCF9] dark:bg-zinc-800/60 text-[#0F172A] dark:text-zinc-100 placeholder-[#94A3B8] text-xs focus:outline-none focus:ring-2 focus:ring-[#E7AC08]/30 focus:border-[#E7AC08] shadow-2xs"
             />
           </div>
+        </div>
+      )}
+
+      {/* LOCATION */}
+      {type === 'location' && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300 mb-1">
+                Latitude <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B] dark:text-zinc-500">
+                  <MapPin className="w-4 h-4" />
+                </div>
+                <input
+                  id="input-loc-lat"
+                  type="text"
+                  value={formData.location.latitude}
+                  onChange={(e) =>
+                    onChange('location', {
+                      ...formData.location,
+                      latitude: e.target.value,
+                    })
+                  }
+                  placeholder="e.g. 26.8467"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[#EDE8DF] dark:border-zinc-700 bg-[#FDFCF9] dark:bg-zinc-800/60 text-[#0F172A] dark:text-zinc-100 placeholder-[#94A3B8] text-sm focus:outline-none focus:ring-2 focus:ring-[#E7AC08]/30 focus:border-[#E7AC08] shadow-2xs"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300 mb-1">
+                Longitude <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#64748B] dark:text-zinc-500">
+                  <Navigation className="w-4 h-4" />
+                </div>
+                <input
+                  id="input-loc-lng"
+                  type="text"
+                  value={formData.location.longitude}
+                  onChange={(e) =>
+                    onChange('location', {
+                      ...formData.location,
+                      longitude: e.target.value,
+                    })
+                  }
+                  placeholder="e.g. 80.9462"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-[#EDE8DF] dark:border-zinc-700 bg-[#FDFCF9] dark:bg-zinc-800/60 text-[#0F172A] dark:text-zinc-100 placeholder-[#94A3B8] text-sm focus:outline-none focus:ring-2 focus:ring-[#E7AC08]/30 focus:border-[#E7AC08] shadow-2xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300 mb-1">
+              Location Name <span className="text-xs font-normal text-[#64748B] dark:text-zinc-500">(Optional)</span>
+            </label>
+            <input
+              id="input-loc-name"
+              type="text"
+              value={formData.location.name}
+              onChange={(e) =>
+                onChange('location', {
+                  ...formData.location,
+                  name: e.target.value,
+                })
+              }
+              placeholder="e.g. Central Park, My Office, Store #42"
+              className="w-full px-3 py-2.5 rounded-xl border border-[#EDE8DF] dark:border-zinc-700 bg-[#FDFCF9] dark:bg-zinc-800/60 text-[#0F172A] dark:text-zinc-100 placeholder-[#94A3B8] text-sm focus:outline-none focus:ring-2 focus:ring-[#E7AC08]/30 focus:border-[#E7AC08] shadow-2xs"
+            />
+          </div>
+
+          <p className="text-[11px] text-[#64748B] dark:text-zinc-400">
+            Encodes direct Google Maps coordinates. Scanners will immediately open the pin in Google Maps or the device's default navigation app.
+          </p>
         </div>
       )}
     </div>

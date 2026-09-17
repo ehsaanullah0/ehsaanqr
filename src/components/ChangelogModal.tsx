@@ -19,16 +19,30 @@ interface ReleaseItem {
 
 const RELEASES: ReleaseItem[] = [
   {
-    version: 'v1.1.4',
+    version: 'v1.1.5',
     date: 'Latest Release',
     isLatest: true,
+    title: 'Location Category, Auto-Logo Persistence & Quality Refinements',
+    highlights: [
+      'New Location Category: Added latitude, longitude & place name fields encoding directly into Google Maps URLs.',
+      'Auto-Logo Toggle Fix: Fixed auto icon toggle preference and category selection to reliably persist on refresh.',
+      'Improved Pre-Loaded Logo Quality: Upgraded SVG vector paths and enabled high-quality anti-aliasing for center logos.',
+      'Colour Palette Fixes: Balanced 28 curated preset swatches with verified contrast and synchronized gradient fills.',
+      'Light Theme Adaptive Section Polish: Enhanced visual readiness, mathematical corner radius, and radiant active badges.',
+    ],
+    tagUrl: 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.5',
+  },
+  {
+    version: 'v1.1.4',
+    date: 'Previous Release',
+    isLatest: false,
     title: 'Monochrome Category Icons, Auto Icon Switch & Per-Category Randomize Locks',
     highlights: [
-      'Selective Randomize Lock Mechanism: Added a minimal lock toggle to each category (Matrix shape, Eye frames, Pupils, Foreground/Background colors, Frame style) in the expanded randomize menu to freeze preferred styles while rolling everything else.',
-      'One-Click Lock Badges & Unlock All: Locked categories display an active lock badge with real-time lock count and a single-click clear shortcut in the popover header, persisted in browser storage.',
-      'Category Icons in Mono Colours: Clean, minimalist monochrome category icons across all QR types (URL, Phone, SMS, WhatsApp, Wi-Fi, Email, UPI) for balanced contrast and visual harmony.',
-      'Auto Category Icon Option (ON/OFF): Automatic category icon adaptation option with a dedicated ON/OFF toggle switch, with preference remembered across browser sessions.',
-      'Refined Default QR Code Style: Default design featuring warm amber cream background (#fbf3c7), deep solid black matrix (#000000), 45° chamfered cut-corner outer eyes (#881337), hexagon inner pupils (#881337), and fluid liquid pixel style for the current URL.',
+      'Selective Randomize Locks: Freeze specific attributes (matrix, eyes, pupils, colors) while rolling everything else.',
+      'Lock Badges & Quick Unlock: Visual active lock count indicator with a one-click unlock shortcut in the header.',
+      'Monochrome Category Icons: Clean minimalist mono icons across all QR types for balanced visual contrast.',
+      'Auto Category Icon Option: Dedicated ON/OFF toggle switch for category-aware center icon adaptation.',
+      'Refined Default QR Style: Warm amber cream background with crimson cut-corner eyes and liquid matrix.',
     ],
     tagUrl: 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.4',
   },
@@ -166,8 +180,8 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
   const isMinimal = theme === 'minimal' || (typeof document !== 'undefined' && document.documentElement.classList.contains('minimal'));
   const [copiedEmail, setCopiedEmail] = useState(false);
   const latestRelease = RELEASES[0];
-  const latestReleaseUrl = latestRelease?.tagUrl || 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.4';
-  const latestVersion = latestRelease?.version || 'v1.1.4';
+  const latestReleaseUrl = latestRelease?.tagUrl || 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.5';
+  const latestVersion = latestRelease?.version || 'v1.1.5';
 
   const handleCopyEmail = async () => {
     try {

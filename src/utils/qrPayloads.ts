@@ -78,6 +78,11 @@ export const DEFAULT_FORM_DATA: QrFormData = {
     endDateTime: '',
     description: '',
   },
+  location: {
+    latitude: '',
+    longitude: '',
+    name: '',
+  },
 };
 
 export function buildPayload(type: QrType, data: QrFormData): string {
@@ -185,6 +190,13 @@ export function buildPayload(type: QrType, data: QrFormData): string {
       return lines.join('\n');
     }
 
+    case 'location': {
+      const lat = data.location.latitude.trim();
+      const lng = data.location.longitude.trim();
+      if (!lat || !lng) return '';
+      return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+    }
+
     default:
       return '';
   }
@@ -260,6 +272,22 @@ export function validatePayload(type: QrType, data: QrFormData): ValidationResul
     case 'calendar':
       if (!data.calendar.title.trim()) return { isValid: false, message: 'Event title is required' };
       return { isValid: true };
+
+    case 'location': {
+      const lat = data.location.latitude.trim();
+      const lng = data.location.longitude.trim();
+      if (!lat) return { isValid: false, message: 'Latitude is required' };
+      if (!lng) return { isValid: false, message: 'Longitude is required' };
+      const latNum = parseFloat(lat);
+      const lngNum = parseFloat(lng);
+      if (isNaN(latNum) || latNum < -90 || latNum > 90) {
+        return { isValid: false, message: 'Latitude must be between -90 and 90' };
+      }
+      if (isNaN(lngNum) || lngNum < -180 || lngNum > 180) {
+        return { isValid: false, message: 'Longitude must be between -180 and 180' };
+      }
+      return { isValid: true };
+    }
 
     default:
       return { isValid: true };

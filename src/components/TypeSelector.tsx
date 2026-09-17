@@ -11,6 +11,7 @@ import {
   Contact,
   CreditCard,
   Calendar,
+  MapPin,
 } from 'lucide-react';
 
 interface TypeSelectorProps {
@@ -38,6 +39,7 @@ const QR_TYPES: TypeItem[] = [
   { id: 'vcard', label: 'vCard', icon: Contact, hint: 'Digital contact', pastelBg: 'bg-[#F5F3FF] dark:bg-purple-950/40', iconColor: 'text-[#7C3AED] dark:text-purple-400' },
   { id: 'upi', label: 'UPI Pay', icon: CreditCard, hint: 'Payment request', pastelBg: 'bg-[#F0F9FF] dark:bg-cyan-950/40', iconColor: 'text-[#0284C7] dark:text-cyan-400' },
   { id: 'calendar', label: 'Calendar', icon: Calendar, hint: 'Event invite', pastelBg: 'bg-[#FFF7ED] dark:bg-orange-950/40', iconColor: 'text-[#EA580C] dark:text-orange-400' },
+  { id: 'location', label: 'Location', icon: MapPin, hint: 'Maps pin', pastelBg: 'bg-[#FEF2F2] dark:bg-rose-950/40', iconColor: 'text-[#E11D48] dark:text-rose-400' },
 ];
 
 export const TypeSelector: React.FC<TypeSelectorProps> = ({
@@ -55,11 +57,11 @@ export const TypeSelector: React.FC<TypeSelectorProps> = ({
         </div>
         <span className="text-[11px] font-medium text-[#64748B] dark:text-zinc-400">
           <span className="sm:hidden">Swipe for more →</span>
-          <span className="hidden sm:inline">10 formats supported</span>
+          <span className="hidden sm:inline">11 formats supported</span>
         </span>
       </div>
 
-      <div className="flex sm:grid sm:grid-cols-5 gap-2.5 overflow-x-auto pb-2 sm:pb-0 scrollbar-none snap-x -mx-1 px-1">
+      <div className="flex sm:grid sm:grid-cols-4 md:grid-cols-6 gap-2.5 overflow-x-auto pb-2 sm:pb-0 scrollbar-none snap-x -mx-1 px-1">
         {QR_TYPES.map((t) => {
           const Icon = t.icon;
           const isSelected = selectedType === t.id;

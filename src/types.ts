@@ -8,7 +8,8 @@ export type QrType =
   | 'whatsapp'
   | 'vcard'
   | 'upi'
-  | 'calendar';
+  | 'calendar'
+  | 'location';
 
 export type PatternStyle =
   | 'square'
@@ -123,6 +124,12 @@ export interface CalendarData {
   description: string;
 }
 
+export interface LocationData {
+  latitude: string;
+  longitude: string;
+  name: string;
+}
+
 export interface QrFormData {
   url: UrlData;
   text: TextData;
@@ -134,6 +141,7 @@ export interface QrFormData {
   vcard: VCardData;
   upi: UpiData;
   calendar: CalendarData;
+  location: LocationData;
 }
 
 export type LogoType =
@@ -145,6 +153,11 @@ export type LogoType =
   | 'email'
   | 'upi'
   | 'payment'
+  | 'text'
+  | 'sms'
+  | 'calendar'
+  | 'vcard'
+  | 'location'
   | 'custom';
 
 export interface LogoConfig {
@@ -155,7 +168,7 @@ export interface LogoConfig {
   background: 'white' | 'match' | 'custom' | 'transparent';
   customBgColor: string;
   borderRadius: number; // px or %
-  autoAdapt?: boolean; // When true, automatically matches logo to active category
+  autoAdapt?: boolean; // When true, automatically matches logo to active category (defaults to false)
 }
 
 export interface QrStyleOptions {
