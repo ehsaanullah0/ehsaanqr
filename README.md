@@ -204,7 +204,8 @@ Because a QR code doesn't have to look boring just because it needs to be functi
 ---
 
 # 💛 SUPPORT THE DEVELOPMENT
-##[ CLICK HERE TO PAY DIRECTLY.](https://ehsaan.odoo.com/about-us)
+## [ CLICK HERE TO PAY DIRECTLY.](https://ehsaan.odoo.com/about-us)
+
 <img width="250" height="250" alt="ehsaan-qr-1024x1024 (1)" src="https://github.com/user-attachments/assets/7139284e-c5e5-424a-bd52-aa71ccc392a8" />
 </p>
 
