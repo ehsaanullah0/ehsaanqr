@@ -433,24 +433,10 @@ html.minimal .bg-amber-700 {
   color: #FFFFFF !important;
 }
 
-/* Ensure Red Note button in Live QR Preview card stays striking red for attention across all themes */
-#btn-live-preview-red-note,
-html.minimal #btn-live-preview-red-note {
-  background-color: #DC2626 !important;
-  color: #FFFFFF !important;
-  border: 1px solid #B91C1C !important;
-}
-
-#btn-live-preview-red-note:hover,
-html.minimal #btn-live-preview-red-note:hover {
-  background-color: #B91C1C !important;
-  color: #FFFFFF !important;
-}
-
-#btn-live-preview-red-note *,
-html.minimal #btn-live-preview-red-note * {
-  color: #FFFFFF !important;
-  stroke: #FFFFFF !important;
+/* Exclusive Features button styling consistency across themes */
+#btn-live-preview-exclusive-suite,
+html.minimal #btn-live-preview-exclusive-suite {
+  border-color: #FDE68A !important;
 }
 
 /* Minimal theme Changelog & Notice button styling: Pure high-contrast Black & White */
@@ -490,22 +476,23 @@ html.minimal [id*="btn-improve-readability"] * {
   fill: currentColor !important;
 }
 
-/* Bottom Navigation Bar in Minimal Theme: Use clean grey instead of dark black */
+/* Bottom Navigation Bar in Minimal Theme: Use signature yellow (#E7AC08) in place of grey */
 html.minimal [id*="floating-nav"] {
   transition: all 0.15s ease !important;
 }
 
-/* Active tab button in bottom nav: Use clean medium grey background (#E4E4E7) with dark slate (#18181B) icon & label */
+/* Active tab button in bottom nav: Light vibrant yellow (#FDE047) with pure black (#000000) icon & text */
 html.minimal [id*="floating-nav"].bg-\[\#E7AC08\],
-html.minimal [id*="floating-nav"].bg-\[\#E7AC08\]:hover {
-  background-color: #E4E4E7 !important;
-  color: #18181B !important;
-  border: 1px solid #D4D4D8 !important;
+html.minimal [id*="floating-nav"].bg-\[\#E7AC08\]:hover,
+html.minimal [id*="floating-nav"].bg-\[\#E7AC08\]:active {
+  background-color: #FDE047 !important;
+  color: #000000 !important;
+  border: 1px solid #FACC15 !important;
 }
 
 html.minimal [id*="floating-nav"].bg-\[\#E7AC08\] * {
-  color: #18181B !important;
-  stroke: #18181B !important;
+  color: #000000 !important;
+  stroke: #000000 !important;
 }
 
 /* Inactive tab buttons in bottom nav: Clean legible slate grey icons (#71717A) */

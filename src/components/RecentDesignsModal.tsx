@@ -18,6 +18,10 @@ import {
   AlertCircle,
   BookmarkPlus,
   Share2,
+  ShieldCheck,
+  ChevronDown,
+  ChevronUp,
+  HelpCircle,
 } from 'lucide-react';
 import {
   encodeTemplateToCode,
@@ -61,6 +65,7 @@ export const RecentDesignsModal: React.FC<RecentDesignsModalProps> = ({
   const [customName, setCustomName] = useState('');
   const [liveThumbnail, setLiveThumbnail] = useState<string | null>(null);
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
+  const [showFunctionGuide, setShowFunctionGuide] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sub-modal for viewing/copying full template code
@@ -330,6 +335,126 @@ export const RecentDesignsModal: React.FC<RecentDesignsModalProps> = ({
 
         {/* Modal Body */}
         <div className="overflow-y-auto flex-1 p-3.5 sm:p-5">
+          {/* Collapsible Backup System Function Guide Banner */}
+          <div
+            id="guide-backup-system-overview"
+            className={`transition-all duration-200 overflow-hidden ${
+              showFunctionGuide
+                ? 'mb-3.5 rounded-2xl border border-amber-200/90 dark:border-amber-900/60 bg-gradient-to-br from-amber-50/90 via-white to-amber-50/40 dark:from-amber-950/40 dark:via-zinc-900 dark:to-amber-950/20 shadow-2xs'
+                : 'mb-2 rounded-lg border border-amber-200/50 dark:border-amber-900/40 bg-amber-50/30 dark:bg-amber-950/20 hover:bg-amber-50/60 dark:hover:bg-amber-950/40'
+            }`}
+          >
+            <div
+              className={`flex items-center justify-between gap-1.5 transition-all ${
+                showFunctionGuide
+                  ? 'p-2.5 sm:p-3.5 border-b border-amber-200/60 dark:border-amber-900/40 bg-amber-100/50 dark:bg-amber-950/50'
+                  : 'px-2 py-0.5 sm:px-2.5 sm:py-1 bg-transparent cursor-pointer'
+              }`}
+              onClick={!showFunctionGuide ? () => setShowFunctionGuide(true) : undefined}
+            >
+              <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+                <div
+                  className={`${
+                    showFunctionGuide ? 'w-6 h-6' : 'w-3.5 h-3.5'
+                  } rounded-md bg-[#f5f5d9] dark:bg-[#E7AC08]/30 text-[#92400E] dark:text-amber-300 flex items-center justify-center shrink-0`}
+                >
+                  <ShieldCheck
+                    className={`${showFunctionGuide ? 'w-3.5 h-3.5' : 'w-2.5 h-2.5'} text-[#E7AC08]`}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <h3 className={`${showFunctionGuide ? 'text-[11px] sm:text-xs font-bold' : 'text-[10px] sm:text-[11px] font-semibold'} text-zinc-900 dark:text-zinc-100 flex items-center gap-1 leading-none truncate`}>
+                    <span>How Backup Works</span>
+                    {showFunctionGuide && (
+                      <span className="hidden xs:inline-block text-[9px] sm:text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-semibold">
+                        100% Client-Side
+                      </span>
+                    )}
+                  </h3>
+                  {showFunctionGuide && (
+                    <p className="hidden sm:block text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      Zero accounts required • Instant portable code transfer & offline file backup
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="shrink-0 flex items-center">
+                <button
+                  type="button"
+                  id="btn-toggle-backup-guide"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowFunctionGuide((prev) => !prev);
+                  }}
+                  className={`flex items-center gap-1 rounded-md bg-[#000000] hover:bg-zinc-800 text-[#f9f9ff] transition-colors cursor-pointer shrink-0 ${
+                    showFunctionGuide
+                      ? 'px-2 py-1 text-[11px] font-bold'
+                      : 'px-1.5 py-0.5 text-[9px] sm:text-[10px] font-semibold'
+                  }`}
+                >
+                  <span className="text-[#f9f9ff]">{showFunctionGuide ? 'Hide Guide' : 'Show Guide'}</span>
+                  {showFunctionGuide ? (
+                    <ChevronUp className="w-3.5 h-3.5 text-[#f9f9ff]" />
+                  ) : (
+                    <ChevronDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#f9f9ff]" />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {showFunctionGuide && (
+              <div className="p-3 sm:p-3.5 space-y-2.5 animate-in fade-in text-xs">
+                {/* 4 Pillars of Backup System */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {/* Pillar 1: Save Locally */}
+                  <div className="p-2.5 rounded-xl bg-white/90 dark:bg-zinc-800/80 border border-amber-100 dark:border-zinc-700/60 space-y-1 shadow-2xs">
+                    <div className="flex items-center gap-1.5 font-bold text-zinc-900 dark:text-zinc-100 text-[11px]">
+                      <BookmarkPlus className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span>1. Save Current QR Style</span>
+                    </div>
+                    <p className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                      Snapshots your active colors, pattern, eyes, gradient, and logo into browser storage with 1 click.
+                    </p>
+                  </div>
+
+                  {/* Pillar 2: 1-Click Code Export */}
+                  <div className="p-2.5 rounded-xl bg-white/90 dark:bg-zinc-800/80 border border-amber-100 dark:border-zinc-700/60 space-y-1 shadow-2xs">
+                    <div className="flex items-center gap-1.5 font-bold text-zinc-900 dark:text-zinc-100 text-[11px]">
+                      <FileCode className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span>2. 1-Click Portable Codes</span>
+                    </div>
+                    <p className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                      Click <Copy className="w-2.5 h-2.5 inline mx-0.5 text-zinc-500" /> on any template to copy an <code className="font-mono bg-zinc-100 dark:bg-zinc-700 px-1 rounded text-[9px]">EHSAAN-TPL-</code> code to share via chat or email.
+                    </p>
+                  </div>
+
+                  {/* Pillar 3: Export All Bundle */}
+                  <div className="p-2.5 rounded-xl bg-white/90 dark:bg-zinc-800/80 border border-amber-100 dark:border-zinc-700/60 space-y-1 shadow-2xs">
+                    <div className="flex items-center gap-1.5 font-bold text-zinc-900 dark:text-zinc-100 text-[11px]">
+                      <Download className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span>3. Full Backup File (.txt)</span>
+                    </div>
+                    <p className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                      Click <strong>Export All</strong> at the bottom to download an offline text/JSON bundle of all your templates at once.
+                    </p>
+                  </div>
+
+                  {/* Pillar 4: Paste / Restore */}
+                  <div className="p-2.5 rounded-xl bg-white/90 dark:bg-zinc-800/80 border border-amber-100 dark:border-zinc-700/60 space-y-1 shadow-2xs">
+                    <div className="flex items-center gap-1.5 font-bold text-zinc-900 dark:text-zinc-100 text-[11px]">
+                      <ClipboardPaste className="w-3.5 h-3.5 text-red-600 dark:text-red-400 shrink-0" />
+                      <span>4. Restore & Import Anytime</span>
+                    </div>
+                    <p className="text-[10px] text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                      Use the <strong>Paste / Recover Code</strong> tab or upload a <code className="font-mono bg-zinc-100 dark:bg-zinc-700 px-1 rounded text-[9px]">.txt</code> file to restore templates on any device.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* TAB 1: SAVED TEMPLATES */}
           {activeTab === 'saved' && (
             <div className="space-y-3">

@@ -5,6 +5,7 @@ import {
   ReadabilityLevel,
 } from '../types';
 import { getImprovedReadabilityOptions } from '../utils/readabilityEngine';
+import { useExclusiveAccess } from '../context/ExclusiveAccessContext';
 import {
   Sparkles,
   Camera,
@@ -20,7 +21,10 @@ import {
   ChevronUp,
   Info,
   Maximize2,
+  Lock,
+  Crown,
 } from 'lucide-react';
+import { ExclusiveCrownBadge } from './ExclusiveCrownBadge';
 
 interface ReadabilityDashboardProps {
   report: ReadabilityReport;
@@ -37,6 +41,7 @@ export const ReadabilityDashboard: React.FC<ReadabilityDashboardProps> = ({
   onOpenScanner,
   onShowToast,
 }) => {
+  const { isUnlocked, openExclusiveModal } = useExclusiveAccess();
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Level Badge configuration
@@ -122,7 +127,10 @@ export const ReadabilityDashboard: React.FC<ReadabilityDashboardProps> = ({
       className="w-full bg-white dark:bg-zinc-900/90 rounded-2xl border border-[#EDE8DF] dark:border-zinc-800 shadow-2xs overflow-hidden transition-all"
     >
       {/* Header Bar */}
-      <div className="p-3.5 sm:p-4 border-b border-[#EDE8DF] dark:border-zinc-800/80 bg-[#FAF8F5]/80 dark:bg-zinc-950/40 flex flex-wrap items-center justify-between gap-2.5">
+      <div
+        id="readability-dashboard-header"
+        className="p-3.5 sm:p-4 border-b border-[#EDE8DF] dark:border-zinc-800/80 bg-[#FAF8F5]/80 dark:bg-zinc-950/40 flex flex-wrap items-center justify-between gap-2.5"
+      >
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-[#B45309] dark:text-amber-400">
             <Activity className="w-4 h-4" />
@@ -155,211 +163,262 @@ export const ReadabilityDashboard: React.FC<ReadabilityDashboardProps> = ({
 
           <button
             type="button"
-            onClick={() => setIsExpanded((prev) => !prev)}
-            className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] dark:hover:text-zinc-200 hover:bg-[#EDE8DF]/60 dark:hover:bg-zinc-800 transition-colors"
-            title={isExpanded ? 'Collapse breakdown' : 'Expand full metrics'}
+            onClick={() => {
+              if (!isUnlocked) {
+                openExclusiveModal('QR Intelligence Analytics');
+                return;
+              }
+              setIsExpanded((prev) => !prev);
+            }}
+            className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] dark:hover:text-zinc-200 hover:bg-[#EDE8DF]/60 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            title={!isUnlocked ? 'QR Intelligence Analytics (Exclusive)' : isExpanded ? 'Collapse breakdown' : 'Expand full metrics'}
             aria-label="Toggle metrics breakdown"
           >
-            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            {!isUnlocked ? (
+              <Crown className="w-4 h-4 text-[#D97706] dark:text-amber-400 stroke-[2.2]" />
+            ) : isExpanded ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
           </button>
         </div>
       </div>
 
       {/* Main Body */}
       <div className="p-3.5 sm:p-4 space-y-3.5">
-        {/* Metric Grid Overview */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
-          {/* 1. Contrast */}
-          <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
-              <span>Contrast</span>
-              <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
-                {report.contrastRatio}:1
-              </span>
+        {!isUnlocked ? (
+          /* Locked State for Intelligence Analytics */
+          <div
+            onClick={() => openExclusiveModal('QR Intelligence Analytics')}
+            className="p-4 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/40 border border-[#EDE8DF] dark:border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#FFF7D9] dark:bg-amber-950/60 border border-[#FDE68A] dark:border-amber-800/70 flex items-center justify-center shrink-0 text-[#D97706] dark:text-amber-400">
+                <Crown className="w-4.5 h-4.5 stroke-[2.2]" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                    QR Intelligence Analytics
+                  </span>
+                  <ExclusiveCrownBadge size="xs" />
+                </div>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  Deep 7-zone contrast breakdown, module geometry analysis, and auto-fix diagnostics.
+                </p>
+              </div>
             </div>
-            <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
-                  report.contrastScore
-                )}`}
-                style={{ width: `${report.contrastScore}%` }}
-              />
-            </div>
-            <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block">
-              {report.contrastScore}% score
-            </span>
-          </div>
 
-          {/* 2. Local Regional Contrast */}
-          <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
-              <span>Local Contrast</span>
-              <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
-                {report.minRegionalContrastRatio}:1
-              </span>
-            </div>
-            <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
-                  report.localContrastScore
-                )}`}
-                style={{ width: `${report.localContrastScore}%` }}
-              />
-            </div>
-            <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block">
-              7 zone analysis
-            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                openExclusiveModal('QR Intelligence Analytics');
+              }}
+              className="px-3.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 text-white text-xs font-bold shadow-xs transition-colors shrink-0 cursor-pointer"
+            >
+              Unlock Analytics →
+            </button>
           </div>
-
-          {/* 3. Module Clarity */}
-          <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
-              <span>Module Clarity</span>
-              <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
-                {report.moduleClarityScore}%
-              </span>
-            </div>
-            <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
-                  report.moduleClarityScore
-                )}`}
-                style={{ width: `${report.moduleClarityScore}%` }}
-              />
-            </div>
-            <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block capitalize">
-              {options.patternStyle} style
-            </span>
-          </div>
-
-          {/* 4. Finder Patterns */}
-          <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
-              <span>Finder Eyes</span>
-              <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
-                {report.finderIntegrityScore}%
-              </span>
-            </div>
-            <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
-                  report.finderIntegrityScore
-                )}`}
-                style={{ width: `${report.finderIntegrityScore}%` }}
-              />
-            </div>
-            <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block capitalize">
-              {options.eyeStyle} frame
-            </span>
-          </div>
-
-          {/* 5. Quiet Zone */}
-          <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
-              <span>Quiet Zone</span>
-              <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
-                {options.margin} mod
-              </span>
-            </div>
-            <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
-                  report.quietZoneScore
-                )}`}
-                style={{ width: `${report.quietZoneScore}%` }}
-              />
-            </div>
-            <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block">
-              {report.quietZoneScore >= 85 ? 'Safe boundary' : 'Compact margin'}
-            </span>
-          </div>
-
-          {/* 6. Logo Impact */}
-          <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
-              <span>Logo Impact</span>
-              <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
-                {options.logo.type !== 'none' ? `${report.logoCoveragePercent}%` : 'None'}
-              </span>
-            </div>
-            <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
-                  report.logoImpactScore
-                )}`}
-                style={{ width: `${report.logoImpactScore}%` }}
-              />
-            </div>
-            <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block">
-              EC: {options.errorCorrection}
-            </span>
-          </div>
-        </div>
-
-        {/* Detailed Expanded Diagnostic View */}
-        {isExpanded && (
-          <div className="pt-2 border-t border-[#EDE8DF] dark:border-zinc-800 space-y-3 animate-in fade-in-50">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/40 border border-[#EDE8DF] dark:border-zinc-800">
-                <span className="text-[10px] text-[#64748B] uppercase font-bold block mb-0.5">
-                  Detection Confidence
-                </span>
-                <span className="font-bold text-[#0F172A] dark:text-zinc-200">
-                  {report.confidence === 'High' ? '🟢 High Confidence' : report.confidence === 'Moderate' ? '🟡 Moderate' : '🔴 Low'}
+        ) : (
+          /* Unlocked Full Analytics Grid */
+          <>
+            {/* Metric Grid Overview */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+              {/* 1. Contrast */}
+              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
+                  <span>Contrast</span>
+                  <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
+                    {report.contrastRatio}:1
+                  </span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
+                      report.contrastScore
+                    )}`}
+                    style={{ width: `${report.contrastScore}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block">
+                  {report.contrastScore}% score
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/40 border border-[#EDE8DF] dark:border-zinc-800">
-                <span className="text-[10px] text-[#64748B] uppercase font-bold block mb-0.5">
-                  Matrix Density & Module Size
-                </span>
-                <span className="font-bold font-mono text-[#0F172A] dark:text-zinc-200">
-                  ~{report.estimatedMatrixModules}×{report.estimatedMatrixModules} ({report.modulePixelSize} px/module)
+              {/* 2. Local Regional Contrast */}
+              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
+                  <span>Local Contrast</span>
+                  <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
+                    {report.minRegionalContrastRatio}:1
+                  </span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
+                      report.localContrastScore
+                    )}`}
+                    style={{ width: `${report.localContrastScore}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block">
+                  7 zone analysis
                 </span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/40 border border-[#EDE8DF] dark:border-zinc-800">
-                <span className="text-[10px] text-[#64748B] uppercase font-bold block mb-0.5">
-                  Background Polarity
+              {/* 3. Module Clarity */}
+              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
+                  <span>Module Clarity</span>
+                  <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
+                    {report.moduleClarityScore}%
+                  </span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
+                      report.moduleClarityScore
+                    )}`}
+                    style={{ width: `${report.moduleClarityScore}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block capitalize">
+                  {options.patternStyle} style
                 </span>
-                <span className="font-bold text-[#0F172A] dark:text-zinc-200">
-                  {report.isDarkBg ? 'Inverted (Dark BG / Light QR)' : 'Standard (Light BG / Dark QR)'}
+              </div>
+
+              {/* 4. Finder Patterns */}
+              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
+                  <span>Finder Eyes</span>
+                  <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
+                    {report.finderIntegrityScore}%
+                  </span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
+                      report.finderIntegrityScore
+                    )}`}
+                    style={{ width: `${report.finderIntegrityScore}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block capitalize">
+                  {options.eyeStyle} frame
+                </span>
+              </div>
+
+              {/* 5. Quiet Zone */}
+              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
+                  <span>Quiet Zone</span>
+                  <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
+                    {options.margin} mod
+                  </span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
+                      report.quietZoneScore
+                    )}`}
+                    style={{ width: `${report.quietZoneScore}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block">
+                  {report.quietZoneScore >= 85 ? 'Safe boundary' : 'Compact margin'}
+                </span>
+              </div>
+
+              {/* 6. Logo Impact */}
+              <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
+                  <span>Logo Impact</span>
+                  <span className="font-mono text-[#0F172A] dark:text-zinc-200 font-bold">
+                    {options.logo.type !== 'none' ? `${report.logoCoveragePercent}%` : 'None'}
+                  </span>
+                </div>
+                <div className="w-full h-1.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700 overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${getProgressColor(
+                      report.logoImpactScore
+                    )}`}
+                    style={{ width: `${report.logoImpactScore}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-[#64748B] dark:text-zinc-500 mt-1 block">
+                  EC: {options.errorCorrection}
                 </span>
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Issues & Suggestions Section (If warnings exist) */}
-        {report.warnings.length > 0 && (
-          <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/90 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5 font-bold text-xs">
-                <AlertTriangle className="w-4 h-4 text-[#B45309] shrink-0" />
-                <span>Readability Considerations Detected ({report.warnings.length})</span>
-              </div>
-              <span className="text-[10px] font-semibold text-[#B45309] dark:text-amber-400">
-                Score Impact
-              </span>
-            </div>
+            {/* Detailed Expanded Diagnostic View */}
+            {isExpanded && (
+              <div className="pt-2 border-t border-[#EDE8DF] dark:border-zinc-800 space-y-3 animate-in fade-in-50">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+                  <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/40 border border-[#EDE8DF] dark:border-zinc-800">
+                    <span className="text-[10px] text-[#64748B] uppercase font-bold block mb-0.5">
+                      Detection Confidence
+                    </span>
+                    <span className="font-bold text-[#0F172A] dark:text-zinc-200">
+                      {report.confidence === 'High' ? '🟢 High Confidence' : report.confidence === 'Moderate' ? '🟡 Moderate' : '🔴 Low'}
+                    </span>
+                  </div>
 
-            <ul className="space-y-1 text-[11px] text-amber-900 dark:text-amber-300 list-disc list-inside">
-              {report.warnings.map((warn, idx) => (
-                <li key={idx} className="leading-relaxed">
-                  {warn}
-                </li>
-              ))}
-            </ul>
+                  <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/40 border border-[#EDE8DF] dark:border-zinc-800">
+                    <span className="text-[10px] text-[#64748B] uppercase font-bold block mb-0.5">
+                      Matrix Density & Module Size
+                    </span>
+                    <span className="font-bold font-mono text-[#0F172A] dark:text-zinc-200">
+                      ~{report.estimatedMatrixModules}×{report.estimatedMatrixModules} ({report.modulePixelSize} px/module)
+                    </span>
+                  </div>
 
-            {report.recommendations.length > 0 && (
-              <div className="pt-1.5 border-t border-amber-200/60 dark:border-amber-900/60 flex items-start gap-1.5 text-[11px] text-amber-800 dark:text-amber-300">
-                <Sparkles className="w-3.5 h-3.5 text-[#E7AC08] shrink-0 mt-0.5" />
-                <span>
-                  <strong className="font-semibold">Suggested Fix:</strong> {report.recommendations.join(' ')}
-                </span>
+                  <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/40 border border-[#EDE8DF] dark:border-zinc-800">
+                    <span className="text-[10px] text-[#64748B] uppercase font-bold block mb-0.5">
+                      Background Polarity
+                    </span>
+                    <span className="font-bold text-[#0F172A] dark:text-zinc-200">
+                      {report.isDarkBg ? 'Inverted (Dark BG / Light QR)' : 'Standard (Light BG / Dark QR)'}
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
-          </div>
+
+            {/* Issues & Suggestions Section (If warnings exist) */}
+            {report.warnings.length > 0 && (
+              <div className="p-3 rounded-xl bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/90 dark:border-amber-900/60 text-amber-950 dark:text-amber-200 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-xs">
+                    <AlertTriangle className="w-4 h-4 text-[#B45309] shrink-0" />
+                    <span>Readability Considerations Detected ({report.warnings.length})</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-[#B45309] dark:text-amber-400">
+                    Score Impact
+                  </span>
+                </div>
+
+                <ul className="space-y-1 text-[11px] text-amber-900 dark:text-amber-300 list-disc list-inside">
+                  {report.warnings.map((warn, idx) => (
+                    <li key={idx} className="leading-relaxed">
+                      {warn}
+                    </li>
+                  ))}
+                </ul>
+
+                {report.recommendations.length > 0 && (
+                  <div className="pt-1.5 border-t border-amber-200/60 dark:border-amber-900/60 flex items-start gap-1.5 text-[11px] text-amber-800 dark:text-amber-300">
+                    <Sparkles className="w-3.5 h-3.5 text-[#E7AC08] shrink-0 mt-0.5" />
+                    <span>
+                      <strong className="font-semibold">Suggested Fix:</strong> {report.recommendations.join(' ')}
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {/* Action Controls */}

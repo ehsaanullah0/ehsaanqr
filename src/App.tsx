@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   QrType,
   QrFormData,
@@ -27,6 +27,11 @@ import { Toast } from './components/Toast';
 import { Footer } from './components/Footer';
 import { OpenSourceShowcase } from './components/OpenSourceShowcase';
 import { PwaInstallBanner } from './components/PwaInstallBanner';
+import { UserGuideTour, STORAGE_TOUR_KEY } from './components/UserGuideTour';
+import { PremiumFeaturesOverviewModal } from './components/PremiumFeaturesOverviewModal';
+import { InitialThemeSelectionModal } from './components/InitialThemeSelectionModal';
+import { useExclusiveAccess } from './context/ExclusiveAccessContext';
+import { isExclusiveAccessUnlocked, getLockedFreeTheme } from './utils/exclusiveAccess';
 import { Sparkles, ShieldCheck, ExternalLink } from 'lucide-react';
 
 const STORAGE_THEME_KEY = 'ehsaan_qr_theme';
@@ -63,8 +68,22 @@ const INITIAL_STYLE: QrStyleOptions = {
 };
 
 export default function App() {
-  // Theme state: defaults to minimal theme
+  const {
+    isOverviewModalOpen,
+    closeOverviewModal,
+    openExclusiveModal,
+    lockedFreeTheme,
+    lockInFreeTheme,
+    isUnlocked,
+  } = useExclusiveAccess();
+
+  // Theme state: defaults to locked free theme if set, otherwise saved or minimal theme
   const [theme, setTheme] = useState<AppTheme>(() => {
+    const isUnlocked = isExclusiveAccessUnlocked();
+    const lockedTheme = getLockedFreeTheme();
+    if (!isUnlocked && lockedTheme) {
+      return lockedTheme;
+    }
     const saved = localStorage.getItem(STORAGE_THEME_KEY);
     if (saved === 'light' || saved === 'dark' || saved === 'material' || saved === 'minimal') {
       return saved;
@@ -220,7 +239,52 @@ export default function App() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
+  const [isTourOpen, setIsTourOpen] = useState<boolean>(() => {
+    try {
+      const completed = localStorage.getItem(STORAGE_TOUR_KEY);
+      return !completed; // Only open automatically for first-time visitors
+    } catch {
+      return false;
+    }
+  });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Initial Theme Selection Popup for new users after completing or skipping the quick guide
+  const [isInitialThemeModalOpen, setIsInitialThemeModalOpen] = useState(false);
+
+  const handleTourFinish = useCallback(() => {
+    // Check if user has already chosen/locked their initial free theme or has full developer unlock
+    const hasLockedTheme = Boolean(
+      lockedFreeTheme || localStorage.getItem('ehsaan_qr_initial_theme_selected')
+    );
+    if (!hasLockedTheme && !isUnlocked) {
+      setIsInitialThemeModalOpen(true);
+    }
+  }, [lockedFreeTheme, isUnlocked]);
+
+  const handleConfirmInitialTheme = useCallback(
+    (chosenTheme: AppTheme) => {
+      setTheme(chosenTheme);
+      lockInFreeTheme(chosenTheme);
+      localStorage.setItem(STORAGE_THEME_KEY, chosenTheme);
+      localStorage.setItem('ehsaan_qr_initial_theme_selected', 'true');
+      setIsInitialThemeModalOpen(false);
+      setToastMessage(
+        `${chosenTheme.charAt(0).toUpperCase() + chosenTheme.slice(1)} theme locked in as your permanent free theme ✓`
+      );
+    },
+    [lockInFreeTheme]
+  );
+
+  const handleSkipInitialTheme = useCallback(() => {
+    // If skipped, automatically lock to Minimal theme as requested
+    setTheme('minimal');
+    lockInFreeTheme('minimal');
+    localStorage.setItem(STORAGE_THEME_KEY, 'minimal');
+    localStorage.setItem('ehsaan_qr_initial_theme_selected', 'true');
+    setIsInitialThemeModalOpen(false);
+    setToastMessage('Defaulted and locked to Minimal theme ✓');
+  }, [lockInFreeTheme]);
 
   // Sync theme changes to DOM root
   useEffect(() => {
@@ -618,7 +682,7 @@ export default function App() {
       </main>
 
       {/* Minimal Footer */}
-      <Footer />
+      <Footer onOpenTour={() => setIsTourOpen(true)} />
 
       {/* Floating Bottom Navigation Bar: Mobile and Tablet format for reachability */}
       <MobileFloatingNav
@@ -662,6 +726,40 @@ export default function App() {
         isOpen={isChangelogOpen}
         onClose={() => setIsChangelogOpen(false)}
         theme={theme}
+      />
+
+      {/* First-Time User Guide & Interactive Tour */}
+      <UserGuideTour
+        isOpen={isTourOpen}
+        onClose={() => setIsTourOpen(false)}
+        onTourFinish={handleTourFinish}
+        onShowToast={setToastMessage}
+        onSelectCustomTab={setActiveCustomTab}
+        onOpenTemplates={() => setIsHistoryOpen(true)}
+        onCloseTemplates={() => setIsHistoryOpen(false)}
+      />
+
+      {/* Initial Free Theme Selection for new users after guide */}
+      <InitialThemeSelectionModal
+        isOpen={isInitialThemeModalOpen}
+        currentTheme={theme}
+        onConfirm={handleConfirmInitialTheme}
+        onSkip={handleSkipInitialTheme}
+      />
+
+      {/* Premium Exclusive Features Overview & Permanent Free Theme Modal */}
+      <PremiumFeaturesOverviewModal
+        isOpen={isOverviewModalOpen}
+        onClose={closeOverviewModal}
+        currentTheme={theme}
+        onSelectTheme={(newTheme) => {
+          setTheme(newTheme);
+          localStorage.setItem(STORAGE_THEME_KEY, newTheme);
+        }}
+        onOpenCodeInput={() => {
+          openExclusiveModal(undefined, 'code');
+        }}
+        onShowToast={setToastMessage}
       />
 
       {/* Micro-interaction Toast */}

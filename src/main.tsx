@@ -2,10 +2,13 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import { ExclusiveAccessProvider } from './context/ExclusiveAccessContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ExclusiveAccessProvider>
+      <App />
+    </ExclusiveAccessProvider>
   </StrictMode>,
 );
 

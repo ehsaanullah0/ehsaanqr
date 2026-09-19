@@ -6,3 +6,8 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Sensitive feature activation codes & private fulfillment docs
+# Uncomment or keep to prevent pushing unlock codes to public GitHub:
+# sensitive docs/
+

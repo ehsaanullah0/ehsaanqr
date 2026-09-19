@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { ShieldCheck, MessageSquare, X, Github, ExternalLink, Eye, Trash2, CheckCircle2, AlertCircle, Mail } from 'lucide-react';
+import { ShieldCheck, MessageSquare, X, Github, ExternalLink, Eye, Trash2, CheckCircle2, AlertCircle, Mail, Compass } from 'lucide-react';
 import { EhsaanFlameIcon } from './EhsaanLogo';
 
 interface FeedbackItem {
   id: string;
   text: string;
   timestamp: string;
+}
+
+interface FooterProps {
+  onOpenTour?: () => void;
 }
 
 const STORAGE_KEY_FEEDBACK = 'ehsaan_qr_feedback_list';
@@ -23,7 +27,7 @@ const INITIAL_FEEDBACK: FeedbackItem[] = [
   },
 ];
 
-export const Footer: React.FC = () => {
+export const Footer: React.FC<FooterProps> = ({ onOpenTour }) => {
   const [modalContent, setModalContent] = useState<'privacy' | 'about' | 'feedback' | null>(null);
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
@@ -144,6 +148,7 @@ export const Footer: React.FC = () => {
             </a>
             <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
             <a
+              id="footer-ehsaan-odoo-link"
               href="https://ehsaan.odoo.com"
               target="_blank"
               rel="noopener noreferrer"
@@ -178,6 +183,20 @@ export const Footer: React.FC = () => {
               <MessageSquare className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-400" />
               <span>Feedback</span>
             </button>
+
+            {/* Quick Tour / Guide button: exact same theme as Feedback button */}
+            {onOpenTour && (
+              <button
+                id="footer-tour-btn"
+                onClick={onOpenTour}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 hover:bg-black text-white dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-100 transition-all shadow-2xs cursor-pointer active:scale-98"
+                title="Start interactive quick tour & guide"
+                aria-label="Start interactive quick tour"
+              >
+                <Compass className="w-3.5 h-3.5 text-[#E7AC08] bg-white rounded-xs" />
+                <span>Tour</span>
+              </button>
+            )}
           </div>
         </div>
 

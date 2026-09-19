@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   QrStyleOptions,
   PatternStyle,
@@ -32,7 +32,11 @@ import {
   CreditCard,
   QrCode,
   Check,
+  Lock,
+  Crown,
 } from 'lucide-react';
+import { ExclusiveCrownBadge } from './ExclusiveCrownBadge';
+import { useExclusiveAccess } from '../context/ExclusiveAccessContext';
 import {
   resolvePupilShape,
   getAutoLogoForCategory,
@@ -433,6 +437,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   onLockedTargetsChange,
   onShowToast,
 }) => {
+  const { isUnlocked, openExclusiveModal } = useExclusiveAccess();
   const [internalTab, setInternalTab] = useState<TabKey>('colors');
   const [internalRandTarget, setInternalRandTarget] = useState<RandomizeTarget>('all');
   const [internalRandType, setInternalRandType] = useState<RandomizeType>('both');
@@ -460,6 +465,13 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   const update = (partial: Partial<QrStyleOptions>) => {
     onChange({ ...options, ...partial });
   };
+
+  // Ensure 2048px quality is locked for free users and falls back to 1024px
+  useEffect(() => {
+    if (!isUnlocked && options.size === 2048) {
+      update({ size: 1024 });
+    }
+  }, [isUnlocked, options.size]);
 
   const handleRandomizeAll = () => {
     const randomized = getRandomAllOptions(options, options.bgSaturationPreference || 'low');
@@ -563,7 +575,10 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
       className="w-full bg-[#FDFCF9] dark:bg-zinc-900 rounded-2xl border border-[#EDE8DF] dark:border-zinc-800 shadow-xs transition-colors overflow-hidden scroll-mt-20"
     >
       {/* Category Tabs: Available on all viewports (mobile, tablet, desktop) */}
-      <div className="p-1 sm:p-2 border-b border-[#EDE8DF] dark:border-zinc-800 bg-[#F8F6F0] dark:bg-zinc-950/40">
+      <div
+        id="customization-panel-tabs"
+        className="p-1 sm:p-2 border-b border-[#EDE8DF] dark:border-zinc-800 bg-[#F8F6F0] dark:bg-zinc-950/40"
+      >
         <div className="grid grid-cols-5 gap-1">
           {[
             { id: 'colors', label: 'Colour', icon: Palette },
@@ -582,14 +597,14 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                 onClick={() => setActiveTab(tab.id as TabKey)}
                 className={`relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-1.5 sm:py-2 px-1 sm:px-3 rounded-xl text-center transition-all focus:outline-none ${
                   isActive
-                    ? 'bg-white dark:bg-zinc-800 text-[#0F172A] dark:text-amber-300 shadow-xs font-bold ring-1 ring-[#EDE8DF] dark:ring-zinc-700'
-                    : 'text-[#64748B] dark:text-zinc-400 hover:text-[#0F172A] dark:hover:text-zinc-200 hover:bg-white/50 dark:hover:bg-zinc-800/40 font-medium'
+                    ? 'bg-[#FEF08A] dark:bg-[#FDE047] text-black shadow-xs font-extrabold ring-1 ring-[#FACC15]'
+                    : 'text-[#334155] dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-white/70 dark:hover:bg-zinc-800/40 font-semibold'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isActive ? 'text-[#E7AC08]' : ''}`} />
-                <span className="text-[10px] sm:text-xs tracking-tight whitespace-nowrap">{tab.label}</span>
+                <Icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${isActive ? 'text-black stroke-[2.4]' : 'text-current'}`} />
+                <span className={`text-[10px] sm:text-xs tracking-tight whitespace-nowrap ${isActive ? 'text-black font-extrabold' : 'text-current'}`}>{tab.label}</span>
                 {tab.id === 'logo' && options.logo.type !== 'none' && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#E7AC08] shrink-0 absolute top-1 right-1 sm:static" />
+                  <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-black' : 'bg-[#FACC15]'} shrink-0 absolute top-1 right-1 sm:static`} />
                 )}
               </button>
             );
@@ -1268,8 +1283,11 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-bold text-[#0F172A] dark:text-zinc-100 tracking-tight">
-                      Auto-adapt Icon to Category
+                    <span className="text-xs font-bold text-[#0F172A] dark:text-zinc-100 tracking-tight flex items-center gap-1.5">
+                      <span>Auto-adapt Icon to Category</span>
+                      {!isUnlocked && (
+                        <ExclusiveCrownBadge size="xs" />
+                      )}
                     </span>
                     {Boolean(options.logo.autoAdapt) && selectedType ? (
                       <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100/90 dark:bg-amber-900/50 text-[#92400E] dark:text-amber-200 border border-amber-200/80 dark:border-amber-700/50 uppercase tracking-wider">
@@ -1295,6 +1313,10 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                 role="switch"
                 aria-checked={Boolean(options.logo.autoAdapt)}
                 onClick={() => {
+                  if (!isUnlocked) {
+                    openExclusiveModal('Icon Auto Adapt');
+                    return;
+                  }
                   const nextVal = !options.logo.autoAdapt;
                   try {
                     localStorage.setItem('ehsaan_qr_auto_adapt_logo', String(nextVal));
@@ -1607,27 +1629,43 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                 Output Canvas Size (Resolution)
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[256, 512, 1024, 2048].map((s) => (
-                  <button
-                    key={s}
-                    id={`size-btn-${s}`}
-                    type="button"
-                    onClick={() => update({ size: s })}
-                    className={`py-2 px-3 rounded-xl border text-xs font-medium transition-all ${
-                      options.size === s
-                        ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 font-bold ring-1 ring-[#E7AC08]/50 shadow-2xs'
-                        : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
-                    }`}
-                  >
-                    <span className="block font-bold">{s} × {s} px</span>
-                    <span className="text-[10px] text-[#64748B] block mt-0.5">
-                      {s === 256 && 'Web Thumbnail'}
-                      {s === 512 && 'Standard Display'}
-                      {s === 1024 && 'High Res Print'}
-                      {s === 2048 && 'Ultra Poster 4K'}
-                    </span>
-                  </button>
-                ))}
+                {[256, 512, 1024, 2048].map((s) => {
+                  const isLocked = s === 2048 && !isUnlocked;
+                  return (
+                    <button
+                      key={s}
+                      id={`size-btn-${s}`}
+                      type="button"
+                      onClick={() => {
+                        if (isLocked) {
+                          openExclusiveModal('2048 × 2048 Pixel Quality');
+                          return;
+                        }
+                        update({ size: s });
+                      }}
+                      className={`py-2 px-3 rounded-xl border text-xs font-medium transition-all cursor-pointer relative ${
+                        options.size === s
+                          ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 font-bold ring-1 ring-[#E7AC08]/50 shadow-2xs'
+                          : isLocked
+                          ? 'border-[#FDE68A] dark:border-amber-900/40 bg-[#FFFDF5] dark:bg-amber-950/20 text-[#334155] dark:text-zinc-300 hover:border-[#E7AC08]/60'
+                          : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="block font-bold">{s} × {s} px</span>
+                        {isLocked && (
+                          <ExclusiveCrownBadge size="xs" />
+                        )}
+                      </div>
+                      <span className="text-[10px] text-[#64748B] dark:text-zinc-400 block mt-0.5">
+                        {s === 256 && 'Web Thumbnail'}
+                        {s === 512 && 'Standard Display'}
+                        {s === 1024 && 'High Res Print'}
+                        {s === 2048 && (isLocked ? 'Ultra Poster 4K (Exclusive)' : 'Ultra Poster 4K')}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

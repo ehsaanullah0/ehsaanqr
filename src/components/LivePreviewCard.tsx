@@ -32,7 +32,11 @@ import {
   Mail,
   Check,
   X,
+  Lock,
+  Crown,
 } from 'lucide-react';
+import { ExclusiveCrownBadge } from './ExclusiveCrownBadge';
+import { useExclusiveAccess } from '../context/ExclusiveAccessContext';
 import { EhsaanFlameIcon } from './EhsaanLogo';
 import { SmartRandomizeController } from './SmartRandomizeController';
 import {
@@ -80,6 +84,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
   onLockedTargetsChange,
   theme,
 }) => {
+  const { isUnlocked, openExclusiveModal, openOverviewModal } = useExclusiveAccess();
   const isMinimal = theme === 'minimal' || (typeof document !== 'undefined' && document.documentElement.classList.contains('minimal'));
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('png');
@@ -185,8 +190,20 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
   };
 
   useEffect(() => {
-    setExportRes(options.size);
-  }, [options.size]);
+    if (!isUnlocked && options.size === 2048) {
+      setExportRes(1024);
+      onOptionsChange?.({ size: 1024 });
+    } else {
+      setExportRes(options.size);
+    }
+  }, [options.size, isUnlocked]);
+
+  // Fallback if SVG was selected and user is not unlocked
+  useEffect(() => {
+    if (!isUnlocked && selectedFormat === 'svg') {
+      setSelectedFormat('png');
+    }
+  }, [selectedFormat, isUnlocked]);
 
   // Re-render canvas whenever payload or options change
   useEffect(() => {
@@ -206,6 +223,14 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
       onShowToast('Please enter some QR content first');
       return;
     }
+    if ((exportRes === 2048 || options.size === 2048) && !isUnlocked) {
+      openExclusiveModal('2048 × 2048 Pixel Quality');
+      return;
+    }
+    if (selectedFormat === 'svg' && !isUnlocked) {
+      openExclusiveModal('SVG Vector Format Export');
+      return;
+    }
     setIsExporting(true);
     try {
       await exportQrCode(selectedFormat, payload, options, exportRes);
@@ -222,6 +247,14 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
   const handleDownloadClick = () => {
     if (!payload) {
       onShowToast('Please enter some QR content first');
+      return;
+    }
+    if ((exportRes === 2048 || options.size === 2048) && !isUnlocked) {
+      openExclusiveModal('2048 × 2048 Pixel Quality');
+      return;
+    }
+    if (selectedFormat === 'svg' && !isUnlocked) {
+      openExclusiveModal('SVG Vector Format Export');
       return;
     }
     if (dontShowAgainPreDownload) {
@@ -339,22 +372,14 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
             </button>
           )}
 
-          {/* Prominent Red Note Button - shifted to right corner and enlarged for attention */}
-          <button
-            type="button"
-            id="btn-live-preview-red-note"
-            onClick={() => setShowDevNoteModal(true)}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-1.5 rounded-full bg-red-600 hover:bg-red-700 active:bg-red-800 text-white text-xs font-black shadow-xs hover:shadow-md transition-all hover:scale-105 active:scale-95 cursor-pointer ring-2 ring-red-500/40 shrink-0 whitespace-nowrap"
-            title="Development Notice: paused until December 2026. Click to read note."
-            aria-label="View development note and bug reporting info"
-          >
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-            </span>
-            <FileText className="w-3.5 h-3.5 text-white shrink-0" />
-            <span className="tracking-wide">Note</span>
-          </button>
+          {/* Exclusive Features Button - Styled with ExclusiveCrownBadge */}
+          <ExclusiveCrownBadge
+            asButton
+            id="btn-live-preview-exclusive-suite"
+            onClick={openOverviewModal}
+            title="View Exclusive Features (₹20) & Unlock Details"
+            className="cursor-pointer shrink-0 whitespace-nowrap"
+          />
         </div>
       </div>
 
@@ -362,7 +387,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 lg:gap-10 items-center">
         {/* Left Side: QR Canvas Box (5 cols on md+) */}
         <div className="md:col-span-5 flex flex-col items-center justify-center">
-          <div className="relative w-full max-w-[210px] sm:max-w-[280px] aspect-square p-3 sm:p-5 rounded-2xl bg-[#FDFCF9] dark:bg-zinc-950/60 border border-[#EDE8DF] dark:border-zinc-800/80 flex items-center justify-center overflow-hidden shadow-2xs group">
+          <div id="qr-canvas-container" className="relative w-full max-w-[210px] sm:max-w-[280px] aspect-square p-3 sm:p-5 rounded-2xl bg-[#FDFCF9] dark:bg-zinc-950/60 border border-[#EDE8DF] dark:border-zinc-800/80 flex items-center justify-center overflow-hidden shadow-2xs group">
             {/* Subtle decorative grid background for contrast check */}
             <div
               className="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none"
@@ -558,21 +583,35 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
             </div>
 
             <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
-              {(['png', 'jpg', 'svg', 'pdf'] as ExportFormat[]).map((fmt) => (
-                <button
-                  key={fmt}
-                  id={`format-btn-${fmt}`}
-                  type="button"
-                  onClick={() => setSelectedFormat(fmt)}
-                  className={`py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl text-xs font-bold uppercase transition-all min-h-[34px] sm:min-h-[38px] ${
-                    selectedFormat === fmt
-                      ? 'bg-[#0F172A] dark:bg-white text-white dark:text-[#0F172A] shadow-xs ring-1 ring-[#0F172A] dark:ring-white'
-                      : 'bg-[#F8F6F0] dark:bg-zinc-800 text-[#334155] dark:text-zinc-300 hover:bg-[#F1ECE1] dark:hover:bg-zinc-700 border border-[#EDE8DF] dark:border-zinc-700/60'
-                  }`}
-                >
-                  {fmt}
-                </button>
-              ))}
+              {(['png', 'jpg', 'svg', 'pdf'] as ExportFormat[]).map((fmt) => {
+                const isLockedFmt = fmt === 'svg' && !isUnlocked;
+                return (
+                  <button
+                    key={fmt}
+                    id={`format-btn-${fmt}`}
+                    type="button"
+                    onClick={() => {
+                      if (isLockedFmt) {
+                        openExclusiveModal('SVG Vector Format Export');
+                        return;
+                      }
+                      setSelectedFormat(fmt);
+                    }}
+                    className={`relative py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl text-xs font-bold uppercase transition-all min-h-[34px] sm:min-h-[38px] flex items-center justify-center gap-1 cursor-pointer ${
+                      selectedFormat === fmt
+                        ? 'bg-[#0F172A] dark:bg-white text-white dark:text-[#0F172A] shadow-xs ring-1 ring-[#0F172A] dark:ring-white'
+                        : isLockedFmt
+                        ? 'bg-[#FFFDF5] dark:bg-amber-950/20 text-[#78350F] dark:text-amber-300 hover:border-[#E7AC08]/50 border border-[#FDE68A] dark:border-amber-900/40'
+                        : 'bg-[#F8F6F0] dark:bg-zinc-800 text-[#334155] dark:text-zinc-300 hover:bg-[#F1ECE1] dark:hover:bg-zinc-700 border border-[#EDE8DF] dark:border-zinc-700/60'
+                    }`}
+                  >
+                    <span>{fmt}</span>
+                    {isLockedFmt && (
+                      <Crown className="w-2.5 h-2.5 text-[#D97706] dark:text-amber-400 stroke-[2.2] shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Expandable Export Resolution Settings */}
@@ -585,23 +624,33 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                   <span className="font-mono text-[#64748B] dark:text-zinc-400">{exportRes} px</span>
                 </div>
                 <div className="grid grid-cols-4 gap-1.5">
-                  {[256, 512, 1024, 2048].map((res) => (
-                    <button
-                      key={res}
-                      type="button"
-                      onClick={() => {
-                        setExportRes(res);
-                        onOptionsChange?.({ size: res });
-                      }}
-                      className={`py-1.5 rounded-md text-[11px] font-mono border transition-all ${
-                        exportRes === res
-                          ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/40 text-[#92400E] dark:text-amber-300 font-bold'
-                          : 'border-[#EDE8DF] dark:border-zinc-700 text-[#64748B] dark:text-zinc-400 hover:border-zinc-300'
-                      }`}
-                    >
-                      {res}px
-                    </button>
-                  ))}
+                  {[256, 512, 1024, 2048].map((res) => {
+                    const isLockedRes = res === 2048 && !isUnlocked;
+                    return (
+                      <button
+                        key={res}
+                        type="button"
+                        onClick={() => {
+                          if (isLockedRes) {
+                            openExclusiveModal('2048 × 2048 Pixel Quality');
+                            return;
+                          }
+                          setExportRes(res);
+                          onOptionsChange?.({ size: res });
+                        }}
+                        className={`py-1.5 rounded-md text-[11px] font-mono border transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                          exportRes === res
+                            ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/40 text-[#92400E] dark:text-amber-300 font-bold'
+                            : 'border-[#EDE8DF] dark:border-zinc-700 text-[#64748B] dark:text-zinc-400 hover:border-zinc-300'
+                        }`}
+                      >
+                        <span>{res}px</span>
+                        {isLockedRes && (
+                          <Crown className="w-2.5 h-2.5 text-[#D97706] dark:text-amber-400 stroke-[2.2]" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}

@@ -22,8 +22,9 @@ const RELEASES: ReleaseItem[] = [
     version: 'v1.1.5',
     date: 'Latest Release',
     isLatest: true,
-    title: 'Location Category, Auto-Logo Persistence & Quality Refinements',
+    title: 'Interactive Quick Guide, Location Category & Quality Refinements',
     highlights: [
+      'Interactive First-Time Quick Guide: Dynamic onboarding tour with element spotlighting, auto-scrolling category showcases, compact non-obstructive card design, skip warning protection, and footer quick-launch access.',
       'New Location Category: Added latitude, longitude & place name fields encoding directly into Google Maps URLs.',
       'Auto-Logo Toggle Fix: Fixed auto icon toggle preference and category selection to reliably persist on refresh.',
       'Improved Pre-Loaded Logo Quality: Upgraded SVG vector paths and enabled high-quality anti-aliasing for center logos.',

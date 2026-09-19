@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { ExportFormat, QrStyleOptions } from '../types';
 import { decodeQrPayload, decodeImageData, DecodeResult } from '../utils/qrDecoder';
 import { exportQrCode, triggerDownloadCelebration } from '../utils/exportUtils';
+import { useExclusiveAccess } from '../context/ExclusiveAccessContext';
 import {
   X,
   CheckCircle2,
@@ -17,6 +18,8 @@ import {
   Play,
   Timer,
   Info,
+  Lock,
+  Crown,
 } from 'lucide-react';
 
 interface MultiTestStats {
@@ -45,6 +48,7 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
   onOptionsChange,
   onShowToast,
 }) => {
+  const { isUnlocked, openExclusiveModal } = useExclusiveAccess();
   const [activeMode, setActiveMode] = useState<'engine' | 'camera'>('engine');
   const [engineResult, setEngineResult] = useState<{
     success: boolean;
@@ -80,6 +84,13 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
       setDownloadResolution(options.size);
     }
   }, [options.size]);
+
+  // Fallback to PNG if SVG is active while locked
+  useEffect(() => {
+    if (!isUnlocked && downloadFormat === 'svg') {
+      setDownloadFormat('png');
+    }
+  }, [downloadFormat, isUnlocked]);
 
   // Single test runner function
   const runSingleEngineTest = async (
@@ -243,6 +254,10 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
   };
 
   const handleSelectResolution = (res: number) => {
+    if (res === 2048 && !isUnlocked) {
+      openExclusiveModal('2048 × 2048 Pixel Quality');
+      return;
+    }
     setDownloadResolution(res);
     if (onOptionsChange) {
       onOptionsChange({ size: res });
@@ -253,6 +268,14 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
     if (!payload) return;
     const targetFormat = fmt || downloadFormat;
     const targetResolution = res || downloadResolution || options.size || 1024;
+    if (targetResolution === 2048 && !isUnlocked) {
+      openExclusiveModal('2048 × 2048 Pixel Quality');
+      return;
+    }
+    if (targetFormat === 'svg' && !isUnlocked) {
+      openExclusiveModal('SVG Vector Format Export');
+      return;
+    }
     setIsDownloading(true);
     try {
       await exportQrCode(targetFormat, payload, options, targetResolution);
@@ -295,31 +318,31 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
         </div>
 
         {/* Mode Selector: In-Engine Decoder vs Live Device Camera */}
-        <div className="flex border-b border-[#EDE8DF] dark:border-zinc-800 p-1.5 sm:p-2 bg-[#FAF8F5] dark:bg-zinc-950/40 shrink-0">
+        <div className="flex border-b border-[#EDE8DF] dark:border-zinc-800 p-1.5 sm:p-2 bg-[#FAF8F5] dark:bg-zinc-950/40 shrink-0 gap-1.5">
           <button
             type="button"
             onClick={() => setActiveMode('engine')}
-            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeMode === 'engine'
-                ? 'bg-white dark:bg-zinc-800 text-[#0F172A] dark:text-zinc-100 shadow-xs border border-[#EDE8DF] dark:border-zinc-700'
-                : 'text-[#64748B] hover:text-[#0F172A] dark:hover:text-zinc-300'
+                ? 'bg-[#000000] text-[#f9f9ff] shadow-xs border border-zinc-900'
+                : 'text-[#64748B] hover:text-[#0F172A] dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
             }`}
           >
-            <Cpu className="w-4 h-4 text-[#E7AC08]" />
-            <span className="text-[11px] sm:text-xs">Barcode Decoder Engine</span>
+            <Cpu className={`w-4 h-4 ${activeMode === 'engine' ? 'text-[#E7AC08]' : 'text-[#64748B]'}`} />
+            <span className={`text-[11px] sm:text-xs ${activeMode === 'engine' ? 'text-[#f9f9ff]' : ''}`}>Barcode Decoder Engine</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveMode('camera')}
-            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeMode === 'camera'
-                ? 'bg-white dark:bg-zinc-800 text-[#0F172A] dark:text-zinc-100 shadow-xs border border-[#EDE8DF] dark:border-zinc-700'
-                : 'text-[#64748B] hover:text-[#0F172A] dark:hover:text-zinc-300'
+                ? 'bg-[#000000] text-[#f9f9ff] shadow-xs border border-zinc-900'
+                : 'text-[#64748B] hover:text-[#0F172A] dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
             }`}
           >
-            <Camera className="w-4 h-4 text-[#E7AC08]" />
-            <span className="text-[11px] sm:text-xs">Device Camera Live Test</span>
+            <Camera className={`w-4 h-4 ${activeMode === 'camera' ? 'text-[#E7AC08]' : 'text-[#64748B]'}`} />
+            <span className={`text-[11px] sm:text-xs ${activeMode === 'camera' ? 'text-[#f9f9ff]' : ''}`}>Device Camera Live Test</span>
           </button>
         </div>
 
@@ -373,17 +396,17 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                         id="btn-run-5-scan-tests"
                         onClick={handleRun5ScanTests}
                         disabled={isRunningMultiTest}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#E7AC08] hover:bg-[#d49e07] active:bg-[#c29006] disabled:opacity-50 text-[#0F172A] font-bold text-xs shadow-2xs transition-all"
+                        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#000000] hover:bg-zinc-800 active:bg-zinc-900 disabled:opacity-50 text-[#f9f9ff] font-bold text-xs shadow-2xs transition-all cursor-pointer"
                       >
                         {isRunningMultiTest ? (
                           <>
-                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                            <span>Testing...</span>
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#f9f9ff]" />
+                            <span className="text-[#f9f9ff]">Testing...</span>
                           </>
                         ) : (
                           <>
-                            <Play className="w-3.5 h-3.5 fill-current" />
-                            <span>Run 5 Scan Tests</span>
+                            <Play className="w-3.5 h-3.5 fill-current text-[#f9f9ff]" />
+                            <span className="text-[#f9f9ff]">Run 5 Scan Tests</span>
                           </>
                         )}
                       </button>
@@ -455,20 +478,34 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                     <div className="space-y-1">
                       <div className="text-[10px] uppercase tracking-wider font-bold text-[#64748B]">Format</div>
                       <div className="grid grid-cols-4 gap-1.5">
-                        {(['png', 'svg', 'pdf', 'jpg'] as ExportFormat[]).map((fmt) => (
-                          <button
-                            key={fmt}
-                            type="button"
-                            onClick={() => setDownloadFormat(fmt)}
-                            className={`py-1.5 px-2 rounded-lg text-xs font-bold uppercase transition-all ${
-                              downloadFormat === fmt
-                                ? 'bg-[#E7AC08] text-[#0F172A] shadow-xs'
-                                : 'bg-[#FAF8F5] dark:bg-zinc-900 border border-[#EDE8DF] dark:border-zinc-700 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
-                            }`}
-                          >
-                            {fmt}
-                          </button>
-                        ))}
+                        {(['png', 'svg', 'pdf', 'jpg'] as ExportFormat[]).map((fmt) => {
+                          const isLockedFmt = fmt === 'svg' && !isUnlocked;
+                          return (
+                            <button
+                              key={fmt}
+                              type="button"
+                              onClick={() => {
+                                if (isLockedFmt) {
+                                  openExclusiveModal('SVG Vector Format Export');
+                                  return;
+                                }
+                                setDownloadFormat(fmt);
+                              }}
+                              className={`py-1.5 px-2 rounded-lg text-xs font-bold uppercase transition-all flex items-center justify-center gap-1 cursor-pointer ${
+                                downloadFormat === fmt
+                                  ? 'bg-[#000000] text-[#f9f9ff] shadow-xs'
+                                  : isLockedFmt
+                                  ? 'bg-[#FFFDF5] dark:bg-amber-950/20 border border-[#FDE68A] dark:border-amber-900/40 text-[#78350F] dark:text-amber-300 hover:border-[#E7AC08]/50'
+                                  : 'bg-[#FAF8F5] dark:bg-zinc-900 border border-[#EDE8DF] dark:border-zinc-700 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
+                              }`}
+                            >
+                              <span>{fmt}</span>
+                              {isLockedFmt && (
+                                <Crown className="w-2.5 h-2.5 text-[#D97706] dark:text-amber-400 stroke-[2.2] shrink-0" />
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -476,20 +513,28 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                     <div className="space-y-1">
                       <div className="text-[10px] uppercase tracking-wider font-bold text-[#64748B]">Resolution</div>
                       <div className="grid grid-cols-4 gap-1.5">
-                        {[256, 512, 1024, 2048].map((res) => (
-                          <button
-                            key={res}
-                            type="button"
-                            onClick={() => handleSelectResolution(res)}
-                            className={`py-1.5 px-1.5 rounded-lg text-xs font-mono font-bold transition-all ${
-                              downloadResolution === res
-                                ? 'border-2 border-[#E7AC08] bg-amber-50 dark:bg-amber-950/40 text-[#92400E] dark:text-[#E7AC08]'
-                                : 'bg-[#FAF8F5] dark:bg-zinc-900 border border-[#EDE8DF] dark:border-zinc-700 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
-                            }`}
-                          >
-                            {res}px
-                          </button>
-                        ))}
+                        {[256, 512, 1024, 2048].map((res) => {
+                          const isLockedRes = res === 2048 && !isUnlocked;
+                          return (
+                            <button
+                              key={res}
+                              type="button"
+                              onClick={() => handleSelectResolution(res)}
+                              className={`py-1.5 px-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                                downloadResolution === res
+                                  ? 'border-2 border-[#000000] dark:border-amber-400 bg-[#f5f5d9] dark:bg-amber-950/40 text-zinc-900 dark:text-[#E7AC08]'
+                                  : isLockedRes
+                                  ? 'bg-[#FFFDF5] dark:bg-amber-950/20 border border-[#FDE68A] dark:border-amber-900/40 text-[#64748B] dark:text-zinc-400 hover:border-[#E7AC08]/50'
+                                  : 'bg-[#FAF8F5] dark:bg-zinc-900 border border-[#EDE8DF] dark:border-zinc-700 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
+                              }`}
+                            >
+                              <span>{res}px</span>
+                              {isLockedRes && (
+                                <Crown className="w-2.5 h-2.5 text-[#D97706] dark:text-amber-400 stroke-[2.2]" />
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -499,21 +544,21 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                       id="btn-download-from-test-result"
                       disabled={isDownloading}
                       onClick={() => handleDownload(downloadFormat, downloadResolution)}
-                      className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-[#0F172A] transition-all shadow-xs ${
+                      className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-[#f9f9ff] transition-all shadow-xs cursor-pointer ${
                         downloadSuccess
-                          ? 'bg-emerald-600 text-white hover:bg-emerald-700'
-                          : 'bg-[#E7AC08] hover:bg-[#d49e07] active:bg-[#c29006]'
+                          ? 'bg-emerald-600 hover:bg-emerald-700'
+                          : 'bg-[#000000] hover:bg-zinc-800 active:bg-zinc-900'
                       } disabled:opacity-50`}
                     >
                       {downloadSuccess ? (
                         <>
-                          <Check className="w-4 h-4 text-white" />
-                          <span className="text-white">Downloaded {downloadFormat.toUpperCase()} ({downloadResolution}px) Successfully!</span>
+                          <Check className="w-4 h-4 text-[#f9f9ff]" />
+                          <span className="text-[#f9f9ff]">Downloaded {downloadFormat.toUpperCase()} ({downloadResolution}px) Successfully!</span>
                         </>
                       ) : (
                         <>
-                          <Download className="w-4 h-4" />
-                          <span>
+                          <Download className="w-4 h-4 text-[#f9f9ff]" />
+                          <span className="text-[#f9f9ff]">
                             {isDownloading
                               ? 'Exporting...'
                               : `Download Verified QR (${downloadFormat.toUpperCase()} • ${downloadResolution}px)`}
@@ -525,15 +570,15 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                 </div>
               ) : engineResult ? (
                 <div className="space-y-3.5">
-                  <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 space-y-2">
+                  <div className="p-4 rounded-2xl bg-[#f5f5d9] dark:bg-amber-950/40 border border-[#e5e5b8] dark:border-amber-800 text-zinc-900 dark:text-amber-200 space-y-2">
                     <div className="flex items-center gap-2">
-                      <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-                      <span className="font-bold text-sm">Decoding Alert</span>
+                      <AlertTriangle className="w-5 h-5 text-amber-700 dark:text-amber-400 shrink-0" />
+                      <span className="font-bold text-sm text-zinc-950 dark:text-amber-100">Decoding Alert</span>
                     </div>
-                    <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                    <p className="text-xs text-zinc-800 dark:text-amber-300 leading-relaxed">
                       {engineResult.error}
                     </p>
-                    <p className="text-xs text-amber-700 dark:text-amber-400">
+                    <p className="text-xs text-zinc-700 dark:text-amber-400">
                       Recommended: Increase foreground contrast, reduce center logo size, or click "Improve Readability" on the dashboard.
                     </p>
                   </div>
@@ -546,10 +591,10 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                       type="button"
                       onClick={() => handleDownload(downloadFormat, downloadResolution)}
                       disabled={isDownloading}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-[#EDE8DF] dark:border-zinc-600 bg-[#FAF8F5] dark:bg-zinc-800 hover:bg-[#EDE8DF]/50 dark:hover:bg-zinc-700 text-[#0F172A] dark:text-zinc-200 font-semibold text-xs"
+                      className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-[#000000] hover:bg-zinc-800 active:bg-zinc-900 text-[#f9f9ff] font-semibold text-xs transition-colors cursor-pointer"
                     >
-                      <Download className="w-3.5 h-3.5 text-[#64748B]" />
-                      <span>Download {downloadFormat.toUpperCase()} ({downloadResolution}px)</span>
+                      <Download className="w-3.5 h-3.5 text-[#f9f9ff]" />
+                      <span className="text-[#f9f9ff]">Download {downloadFormat.toUpperCase()} ({downloadResolution}px)</span>
                     </button>
                   </div>
                 </div>
@@ -570,7 +615,7 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
               </p>
 
               {cameraError ? (
-                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 text-amber-900 dark:text-amber-200 text-xs">
+                <div className="p-4 rounded-2xl bg-[#f5f5d9] dark:bg-amber-950/30 border border-[#e5e5b8] dark:border-amber-900 text-zinc-900 dark:text-amber-200 text-xs">
                   <span className="font-bold block mb-1">Camera Notice</span>
                   {cameraError}
                 </div>
@@ -611,10 +656,10 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                       type="button"
                       onClick={() => handleDownload(downloadFormat, downloadResolution)}
                       disabled={isDownloading}
-                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-xs sm:text-sm shadow-sm transition-all"
+                      className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-[#000000] hover:bg-zinc-800 active:bg-zinc-900 text-[#f9f9ff] font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer"
                     >
-                      <Download className="w-4 h-4" />
-                      <span>Download Verified QR ({downloadFormat.toUpperCase()} • {downloadResolution}px)</span>
+                      <Download className="w-4 h-4 text-[#f9f9ff]" />
+                      <span className="text-[#f9f9ff]">Download Verified QR ({downloadFormat.toUpperCase()} • {downloadResolution}px)</span>
                     </button>
                   </div>
                 </div>
@@ -651,7 +696,7 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-bold bg-[#EDE8DF] dark:bg-zinc-800 text-[#0F172A] dark:text-zinc-200 hover:bg-[#CBD5E1] dark:hover:bg-zinc-700 transition-colors"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-[#000000] hover:bg-zinc-800 text-[#f9f9ff] transition-colors cursor-pointer shadow-xs"
             >
               Close
             </button>

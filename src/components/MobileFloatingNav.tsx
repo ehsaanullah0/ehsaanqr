@@ -39,6 +39,7 @@ export const MobileFloatingNav: React.FC<MobileFloatingNavProps> = ({
 
   return (
     <nav
+      id="mobile-floating-nav"
       aria-label="Mobile and Tablet Customization Navigation"
       className="fixed bottom-2.5 inset-x-2.5 sm:inset-x-6 max-w-md sm:max-w-lg mx-auto z-40 lg:hidden pb-[max(0px,env(safe-area-inset-bottom))]"
     >
@@ -55,20 +56,20 @@ export const MobileFloatingNav: React.FC<MobileFloatingNavProps> = ({
                 onClick={() => handleClick(item.id)}
                 className={`relative flex flex-col items-center justify-center gap-1 min-h-[42px] sm:min-h-[46px] py-1.5 px-0.5 rounded-xl text-center transition-all active:scale-95 focus:outline-hidden ${
                   isActive
-                    ? 'bg-[#E7AC08] text-[#0F172A] shadow-xs font-bold'
-                    : 'text-[#64748B] dark:text-zinc-400 hover:text-[#0F172A] dark:hover:text-zinc-200 hover:bg-[#EDE8DF]/60 dark:hover:bg-zinc-800/60 font-medium'
+                    ? 'bg-[#FEF08A] dark:bg-[#FDE047] text-black shadow-xs font-extrabold border border-[#FACC15]'
+                    : 'text-[#334155] dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-[#EDE8DF]/60 dark:hover:bg-zinc-800/60 font-semibold'
                 }`}
                 title={`Customize ${item.label}`}
               >
-                <Icon className="w-4 h-4 shrink-0 text-current" />
-                <span className="text-[10px] sm:text-[11px] leading-tight tracking-tight whitespace-nowrap text-current">
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-black stroke-[2.4]' : 'text-current'}`} />
+                <span className={`text-[10px] sm:text-[11px] leading-tight tracking-tight whitespace-nowrap ${isActive ? 'text-black font-extrabold' : 'text-current'}`}>
                   {item.label}
                 </span>
 
                 {item.id === 'logo' && hasLogo && (
                   <span
                     className={`absolute top-1 right-1.5 sm:right-2 w-1.5 h-1.5 rounded-full ${
-                      isActive ? 'bg-current opacity-80' : 'bg-[#E7AC08]'
+                      isActive ? 'bg-black' : 'bg-[#FACC15]'
                     }`}
                   />
                 )}
