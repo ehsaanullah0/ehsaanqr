@@ -21,6 +21,8 @@
   <a href="https://ehsaanmovie.ai.studio/" target="_blank">
     <img height="70" src="https://github.com/user-attachments/assets/d1a10368-bb1f-4a86-890e-1d3c5d836ff6" />
   </a>
+  <a href="https://ehsaanmovie.ai.studio/" target="_blank">
+    <img height="70" src="https://github.com/user-attachments/assets/8c4edd78-a289-4f89-bcc6-7742476e4db5" />
 </p>
 <br>
 
