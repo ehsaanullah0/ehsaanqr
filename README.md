@@ -19,9 +19,9 @@
     <img height="70" src="https://github.com/user-attachments/assets/1f63c7f3-7c86-45fd-9af6-ed9b14805820" />
   </a>
   <a href="https://ehsaanmovie.ai.studio/" target="_blank">
-    <img height="70" src="https://github.com/user-attachments/assets/d1a10368-bb1f-4a86-890e-1d3c5d836ff6" />
+   <img height="70" src="https://github.com/user-attachments/assets/7e3c4963-7c62-4175-9a77-b389a78a42e6" />
   </a>
-  <a href="https://ehsaanmovie.ai.studio/" target="_blank">
+  <a href="https://ehsaancompress.ai.studio/" target="_blank">
     <img height="70" src="https://github.com/user-attachments/assets/8c4edd78-a289-4f89-bcc6-7742476e4db5" />
 </p>
 <br>
