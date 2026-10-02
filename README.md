@@ -178,23 +178,10 @@ Just create a QR code that works **and looks good**.
 
 ---
 
-## 🎨 THE EHSAAN STYLE
+<div align="center">
 
-EHSAAN QR is part of the **EHSAAN** digital project.
-
-The idea is simple:
-
-> **Useful tools should feel simple.**
-
-Clean interfaces.
-Minimal distractions.
-Useful controls.
-Creative customization.
-No unnecessary clutter.
-
-Because a QR code doesn't have to look boring just because it needs to be functional.
-
----
+# MADE BY EHSAAN ULLAH
+**Make useful things. Make them feel good to use.**
 
 # 💛 SUPPORT THE DEVELOPMENT
 ## [ CLICK HERE TO PAY DIRECTLY.](https://ehsaan.odoo.com/about-us)
@@ -206,38 +193,21 @@ Because a QR code doesn't have to look boring just because it needs to be functi
   <sub>If you find something useful here, a ⭐ is always appreciated.</sub>
 </p>
 
-<p align="center">
-## ✦ FINDING GOOD RESOURCES SHOULDN'T BE HARD.
 
-<p align="center">
-  <a href="https://ehsaan.odoo.com/" target="_blank">
-<img width="130" height="130" alt="cropped_circle_image" src="https://github.com/user-attachments/assets/336454db-ef7d-4003-b33a-db16a945ae3c" />
-  </a>
-</p>
-
-<p align="center">
 **EHSAAN ULLAH**
 
-<p align="center">
-  <a href="mailto:worsmon@gmail.com">
-    <img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
-  </a>
-  &nbsp;
-  <a href="https://github.com/ehsaanullah0">
-    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
-  </a>
-  &nbsp;
-  <a href="https://ehsaan.odoo.com/">
-    <img src="https://img.shields.io/badge/Website-0A84FF?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Website">
-  </a>
-</p>
+<a href="mailto:worsmon@gmail.com">
+  <img src="https://img.shields.io/badge/Email-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
+</a>
+&nbsp;
+<a href="https://github.com/ehsaanullah0">
+  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub">
+</a>
+&nbsp;
+<a href="https://ehsaan.odoo.com/">
+  <img src="https://img.shields.io/badge/Website-0A84FF?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Website">
+</a>
 
-<p align="center">
-  <a href="https://github.com/ehsaanullah0/niagara-premium/releases/tag/v.10.21">
-    <img src="https://img.shields.io/badge/Release-Niagara.pro-c9b58a?style=for-the-badge" />
-  </a>
-</p>
+<sub>Built with curiosity, too many tabs, and the occasional “let's see what happens.”</sub>
 
-<p align="center">
-  <sub>Built with curiosity, too many tabs, and the occasional “let's see what happens.”</sub>
-</p>
+</div>
