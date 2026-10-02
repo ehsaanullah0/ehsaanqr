@@ -9,11 +9,20 @@
 # 🔗 [**ehsaanqr.ai.studio**](https://ehsaanqr.ai.studio/)
 
 <p>
-  <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Android/android2.svg">&nbsp;
-  <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/AndroidStudio/androidstudio2.svg">&nbsp;
-  <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/Kotlin/kotlin2.svg">&nbsp;
-  <img src="https://ziadoua.github.io/m3-Markdown-Badges/badges/LicenceGPLv3/licencegplv32.svg">
+  <a href="https://ehsaancolour.ai.studio/" target="_blank">
+    <img height="70" src="https://github.com/user-attachments/assets/102323a5-e5f2-4174-8a25-7be76d1ef7d3" />
+  </a>
+  <a href="https://ehsaanflow.ai.studio/" target="_blank">
+    <img height="70" src="https://github.com/user-attachments/assets/934bccf2-cafa-4494-a773-dd315ab51ccf" />
+  </a>
+  <a href="https://ehsaanflow.ai.studio/" target="_blank">
+    <img height="70" src="https://github.com/user-attachments/assets/1f63c7f3-7c86-45fd-9af6-ed9b14805820" />
+  </a>
+  <a href="https://ehsaanmovie.ai.studio/" target="_blank">
+    <img height="70" src="https://github.com/user-attachments/assets/d1a10368-bb1f-4a86-890e-1d3c5d836ff6" />
+  </a>
 </p>
+<br>
 
 <p align="center">
   
