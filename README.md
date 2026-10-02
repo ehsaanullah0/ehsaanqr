@@ -22,7 +22,7 @@
    <img height="70" src="https://github.com/user-attachments/assets/7e3c4963-7c62-4175-9a77-b389a78a42e6" />
   </a>
   <a href="https://ehsaancompress.ai.studio/" target="_blank">
-    <img height="70" src="https://github.com/user-attachments/assets/8c4edd78-a289-4f89-bcc6-7742476e4db5" />
+   <img height="70" src="https://github.com/user-attachments/assets/de9dd1ed-3480-442f-af74-62c3924dd747" />
 </p>
 <br>
 
