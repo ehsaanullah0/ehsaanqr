@@ -15,7 +15,7 @@
   <a href="https://ehsaanflow.ai.studio/" target="_blank">
     <img height="70" src="https://github.com/user-attachments/assets/934bccf2-cafa-4494-a773-dd315ab51ccf" />
   </a>
-  <a href="https://ehsaanflow.ai.studio/" target="_blank">
+  <a href="https://ehsaanqr.ai.studio/" target="_blank">
     <img height="70" src="https://github.com/user-attachments/assets/1f63c7f3-7c86-45fd-9af6-ed9b14805820" />
   </a>
   <a href="https://ehsaanmovie.ai.studio/" target="_blank">
