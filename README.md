@@ -49,7 +49,9 @@ Designed to keep things simple.**
 
 # WHAT'S NEW ~ 📌 V1.1.5
 
-<img width="603" height="293" alt="image" src="https://github.com/user-attachments/assets/592c4108-ac90-42a2-a2a2-d76614918058" />
+<img width="606" height="470" alt="image" src="https://github.com/user-attachments/assets/c7d6d66a-10e0-46da-b133-7d800ab80a56" />
+
+### premium pass no longer available on app
 
 ### ✨ New in V1.1.5
 
