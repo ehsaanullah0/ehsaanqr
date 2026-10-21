@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="200" height="200" src="https://github.com/user-attachments/assets/b9cebf1b-2097-4f49-8967-338bdd794664" />
+<img width="1795" height="876" alt="Ehsaan QR Yellow Marketing Banner" src="https://github.com/user-attachments/assets/74bc3833-0eeb-44cd-838b-bc64613631d4" />
 
 # 🗜️ EHSAAN QR GENERATOR
 
