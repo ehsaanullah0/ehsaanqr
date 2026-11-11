@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AppTheme } from '../types';
 import { EhsaanLogo } from './EhsaanLogo';
-import { useExclusiveAccess } from '../context/ExclusiveAccessContext';
 import {
   Sun,
   Moon,
@@ -12,11 +11,11 @@ import {
   ShieldCheck,
   QrCode,
   Layers,
-  Lock,
   Coins,
-  Crown,
+  Settings,
+  EyeOff,
+  ChevronRight,
 } from 'lucide-react';
-import { ExclusiveCrownBadge } from './ExclusiveCrownBadge';
 
 interface HeaderProps {
   theme: AppTheme;
@@ -24,6 +23,9 @@ interface HeaderProps {
   onOpenHistory: () => void;
   onOpenScanner: () => void;
   onOpenChangelog: () => void;
+  onOpenSettings?: () => void;
+  onStartHideCardsMode?: () => void;
+  hiddenCardsCount?: number;
   savedCount: number;
 }
 
@@ -82,6 +84,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenHistory,
   onOpenScanner,
   onOpenChangelog,
+  onOpenSettings,
+  onStartHideCardsMode,
+  hiddenCardsCount = 0,
   savedCount,
 }) => {
   const [isThemeOpen, setIsThemeOpen] = useState(false);
@@ -114,36 +119,11 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, [isThemeOpen]);
 
-  const { isUnlocked, lockedFreeTheme, lockInFreeTheme, openExclusiveModal, openOverviewModal } =
-    useExclusiveAccess();
-
   const currentTheme = THEME_OPTIONS.find((t) => t.id === theme) || THEME_OPTIONS[0];
 
   const handleSelectTheme = (newTheme: AppTheme) => {
-    if (isUnlocked) {
-      onThemeChange(newTheme);
-      setIsThemeOpen(false);
-      return;
-    }
-
-    // If user has not picked their free theme yet, lock this one in
-    if (!lockedFreeTheme) {
-      lockInFreeTheme(newTheme);
-      onThemeChange(newTheme);
-      setIsThemeOpen(false);
-      return;
-    }
-
-    // If user already has a locked free theme and chose it
-    if (lockedFreeTheme === newTheme) {
-      onThemeChange(newTheme);
-      setIsThemeOpen(false);
-      return;
-    }
-
-    // Different theme requested by free user whose theme is already locked
+    onThemeChange(newTheme);
     setIsThemeOpen(false);
-    openExclusiveModal('Theme Options');
   };
 
   return (
@@ -179,11 +159,11 @@ export const Header: React.FC<HeaderProps> = ({
             id="header-changelog-btn"
             onClick={onOpenChangelog}
             className="hidden lg:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-bold border border-[#FACC15] text-black bg-[#FEF08A] hover:bg-[#FDE047] transition-colors focus:outline-hidden focus:ring-2 focus:ring-[#FACC15]/50 shadow-2xs active:scale-98 cursor-pointer shrink-0"
-            title="View Changelog & Release v1.1.5"
+            title="View Changelog & Release v1.1.6"
             aria-label="View changelog and releases"
           >
             <Coins className="w-3.5 h-3.5 text-black shrink-0" />
-            <span className="text-black font-bold">v1.1.5</span>
+            <span className="text-black font-bold">v1.1.6</span>
           </button>
 
           {/* Saved Templates button */}
@@ -265,30 +245,10 @@ export const Header: React.FC<HeaderProps> = ({
                     </span>
                   </div>
 
-                  {/* Free Theme Status Banner if not unlocked */}
-                  {!isUnlocked && (
-                    <div className="mb-2 p-2 rounded-xl bg-[#FEF9C3] dark:bg-amber-950/30 border border-[#FACC15] dark:border-amber-900/60 text-[11px] text-black dark:text-amber-300 leading-snug">
-                      {lockedFreeTheme ? (
-                        <span>
-                          Your free theme is locked to{' '}
-                          <strong className="uppercase">{lockedFreeTheme}</strong>. Unlock Developer
-                          Access (₹20) to change.
-                        </span>
-                      ) : (
-                        <span>
-                          Choose <strong>1 free theme</strong> to apply permanently, or unlock all
-                          themes for ₹20.
-                        </span>
-                      )}
-                    </div>
-                  )}
-
                   <div className="space-y-1">
                     {THEME_OPTIONS.map((opt) => {
                       const Icon = opt.icon;
                       const isSelected = theme === opt.id;
-                      const isUserLocked = !isUnlocked && lockedFreeTheme === opt.id;
-                      const isLockedOut = !isUnlocked && lockedFreeTheme && lockedFreeTheme !== opt.id;
 
                       return (
                         <button
@@ -331,11 +291,6 @@ export const Header: React.FC<HeaderProps> = ({
                             <div className="min-w-0">
                               <div className="text-xs font-bold text-black dark:text-zinc-100 flex items-center gap-1.5 flex-wrap">
                                 <span>{opt.label}</span>
-                                {isUserLocked && (
-                                  <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold uppercase">
-                                    Free Pick
-                                  </span>
-                                )}
                               </div>
                               <span className="text-[11px] text-[#475569] dark:text-zinc-400 block leading-tight truncate">
                                 {opt.subtitle}
@@ -343,38 +298,96 @@ export const Header: React.FC<HeaderProps> = ({
                             </div>
                           </div>
 
-                          {isSelected ? (
+                          {isSelected && (
                             <div className="w-5 h-5 rounded-full bg-[#FDE047] text-black flex items-center justify-center shrink-0 shadow-2xs border border-black/10">
                               <Check className="w-3 h-3 stroke-[2.8] text-black" />
                             </div>
-                          ) : isLockedOut ? (
-                            <div className="w-5 h-5 flex items-center justify-center text-black dark:text-amber-400 shrink-0">
-                              <Crown className="w-3.5 h-3.5 stroke-[2.2] text-black dark:text-amber-400" />
-                            </div>
-                          ) : null}
+                          )}
                         </button>
                       );
                     })}
                   </div>
 
-                  {/* Bottom Overview trigger in dropdown */}
-                  <div className="mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsThemeOpen(false);
-                        openOverviewModal();
-                      }}
-                      className="w-full py-2 px-2.5 rounded-xl bg-[#FEF08A] hover:bg-[#FDE047] dark:bg-zinc-800/60 dark:hover:bg-zinc-800 text-[11px] font-bold text-black dark:text-amber-300 border border-[#FACC15] dark:border-zinc-700 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <Crown className="w-3.5 h-3.5 text-black dark:text-amber-400 stroke-[2.2] shrink-0" />
-                      <span className="truncate text-black dark:text-amber-300 font-bold">Explain all Exclusive Features (₹20)</span>
-                    </button>
-                  </div>
+                  {/* Hide Cards Action Option in Theme Section */}
+                  {onStartHideCardsMode && (
+                    <div className="mt-2 pt-2 border-t border-[#EDE8DF]/90 dark:border-zinc-800">
+                      <div className="px-2 pb-1.5 flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#475569] dark:text-zinc-400">
+                          Workspace Cards
+                        </span>
+                        {hiddenCardsCount > 0 ? (
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300 font-bold">
+                            {hiddenCardsCount} hidden
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-zinc-400 dark:text-zinc-500 font-medium">
+                            All visible
+                          </span>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        id="theme-hide-cards-trigger-btn"
+                        onClick={() => {
+                          setIsThemeOpen(false);
+                          onStartHideCardsMode();
+                        }}
+                        className="w-full flex items-center justify-between p-2 rounded-xl text-left transition-all duration-150 hover:bg-[#FAF8F5] dark:hover:bg-zinc-800/80 border border-transparent hover:border-[#FACC15] group cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 pr-1">
+                          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-[#FEF9C3] dark:bg-amber-950/60 border border-[#FACC15] shrink-0 group-hover:scale-105 transition-transform shadow-2xs">
+                            <EyeOff className="w-4 h-4 text-black dark:text-amber-400 stroke-[2.2]" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-black dark:text-zinc-100 flex items-center gap-1.5">
+                              <span>Hide Cards</span>
+                            </div>
+                            <span className="text-[11px] text-[#475569] dark:text-zinc-400 block leading-tight truncate">
+                              Customize cards & workspace
+                            </span>
+                          </div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-black dark:group-hover:text-zinc-200 group-hover:translate-x-0.5 transition-all shrink-0" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Bottom Settings shortcut in dropdown */}
+                  {onOpenSettings && (
+                    <div className="mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                      <button
+                        type="button"
+                        id="header-dropdown-settings-btn"
+                        onClick={() => {
+                          setIsThemeOpen(false);
+                          onOpenSettings();
+                        }}
+                        className="w-full py-2 px-2.5 rounded-xl bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800/80 dark:hover:bg-zinc-800 text-[11px] font-bold text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <Settings className="w-3.5 h-3.5 text-[#E7AC08] shrink-0" />
+                        <span className="truncate">More Settings</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </>
             )}
           </div>
+
+          {/* Settings Trigger Icon Button */}
+          {onOpenSettings && (
+            <button
+              id="header-open-settings-btn"
+              type="button"
+              onClick={onOpenSettings}
+              className="flex items-center justify-center p-2 rounded-full border border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-[#F5F2EA] dark:hover:bg-zinc-800 hover:border-[#FACC15] text-[#0F172A] dark:text-zinc-200 transition-colors shadow-2xs active:scale-98 cursor-pointer shrink-0"
+              title="Settings & Layout Customization"
+              aria-label="Open settings"
+            >
+              <Settings className="w-4 h-4 text-zinc-700 dark:text-zinc-300" />
+            </button>
+          )}
         </div>
       </div>
     </header>

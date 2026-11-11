@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   QrType,
   QrFormData,
+  MultiUrlData,
   QrStyleOptions,
   AppTheme,
   SavedQrDesign,
@@ -26,13 +27,20 @@ import { MobileFloatingNav } from './components/MobileFloatingNav';
 import { Toast } from './components/Toast';
 import { Footer } from './components/Footer';
 import { OpenSourceShowcase } from './components/OpenSourceShowcase';
-import { PwaInstallBanner } from './components/PwaInstallBanner';
-import { UserGuideTour, STORAGE_TOUR_KEY } from './components/UserGuideTour';
-import { PremiumFeaturesOverviewModal } from './components/PremiumFeaturesOverviewModal';
-import { InitialThemeSelectionModal } from './components/InitialThemeSelectionModal';
-import { useExclusiveAccess } from './context/ExclusiveAccessContext';
-import { isExclusiveAccessUnlocked, getLockedFreeTheme } from './utils/exclusiveAccess';
-import { Sparkles, ShieldCheck, ExternalLink } from 'lucide-react';
+import { useSettings } from './context/SettingsContext';
+import { CardVisibilityBanner } from './components/CardVisibilityBanner';
+import { CardVisibilityWrapper } from './components/CardVisibilityWrapper';
+import {
+  Sparkles,
+  ShieldCheck,
+  ExternalLink,
+  QrCode,
+  FileText,
+  Layers,
+  Activity,
+  Palette,
+  EyeOff,
+} from 'lucide-react';
 
 const STORAGE_THEME_KEY = 'ehsaan_qr_theme';
 const STORAGE_SAVED_KEY = 'ehsaan_qr_saved_designs';
@@ -68,22 +76,37 @@ const INITIAL_STYLE: QrStyleOptions = {
 };
 
 export default function App() {
-  const {
-    isOverviewModalOpen,
-    closeOverviewModal,
-    openExclusiveModal,
-    lockedFreeTheme,
-    lockInFreeTheme,
-    isUnlocked,
-  } = useExclusiveAccess();
+  const { settings, toggleCardVisibility, setAllCardsVisibility } = useSettings();
+  const [isHideCardsMode, setIsHideCardsMode] = useState(false);
 
-  // Theme state: defaults to locked free theme if set, otherwise saved or minimal theme
+  // Count visible and hidden cards
+  const totalCards = 6;
+  const visibleCardsCount = useMemo(() => {
+    const vc = settings.visibleCards;
+    return (
+      (vc.preview !== false ? 1 : 0) +
+      (vc.contentForm !== false ? 1 : 0) +
+      (vc.typeSelector !== false ? 1 : 0) +
+      (vc.readability !== false ? 1 : 0) +
+      (vc.customization !== false ? 1 : 0) +
+      (vc.opensource !== false ? 1 : 0)
+    );
+  }, [settings.visibleCards]);
+
+  const hiddenCardsCount = totalCards - visibleCardsCount;
+
+  const handleDoneHidingCards = useCallback(() => {
+    setIsHideCardsMode(false);
+    setToastMessage('Workspace layout saved ✓');
+  }, []);
+
+  const handleUnhideAllCards = useCallback(() => {
+    setAllCardsVisibility(true);
+    setToastMessage('All cards restored to workspace ✓');
+  }, [setAllCardsVisibility]);
+
+  // Theme state: saved theme or minimal default
   const [theme, setTheme] = useState<AppTheme>(() => {
-    const isUnlocked = isExclusiveAccessUnlocked();
-    const lockedTheme = getLockedFreeTheme();
-    if (!isUnlocked && lockedTheme) {
-      return lockedTheme;
-    }
     const saved = localStorage.getItem(STORAGE_THEME_KEY);
     if (saved === 'light' || saved === 'dark' || saved === 'material' || saved === 'minimal') {
       return saved;
@@ -97,7 +120,7 @@ export default function App() {
       const saved = localStorage.getItem('ehsaan_qr_selected_type');
       if (
         saved &&
-        ['url', 'text', 'email', 'phone', 'sms', 'wifi', 'whatsapp', 'vcard', 'upi', 'calendar', 'location'].includes(saved)
+        ['url', 'text', 'email', 'phone', 'sms', 'wifi', 'whatsapp', 'vcard', 'upi', 'calendar', 'location', 'multi-url'].includes(saved)
       ) {
         return saved as QrType;
       }
@@ -127,7 +150,7 @@ export default function App() {
       const savedType = localStorage.getItem('ehsaan_qr_selected_type');
       if (
         savedType &&
-        ['url', 'text', 'email', 'phone', 'sms', 'wifi', 'whatsapp', 'vcard', 'upi', 'calendar', 'location'].includes(savedType)
+        ['url', 'text', 'email', 'phone', 'sms', 'wifi', 'whatsapp', 'vcard', 'upi', 'calendar', 'location', 'multi-url'].includes(savedType)
       ) {
         initialType = savedType as QrType;
       }
@@ -239,52 +262,7 @@ export default function App() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
-  const [isTourOpen, setIsTourOpen] = useState<boolean>(() => {
-    try {
-      const completed = localStorage.getItem(STORAGE_TOUR_KEY);
-      return !completed; // Only open automatically for first-time visitors
-    } catch {
-      return false;
-    }
-  });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Initial Theme Selection Popup for new users after completing or skipping the quick guide
-  const [isInitialThemeModalOpen, setIsInitialThemeModalOpen] = useState(false);
-
-  const handleTourFinish = useCallback(() => {
-    // Check if user has already chosen/locked their initial free theme or has full developer unlock
-    const hasLockedTheme = Boolean(
-      lockedFreeTheme || localStorage.getItem('ehsaan_qr_initial_theme_selected')
-    );
-    if (!hasLockedTheme && !isUnlocked) {
-      setIsInitialThemeModalOpen(true);
-    }
-  }, [lockedFreeTheme, isUnlocked]);
-
-  const handleConfirmInitialTheme = useCallback(
-    (chosenTheme: AppTheme) => {
-      setTheme(chosenTheme);
-      lockInFreeTheme(chosenTheme);
-      localStorage.setItem(STORAGE_THEME_KEY, chosenTheme);
-      localStorage.setItem('ehsaan_qr_initial_theme_selected', 'true');
-      setIsInitialThemeModalOpen(false);
-      setToastMessage(
-        `${chosenTheme.charAt(0).toUpperCase() + chosenTheme.slice(1)} theme locked in as your permanent free theme ✓`
-      );
-    },
-    [lockInFreeTheme]
-  );
-
-  const handleSkipInitialTheme = useCallback(() => {
-    // If skipped, automatically lock to Minimal theme as requested
-    setTheme('minimal');
-    lockInFreeTheme('minimal');
-    localStorage.setItem(STORAGE_THEME_KEY, 'minimal');
-    localStorage.setItem('ehsaan_qr_initial_theme_selected', 'true');
-    setIsInitialThemeModalOpen(false);
-    setToastMessage('Defaulted and locked to Minimal theme ✓');
-  }, [lockInFreeTheme]);
 
   // Sync theme changes to DOM root
   useEffect(() => {
@@ -377,6 +355,26 @@ export default function App() {
   }, [styleOptions, currentPayload]);
 
   // Save current design template locally (styling only, no user data)
+  // Save Multi-URL configuration as a Template
+  const handleSaveMultiUrlTemplate = (data: MultiUrlData) => {
+    const heading = (data.heroHeading || data.title || 'Multi-URL Link Hub').trim();
+    const linkCount = (data.links || []).filter((l) => l.url && l.url.trim()).length;
+
+    const newDesign: SavedQrDesign = {
+      id: 'template-multiurl-' + Date.now(),
+      name: `${heading} (${linkCount} Link${linkCount === 1 ? '' : 's'})`,
+      timestamp: Date.now(),
+      qrType: 'multi-url',
+      formData: {
+        'multi-url': data,
+      },
+      style: { ...styleOptions },
+    };
+
+    setSavedDesigns((prev) => [newDesign, ...prev.slice(0, 24)]);
+    setToastMessage(`Saved Multi-URL HTML template "${heading}" to Templates ✓ (Code & Backup ready)`);
+  };
+
   const handleSaveDesign = async () => {
     let thumbnail: string | undefined;
     const samplePayload = 'https://ehsaan.io';
@@ -458,7 +456,7 @@ export default function App() {
     }
   };
 
-  // Apply a saved design template (preserves user data & current QR type)
+  // Apply a saved design template
   const handleLoadDesign = (design: SavedQrDesign) => {
     setStyleOptions((prev) => ({
       ...design.style,
@@ -470,6 +468,26 @@ export default function App() {
             : prev.logo.autoAdapt,
       },
     }));
+
+    const isMultiUrl = design.qrType === 'multi-url' || Boolean(design.formData?.['multi-url']);
+    if (isMultiUrl) {
+      setSelectedType('multi-url');
+      if (design.formData?.['multi-url']) {
+        setFormData((prev) => ({
+          ...prev,
+          'multi-url': design.formData!['multi-url'],
+        }));
+      }
+    } else if (design.qrType) {
+      setSelectedType(design.qrType as QrType);
+      if (design.formData) {
+        setFormData((prev) => ({
+          ...prev,
+          ...design.formData,
+        }));
+      }
+    }
+
     setToastMessage(`Applied "${design.name}" template ✓`);
   };
 
@@ -514,8 +532,20 @@ export default function App() {
         onOpenHistory={() => setIsHistoryOpen(true)}
         onOpenScanner={() => setIsScannerOpen(true)}
         onOpenChangelog={() => setIsChangelogOpen(true)}
+        onStartHideCardsMode={() => setIsHideCardsMode(true)}
+        hiddenCardsCount={hiddenCardsCount}
         savedCount={savedDesigns.length}
       />
+
+      {/* Sticky Card Visibility Toolbar when Hide Cards Mode is Active */}
+      {isHideCardsMode && (
+        <CardVisibilityBanner
+          totalCards={totalCards}
+          visibleCount={visibleCardsCount}
+          onDone={handleDoneHidingCards}
+          onUnhideAll={handleUnhideAllCards}
+        />
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-7 pb-10 sm:pb-14 lg:pb-12">
@@ -530,7 +560,7 @@ export default function App() {
             </p>
           </div>
 
-          {/* Minimal ehsaan.odoo.com & Ehsaan Compressor Ecosystem Branding */}
+          {/* Minimal ehsaan.odoo.com Official Portal Link */}
           <div className="flex flex-wrap items-center gap-2">
             <a
               id="header-ehsaan-odoo-link"
@@ -551,108 +581,211 @@ export default function App() {
               </span>
               <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-red-500 transition-colors ml-0.5" />
             </a>
-
-            {/* Minimal button to showcase Ehsaan Compressor in Ehsaan Ecosystem */}
-            <a
-              id="header-ehsaan-compressor-link"
-              href="https://ehsaancompress.ai.studio"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-zinc-800 bg-[#000000] hover:border-red-500/50 text-xs shadow-2xs backdrop-blur-xs transition-all group focus:outline-none focus:ring-2 focus:ring-red-500/30"
-              title="Explore Ehsaan Compressor in the Ehsaan Ecosystem (ehsaancompress.ai.studio)"
-            >
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#ffffff]">
-                Ecosystem
-              </span>
-              <span className="text-zinc-600">•</span>
-              <span className="font-semibold tracking-tight text-[#ffffff]">
-                Ehsaan Compressor
-              </span>
-              <ExternalLink className="w-3.5 h-3.5 text-zinc-400 group-hover:text-red-500 transition-colors ml-0.5" />
-            </a>
           </div>
         </div>
 
-        {/* Top Hero Section: Main QR Code Preview & Instant Export */}
-        <section aria-label="Main QR Code Preview" className="w-full space-y-4">
-          <LivePreviewCard
-            payload={currentPayload}
-            options={styleOptions}
-            readability={readability}
-            onShowToast={setToastMessage}
-            onOpenScanner={() => setIsScannerOpen(true)}
-            onOpenChangelog={() => setIsChangelogOpen(true)}
-            onSaveDesign={handleSaveDesign}
-            onOptionsChange={(newOpts) =>
-              setStyleOptions((prev) => ({
-                ...prev,
-                ...newOpts,
-              }))
-            }
-            selectedRandomizeTarget={selectedRandomizeTarget}
-            selectedRandomizeType={selectedRandomizeType}
-            onRandomizeTargetChange={setSelectedRandomizeTarget}
-            onRandomizeTypeChange={setSelectedRandomizeType}
-            lockedTargets={lockedRandomizeTargets}
-            onLockedTargetsChange={setLockedRandomizeTargets}
-            theme={theme}
-          />
-
-          {/* Intelligent Readability Health Dashboard */}
-          <ReadabilityDashboard
-            report={readability}
-            options={styleOptions}
-            onOpenScanner={() => setIsScannerOpen(true)}
-            onShowToast={setToastMessage}
-            onOptionsChange={(newOpts) =>
-              setStyleOptions((prev) => ({
-                ...prev,
-                ...newOpts,
-              }))
-            }
-          />
-        </section>
-
-        {/* Settings Area (Below the QR Code Preview) */}
-        <section aria-label="QR Code Settings" className="space-y-6 pt-2">
-          {/* Section Heading */}
-          <div className="flex items-center justify-between border-b border-zinc-200/80 dark:border-zinc-800 pb-3">
-            <div>
-              <h2 className="text-sm font-bold uppercase tracking-wider text-zinc-900 dark:text-zinc-100">
-                Configure & Customize
-              </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                Select your data format, enter details, and style the matrix.
-              </p>
+        {/* Empty state when all cards are hidden in normal mode */}
+        {visibleCardsCount === 0 && !isHideCardsMode && (
+          <div className="my-12 p-8 sm:p-12 text-center rounded-3xl border-2 border-dashed border-amber-300 dark:border-zinc-800 bg-amber-50/50 dark:bg-zinc-900/40 max-w-lg mx-auto animate-in fade-in">
+            <div className="w-14 h-14 rounded-2xl bg-[#FEF08A] dark:bg-amber-950/80 border border-[#FACC15] text-black dark:text-amber-300 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <EyeOff className="w-7 h-7 stroke-[2]" />
+            </div>
+            <h2 className="text-lg sm:text-xl font-black text-zinc-900 dark:text-zinc-50">
+              All workspace cards are hidden
+            </h2>
+            <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-1.5 max-w-sm mx-auto">
+              You have hidden all 6 cards. Enter visibility mode anytime to choose which cards to display.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setIsHideCardsMode(true)}
+                className="px-4 py-2 rounded-full text-xs font-bold bg-[#FACC15] hover:bg-[#EAB308] text-black shadow-xs cursor-pointer transition-transform active:scale-95"
+              >
+                Customize Visible Cards
+              </button>
+              <button
+                type="button"
+                onClick={handleUnhideAllCards}
+                className="px-4 py-2 rounded-full text-xs font-semibold bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 shadow-2xs cursor-pointer transition-transform active:scale-95"
+              >
+                Unhide All Cards
+              </button>
             </div>
           </div>
+        )}
 
-          {/* Step 1: QR Type Selection */}
-          <div>
-            <TypeSelector
-              selectedType={selectedType}
-              onSelectType={handleSelectType}
-            />
-          </div>
-
-          {/* Step 2 & 3: Content Form and Styling Panels in a Balanced Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left Wing: Content Input Fields */}
-            <div className="lg:col-span-6 space-y-6">
-              <ContentForm
-                type={selectedType}
-                formData={formData}
-                onChange={handleFormChange}
-                validation={validation}
+        {/* 1. Main QR Code Preview & Instant Export */}
+        {(isHideCardsMode || settings.visibleCards.preview) && (
+          <section aria-label="Main QR Code Preview" className="w-full space-y-4">
+            <CardVisibilityWrapper
+              cardId="preview"
+              cardTitle="QR Preview & Download"
+              cardDescription="Interactive QR code preview, scanner validation, and format export suite"
+              icon={QrCode}
+              isHideCardsMode={isHideCardsMode}
+              isVisible={settings.visibleCards.preview}
+              onToggleVisibility={toggleCardVisibility}
+            >
+              <LivePreviewCard
+                selectedType={selectedType}
+                payload={currentPayload}
+                options={styleOptions}
+                readability={readability}
+                onShowToast={setToastMessage}
+                onOpenScanner={() => setIsScannerOpen(true)}
+                onOpenChangelog={() => setIsChangelogOpen(true)}
+                onSaveDesign={handleSaveDesign}
+                onOptionsChange={(newOpts) =>
+                  setStyleOptions((prev) => ({
+                    ...prev,
+                    ...newOpts,
+                  }))
+                }
+                selectedRandomizeTarget={selectedRandomizeTarget}
+                selectedRandomizeType={selectedRandomizeType}
+                onRandomizeTargetChange={setSelectedRandomizeTarget}
+                onRandomizeTypeChange={setSelectedRandomizeType}
+                lockedTargets={lockedRandomizeTargets}
+                onLockedTargetsChange={setLockedRandomizeTargets}
+                theme={theme}
               />
-            </div>
+            </CardVisibilityWrapper>
+          </section>
+        )}
 
-            {/* Right Wing: Customization Tabs */}
-            <div className="lg:col-span-6 space-y-6">
+        {/* 2. Both Category and Data Input Cards (Desktop: side-by-side with Input on the left of Category, Mobile: stacked) */}
+        {(isHideCardsMode ||
+          settings.visibleCards.contentForm ||
+          settings.visibleCards.opensource ||
+          settings.visibleCards.typeSelector) && (
+          <section aria-label="QR Category and Data Configuration" className="w-full pt-4 sm:pt-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column: Content Input Card & GitHub Showcase */}
+              {(isHideCardsMode ||
+                settings.visibleCards.contentForm ||
+                settings.visibleCards.opensource) && (
+                <div
+                  className={`${
+                    !isHideCardsMode && !settings.visibleCards.typeSelector
+                      ? 'lg:col-span-12'
+                      : 'lg:col-span-6'
+                  } space-y-6 order-2 lg:order-1`}
+                >
+                  <CardVisibilityWrapper
+                    cardId="contentForm"
+                    cardTitle="Content & Data Input"
+                    cardDescription="Input data fields for URL, Wi-Fi, UPI Pay, Contact, Email, etc."
+                    icon={FileText}
+                    isHideCardsMode={isHideCardsMode}
+                    isVisible={settings.visibleCards.contentForm}
+                    onToggleVisibility={toggleCardVisibility}
+                  >
+                    <ContentForm
+                      type={selectedType}
+                      formData={formData}
+                      onChange={handleFormChange}
+                      validation={validation}
+                      onSaveMultiUrlTemplate={handleSaveMultiUrlTemplate}
+                      onOpenTemplates={() => setIsHistoryOpen(true)}
+                    />
+                  </CardVisibilityWrapper>
+
+                  <CardVisibilityWrapper
+                    cardId="opensource"
+                    cardTitle="Open Source Community"
+                    cardDescription="Community GitHub project, star badge, and open source showcase"
+                    icon={Sparkles}
+                    isHideCardsMode={isHideCardsMode}
+                    isVisible={settings.visibleCards.opensource}
+                    onToggleVisibility={toggleCardVisibility}
+                  >
+                    <OpenSourceShowcase
+                      onShowToast={setToastMessage}
+                      onOpenChangelog={() => setIsChangelogOpen(true)}
+                    />
+                  </CardVisibilityWrapper>
+                </div>
+              )}
+
+              {/* Right Column: Category Selection Card */}
+              {(isHideCardsMode || settings.visibleCards.typeSelector) && (
+                <div
+                  className={`${
+                    !isHideCardsMode &&
+                    !settings.visibleCards.contentForm &&
+                    !settings.visibleCards.opensource
+                      ? 'lg:col-span-12'
+                      : 'lg:col-span-6'
+                  } space-y-6 order-1 lg:order-2`}
+                >
+                  <CardVisibilityWrapper
+                    cardId="typeSelector"
+                    cardTitle="QR Code Category"
+                    cardDescription="Select QR code type with quick pinning and hidden categories toggle"
+                    icon={Layers}
+                    isHideCardsMode={isHideCardsMode}
+                    isVisible={settings.visibleCards.typeSelector}
+                    onToggleVisibility={toggleCardVisibility}
+                  >
+                    <TypeSelector
+                      selectedType={selectedType}
+                      onSelectType={handleSelectType}
+                      onShowToast={setToastMessage}
+                    />
+                  </CardVisibilityWrapper>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* 3. Analytics Card (Readability & Scanning Diagnostics) */}
+        {(isHideCardsMode || settings.visibleCards.readability) && (
+          <section aria-label="QR Code Analytics" className="w-full pt-4 sm:pt-6">
+            <CardVisibilityWrapper
+              cardId="readability"
+              cardTitle="QR Health & Analytics"
+              cardDescription="Readability diagnostics, scan reliability score, and contrast analysis"
+              icon={Activity}
+              isHideCardsMode={isHideCardsMode}
+              isVisible={settings.visibleCards.readability}
+              onToggleVisibility={toggleCardVisibility}
+            >
+              <ReadabilityDashboard
+                report={readability}
+                options={styleOptions}
+                onOpenScanner={() => setIsScannerOpen(true)}
+                onShowToast={setToastMessage}
+                onOptionsChange={(newOpts) =>
+                  setStyleOptions((prev) => ({
+                    ...prev,
+                    ...newOpts,
+                  }))
+                }
+              />
+            </CardVisibilityWrapper>
+          </section>
+        )}
+
+        {/* 4. Customization Card with Full Width */}
+        {(isHideCardsMode || settings.visibleCards.customization) && (
+          <section aria-label="QR Code Customization" className="w-full pt-4 sm:pt-6">
+            <CardVisibilityWrapper
+              cardId="customization"
+              cardTitle="Design & Customization"
+              cardDescription="Colors, shapes, frames, logo styling, and high-resolution export quality"
+              icon={Palette}
+              isHideCardsMode={isHideCardsMode}
+              isVisible={settings.visibleCards.customization}
+              onToggleVisibility={toggleCardVisibility}
+            >
               <CustomizationPanel
                 options={styleOptions}
                 onChange={setStyleOptions}
                 selectedType={selectedType}
+                payload={currentPayload}
+                readability={readability}
                 activeTab={activeCustomTab}
                 onTabChange={setActiveCustomTab}
                 selectedRandomizeTarget={selectedRandomizeTarget}
@@ -663,26 +796,13 @@ export default function App() {
                 onLockedTargetsChange={setLockedRandomizeTargets}
                 onShowToast={setToastMessage}
               />
-            </div>
-          </div>
-        </section>
-
-        {/* Showcase Ehsaan QR Open Source Project */}
-        <section className="pt-2">
-          <OpenSourceShowcase
-            onShowToast={setToastMessage}
-            onOpenChangelog={() => setIsChangelogOpen(true)}
-          />
-        </section>
-
-        {/* PWA Native App Installation */}
-        <section className="pt-1">
-          <PwaInstallBanner onShowToast={setToastMessage} />
-        </section>
+            </CardVisibilityWrapper>
+          </section>
+        )}
       </main>
 
       {/* Minimal Footer */}
-      <Footer onOpenTour={() => setIsTourOpen(true)} />
+      <Footer onShowToast={setToastMessage} />
 
       {/* Floating Bottom Navigation Bar: Mobile and Tablet format for reachability */}
       <MobileFloatingNav
@@ -726,40 +846,6 @@ export default function App() {
         isOpen={isChangelogOpen}
         onClose={() => setIsChangelogOpen(false)}
         theme={theme}
-      />
-
-      {/* First-Time User Guide & Interactive Tour */}
-      <UserGuideTour
-        isOpen={isTourOpen}
-        onClose={() => setIsTourOpen(false)}
-        onTourFinish={handleTourFinish}
-        onShowToast={setToastMessage}
-        onSelectCustomTab={setActiveCustomTab}
-        onOpenTemplates={() => setIsHistoryOpen(true)}
-        onCloseTemplates={() => setIsHistoryOpen(false)}
-      />
-
-      {/* Initial Free Theme Selection for new users after guide */}
-      <InitialThemeSelectionModal
-        isOpen={isInitialThemeModalOpen}
-        currentTheme={theme}
-        onConfirm={handleConfirmInitialTheme}
-        onSkip={handleSkipInitialTheme}
-      />
-
-      {/* Premium Exclusive Features Overview & Permanent Free Theme Modal */}
-      <PremiumFeaturesOverviewModal
-        isOpen={isOverviewModalOpen}
-        onClose={closeOverviewModal}
-        currentTheme={theme}
-        onSelectTheme={(newTheme) => {
-          setTheme(newTheme);
-          localStorage.setItem(STORAGE_THEME_KEY, newTheme);
-        }}
-        onOpenCodeInput={() => {
-          openExclusiveModal(undefined, 'code');
-        }}
-        onShowToast={setToastMessage}
       />
 
       {/* Micro-interaction Toast */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Palette, Shapes, Eye, Image as ImageIcon, Sliders } from 'lucide-react';
+import { Palette, Shapes, Image as ImageIcon, Sliders, ArrowUp } from 'lucide-react';
 import { CustomizationTabKey } from '../types';
 
 interface MobileFloatingNavProps {
@@ -16,8 +16,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: 'colors', label: 'Colour', icon: Palette },
-  { id: 'patterns', label: 'Pattern', icon: Shapes },
-  { id: 'eyes', label: 'Eyes', icon: Eye },
+  { id: 'shapes', label: 'Shapes', icon: Shapes },
   { id: 'logo', label: 'Logo', icon: ImageIcon },
   { id: 'quality', label: 'Quality', icon: Sliders },
 ];
@@ -37,6 +36,10 @@ export const MobileFloatingNav: React.FC<MobileFloatingNavProps> = ({
     }
   };
 
+  const handleScrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <nav
       id="mobile-floating-nav"
@@ -47,7 +50,11 @@ export const MobileFloatingNav: React.FC<MobileFloatingNavProps> = ({
         <div className="grid grid-cols-5 gap-0.5 sm:gap-1">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const isActive =
+              item.id === 'shapes'
+                ? activeTab === 'shapes' || activeTab === 'patterns' || activeTab === 'eyes'
+                : activeTab === item.id;
+
             return (
               <button
                 key={item.id}
@@ -76,6 +83,21 @@ export const MobileFloatingNav: React.FC<MobileFloatingNavProps> = ({
               </button>
             );
           })}
+
+          {/* 5th slot: Scroll to top button in navigation bar at right corner */}
+          <button
+            id="floating-nav-scroll-top"
+            type="button"
+            onClick={handleScrollToTop}
+            className="relative flex flex-col items-center justify-center gap-1 min-h-[42px] sm:min-h-[46px] py-1.5 px-0.5 rounded-xl text-center transition-all active:scale-95 focus:outline-hidden text-[#334155] dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-[#FEF08A]/50 dark:hover:bg-zinc-800/60 font-semibold cursor-pointer"
+            title="Scroll to top of page"
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="w-4 h-4 shrink-0 stroke-[2.4] text-[#E7AC08] dark:text-amber-400" />
+            <span className="text-[10px] sm:text-[11px] leading-tight tracking-tight whitespace-nowrap font-semibold">
+              Top
+            </span>
+          </button>
         </div>
       </div>
     </nav>

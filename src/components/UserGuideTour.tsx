@@ -20,6 +20,7 @@ import {
   ArrowRight,
   SunMedium,
 } from 'lucide-react';
+import { EhsaanFlameIcon } from './EhsaanLogo';
 
 export const STORAGE_TOUR_KEY = 'ehsaan_qr_tour_completed';
 
@@ -134,9 +135,9 @@ const TOUR_STEPS: TourStep[] = [
   {
     id: 'customization-suite',
     badge: 'Step 8 • Customization',
-    title: 'Colours, Patterns, Eyes & Quality',
+    title: 'Colours, Shapes, Logo & Quality',
     description:
-      'Deeply style every element: solid or gradient colors, fluid liquid shapes, 45° cut-corner eyes, and adjustable error correction.',
+      'Deeply style every element: solid or gradient colors, geometric pixel matrix shapes, 45° cut-corner eyes, and adjustable error correction.',
     targetId: 'customization-panel-tabs',
     secondaryTargetId: 'customization-panel',
     icon: Sliders,
@@ -184,7 +185,7 @@ const TOUR_STEPS: TourStep[] = [
     badge: 'Step 12 • Reachability',
     title: 'Floating Bottom Navigation',
     description:
-      'On phones and tablets, use the tactile floating bottom dock to jump between Colour, Pattern, Eyes, Logo, and Quality controls.',
+      'On phones and tablets, use the tactile floating bottom dock to jump between Colour, Shapes, Logo, and Quality controls, plus quick Scroll-to-Top.',
     targetId: 'mobile-floating-nav',
     secondaryTargetId: 'customization-panel-tabs',
     icon: Smartphone,
@@ -196,7 +197,7 @@ const TOUR_STEPS: TourStep[] = [
     badge: 'Step 13 • Open Source',
     title: 'GitHub Repository & Changelog',
     description:
-      'EHSAAN QR is free, client-side, and open source. Explore version release history (v1.1.5), review commit logs, or star on GitHub.',
+      'EHSAAN QR is free, client-side, and open source. Explore version release history (v1.1.6), review commit logs, or star on GitHub.',
     targetId: 'header-changelog-btn',
     secondaryTargetId: 'opensource-showcase',
     icon: Sparkles,
@@ -859,8 +860,12 @@ export const UserGuideTour: React.FC<UserGuideTourProps> = ({
         {/* Compact Content Body */}
         <div className="p-3.5 space-y-2.5 max-h-[55vh] overflow-y-auto">
           <div className="flex items-start gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-[#E7AC08]/15 dark:bg-[#E7AC08]/25 text-[#92400E] dark:text-amber-300 flex items-center justify-center shrink-0 border border-[#E7AC08]/30">
-              <IconComponent className="w-4 h-4 text-[#E7AC08]" />
+            <div className="w-8 h-8 rounded-lg bg-[#E7AC08]/15 dark:bg-[#E7AC08]/25 text-[#92400E] dark:text-amber-300 flex items-center justify-center shrink-0 border border-[#E7AC08]/30 overflow-hidden">
+              {step.id === 'welcome' ? (
+                <EhsaanFlameIcon size={22} className="shrink-0" />
+              ) : (
+                <IconComponent className="w-4 h-4 text-[#E7AC08]" />
+              )}
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-bold text-[#0F172A] dark:text-zinc-100 leading-tight tracking-tight">

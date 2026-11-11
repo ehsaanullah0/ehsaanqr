@@ -27,6 +27,8 @@ export interface TemplateCodePayload {
   type: 'ehsaan-template';
   name: string;
   timestamp?: number;
+  qrType?: string;
+  formData?: any;
   style: QrStyleOptions;
   thumbnail?: string;
 }
@@ -37,6 +39,8 @@ export interface BundleCodePayload {
   exportedAt: number;
   templates: Array<{
     name: string;
+    qrType?: string;
+    formData?: any;
     style: QrStyleOptions;
     timestamp?: number;
     thumbnail?: string;
@@ -144,12 +148,14 @@ export function sanitizeStyleOptions(rawStyle: Partial<QrStyleOptions> | undefin
 /**
  * Encodes a single SavedQrDesign into an exportable EHSAAN-TPL-... code string
  */
-export function encodeTemplateToCode(design: SavedQrDesign | { name: string; style: QrStyleOptions }): string {
+export function encodeTemplateToCode(design: SavedQrDesign | { name: string; style: QrStyleOptions; qrType?: string; formData?: any }): string {
   const payload: TemplateCodePayload = {
     v: 1,
     type: 'ehsaan-template',
     name: (design.name || 'Custom Template').trim(),
     timestamp: 'timestamp' in design && typeof design.timestamp === 'number' ? design.timestamp : Date.now(),
+    qrType: 'qrType' in design ? (design as SavedQrDesign).qrType : undefined,
+    formData: 'formData' in design ? (design as SavedQrDesign).formData : undefined,
     style: sanitizeStyleOptions(design.style),
   };
 
@@ -168,6 +174,8 @@ export function encodeBundleToCode(designs: SavedQrDesign[]): string {
     exportedAt: Date.now(),
     templates: designs.map((d) => ({
       name: d.name,
+      qrType: d.qrType,
+      formData: d.formData,
       style: sanitizeStyleOptions(d.style),
       timestamp: d.timestamp,
     })),
@@ -279,20 +287,28 @@ function parseSinglePayload(obj: any): ParseTemplateResult {
   const name = typeof obj.name === 'string' && obj.name.trim() ? obj.name.trim() : 'Imported Template';
   const rawStyle = obj.style || obj;
   const style = sanitizeStyleOptions(rawStyle);
+  const isMultiUrl = obj.qrType === 'multi-url' || Boolean(obj.formData?.['multi-url']);
+  const linkCount = obj.formData?.['multi-url']?.links?.length || 0;
 
   const design: SavedQrDesign = {
     id: 'template-imported-' + Date.now(),
     name,
     timestamp: typeof obj.timestamp === 'number' ? obj.timestamp : Date.now(),
+    qrType: obj.qrType || (isMultiUrl ? 'multi-url' : undefined),
+    formData: obj.formData || undefined,
     style,
     previewThumbnail: typeof obj.thumbnail === 'string' && obj.thumbnail.startsWith('data:image/') ? obj.thumbnail : undefined,
   };
+
+  const summary = isMultiUrl
+    ? `Multi-URL HTML Template: "${name}" (${linkCount} link${linkCount === 1 ? '' : 's'})`
+    : `Valid template: "${name}" (${style.patternStyle} pattern, ${style.colorMode} color)`;
 
   return {
     success: true,
     isBundle: false,
     templates: [design],
-    summary: `Valid template: "${name}" (${style.patternStyle} pattern, ${style.colorMode} color)`,
+    summary,
   };
 }
 
@@ -306,11 +322,14 @@ function parseBundlePayload(obj: any): ParseTemplateResult {
     const name = typeof item?.name === 'string' && item.name.trim() ? item.name.trim() : `Imported Template #${idx + 1}`;
     const rawStyle = item?.style || item;
     const style = sanitizeStyleOptions(rawStyle);
+    const isMultiUrl = item?.qrType === 'multi-url' || Boolean(item?.formData?.['multi-url']);
 
     return {
       id: `template-bundle-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
       name,
       timestamp: typeof item?.timestamp === 'number' ? item.timestamp : Date.now(),
+      qrType: item?.qrType || (isMultiUrl ? 'multi-url' : undefined),
+      formData: item?.formData || undefined,
       style,
       previewThumbnail: typeof item?.thumbnail === 'string' && item.thumbnail.startsWith('data:image/') ? item.thumbnail : undefined,
     };
@@ -333,11 +352,14 @@ function parseArrayOfTemplates(arr: any[]): ParseTemplateResult {
     const name = typeof item?.name === 'string' && item.name.trim() ? item.name.trim() : `Imported Template #${idx + 1}`;
     const rawStyle = item?.style || item;
     const style = sanitizeStyleOptions(rawStyle);
+    const isMultiUrl = item?.qrType === 'multi-url' || Boolean(item?.formData?.['multi-url']);
 
     return {
       id: `template-arr-${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 6)}`,
       name,
       timestamp: typeof item?.timestamp === 'number' ? item.timestamp : Date.now(),
+      qrType: item?.qrType || (isMultiUrl ? 'multi-url' : undefined),
+      formData: item?.formData || undefined,
       style,
       previewThumbnail: typeof item?.previewThumbnail === 'string' && item.previewThumbnail.startsWith('data:image/')
         ? item.previewThumbnail

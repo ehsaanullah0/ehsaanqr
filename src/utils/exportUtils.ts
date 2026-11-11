@@ -160,6 +160,200 @@ export async function exportQrCode(
 }
 
 /**
+ * Direct print QR code without downloading, preserving target resolution & format
+ */
+export async function printQrCode(
+  format: ExportFormat,
+  payload: string,
+  options: QrStyleOptions,
+  customResolution?: number
+): Promise<boolean> {
+  const exportResolution = customResolution || options.size || 1024;
+
+  return new Promise(async (resolve) => {
+    try {
+      let printContentUrl = '';
+      let isPdfBlob = false;
+
+      if (format === 'svg') {
+        const svgString = generateQrSvg(payload, {
+          ...options,
+          size: exportResolution,
+        });
+        const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+        printContentUrl = URL.createObjectURL(blob);
+      } else if (format === 'pdf') {
+        const canvas = document.createElement('canvas');
+        await renderQrToCanvas(canvas, payload, {
+          ...options,
+          size: exportResolution,
+        });
+
+        const doc = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+        });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const qrMm = 130;
+        const x = (pageWidth - qrMm) / 2;
+        const y = (pageHeight - qrMm) / 2;
+
+        const imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', x, y, qrMm, qrMm);
+
+        doc.autoPrint();
+        const pdfBlob = doc.output('blob');
+        printContentUrl = URL.createObjectURL(pdfBlob);
+        isPdfBlob = true;
+      } else if (format === 'jpg') {
+        const canvas = document.createElement('canvas');
+        await renderQrToCanvas(canvas, payload, {
+          ...options,
+          size: exportResolution,
+        });
+
+        const jpgCanvas = document.createElement('canvas');
+        jpgCanvas.width = exportResolution;
+        jpgCanvas.height = exportResolution;
+        const ctx = jpgCanvas.getContext('2d');
+        if (ctx) {
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, exportResolution, exportResolution);
+          ctx.drawImage(canvas, 0, 0);
+        }
+        printContentUrl = jpgCanvas.toDataURL('image/jpeg', 0.98);
+      } else {
+        // PNG default
+        const canvas = document.createElement('canvas');
+        await renderQrToCanvas(canvas, payload, {
+          ...options,
+          size: exportResolution,
+        });
+        printContentUrl = canvas.toDataURL('image/png');
+      }
+
+      // Create isolated print iframe
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
+      iframe.setAttribute('title', 'Print QR Code Frame');
+
+      document.body.appendChild(iframe);
+
+      if (isPdfBlob) {
+        iframe.src = printContentUrl;
+        iframe.onload = () => {
+          setTimeout(() => {
+            try {
+              iframe.contentWindow?.focus();
+              iframe.contentWindow?.print();
+            } catch (e) {
+              console.error('Print error:', e);
+            }
+            setTimeout(() => {
+              if (document.body.contains(iframe)) {
+                document.body.removeChild(iframe);
+              }
+              if (printContentUrl.startsWith('blob:')) {
+                URL.revokeObjectURL(printContentUrl);
+              }
+              resolve(true);
+            }, 1000);
+          }, 300);
+        };
+      } else {
+        const doc = iframe.contentWindow?.document;
+        if (!doc) {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+          resolve(false);
+          return;
+        }
+
+        doc.open();
+        doc.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Print QR Code (${format.toUpperCase()})</title>
+              <style>
+                @page { margin: 1cm; size: auto; }
+                body {
+                  margin: 0;
+                  padding: 20px;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  min-height: 90vh;
+                  font-family: system-ui, -apple-system, sans-serif;
+                  background: #ffffff;
+                }
+                .qr-container {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  text-align: center;
+                }
+                .qr-img {
+                  max-width: 80vw;
+                  max-height: 70vh;
+                  width: auto;
+                  height: auto;
+                  object-fit: contain;
+                  margin-bottom: 12px;
+                }
+                .qr-meta {
+                  font-size: 11px;
+                  color: #64748b;
+                  font-family: monospace;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="qr-container">
+                <img src="${printContentUrl}" class="qr-img" alt="QR Code" />
+              </div>
+              <script>
+                window.onload = function() {
+                  setTimeout(function() {
+                    window.focus();
+                    window.print();
+                  }, 150);
+                };
+              </script>
+            </body>
+          </html>
+        `);
+        doc.close();
+
+        setTimeout(() => {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+          if (printContentUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(printContentUrl);
+          }
+          resolve(true);
+        }, 3000);
+      }
+    } catch (err) {
+      console.error('Failed to print QR code:', err);
+      resolve(false);
+    }
+  });
+}
+
+/**
  * Copies the rendered QR code directly to the user's OS clipboard
  */
 export async function copyQrImageToClipboard(

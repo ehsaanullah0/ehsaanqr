@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Sparkles, Github, ExternalLink, Tag, CheckCircle2, GitCommit, ArrowRight, Mail, Copy, Check, FileText } from 'lucide-react';
+import { EhsaanFlameIcon } from './EhsaanLogo';
 import { AppTheme } from '../types';
 
 interface ChangelogModalProps {
@@ -19,9 +20,28 @@ interface ReleaseItem {
 
 const RELEASES: ReleaseItem[] = [
   {
-    version: 'v1.1.5',
+    version: 'v1.1.6',
     date: 'Latest Release',
     isLatest: true,
+    title: 'Shapes Consolidation, ₹20 Premium Feature Pass, Redesigned Color Presets & Scroll-to-Top',
+    highlights: [
+      'Development Premium Pass (₹20): Added an optional ₹20 support charge for development to unlock exclusive capabilities (Icon Auto-Adapt, Fluid Liquid Matrix, Cut-Corner Eyes, Chamfer Pupils).',
+      'Code-Based Activation System: Secure 6-digit access code validation with instant local activation, activation status indicator, and Revoke/Suspend feature controls.',
+      'Shapes Section Consolidation: Merged Module Pattern and Eye/Pupil sections into a unified "Shapes" customization category on-screen and in mobile floating dock.',
+      'Redesigned Color Presets: Re-engineered curated color combos into a balanced, responsive medium grid with synchronized custom FG, BG, eye, and pupil chips.',
+      'Scroll to Top Navigation: Added a dedicated, smooth scroll-to-top shortcut at the right corner of the navigation bar for seamless reachability.',
+      'Minimalist UI & Clutter Reduction: Cleaned up extraneous buttons, streamlined navigation elements, and polished visual contrast.',
+      'Minor Bug Fixes: Enhanced contrast readability, theme synchronization, and code verification state handling.',
+      'Added a density controller and restrict the logo on high density detection.',
+      'Multi URLs Category (Link Hub): Added dedicated Multi URLs category to bundle links with custom titles, section dividers, hero headers, avatar customization, and instant responsive HTML landing page export.',
+      'Brand Identity Refresh: Updated official logo to the light-brown background with chocolate QR code and red top-right pupil across the app, favicon, and PWA install icon.',
+    ],
+    tagUrl: 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.6',
+  },
+  {
+    version: 'v1.1.5',
+    date: 'Previous Release',
+    isLatest: false,
     title: 'Interactive Quick Guide, Location Category & Quality Refinements',
     highlights: [
       'Interactive First-Time Quick Guide: Dynamic onboarding tour with element spotlighting, auto-scrolling category showcases, compact non-obstructive card design, skip warning protection, and footer quick-launch access.',
@@ -71,7 +91,7 @@ const RELEASES: ReleaseItem[] = [
       'Shared Crimson Red Palette: Light and Dark themes now share the unified deep red accent system (#B91C1C / #DC2626).',
       'Exclusive Material Theme: Warm Yellow/Gold (#E7AC08) tone is now reserved exclusively for Material theme.',
       'Mobile/Tablet Footer Clearance Fix: Fixed bug where floating bottom navigation bar overlapped the footer in mobile and tablet views.',
-      'Ehsaan Ecosystem Showcase: Added minimal button to discover Ehsaan Compressor (ehsaancompress.ai.studio).',
+      'Ehsaan Ecosystem Showcase: Added minimal button to discover EHSAAN PLAY (ehsaanplay.ai.studio).',
       'Favicon & App Icon Synchronization: Updated favicon SVG, ICO, and PNG assets to match official circular flame logo.',
       'High-Priority Notice Indicator: Enhanced note button in Minimal theme with high-contrast red accent.',
     ],
@@ -86,7 +106,6 @@ const RELEASES: ReleaseItem[] = [
       'Touch-friendly 2D Saturation/Brightness spectrum and smooth Hue slider.',
       'Precision RGB (0-255) and HEX format switcher with live preview circle.',
       'Quick swatch palette and integrated Eyedropper tool support.',
-      'Note: The app reaches at level where every system works well and polished so the development is stopped till december 2026. Any bug report may fix with request on ~ worsmon@proton.me',
     ],
     tagUrl: 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.1',
   },
@@ -181,8 +200,8 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
   const isMinimal = theme === 'minimal' || (typeof document !== 'undefined' && document.documentElement.classList.contains('minimal'));
   const [copiedEmail, setCopiedEmail] = useState(false);
   const latestRelease = RELEASES[0];
-  const latestReleaseUrl = latestRelease?.tagUrl || 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.5';
-  const latestVersion = latestRelease?.version || 'v1.1.5';
+  const latestReleaseUrl = latestRelease?.tagUrl || 'https://github.com/ehsaanullah0/ehsaanqr/releases/tag/v1.1.6';
+  const latestVersion = latestRelease?.version || 'v1.1.6';
 
   const handleCopyEmail = async () => {
     try {
@@ -208,14 +227,8 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-[#EDE8DF] dark:border-zinc-800 shrink-0 bg-[#FAF8F5]/80 dark:bg-zinc-900/50">
           <div className="flex items-center gap-2.5">
-            <div
-              className={`p-2 rounded-xl flex items-center justify-center font-bold ${
-                isMinimal
-                  ? 'bg-black text-white dark:bg-white dark:text-black'
-                  : 'bg-[#E7AC08] text-[#0F172A]'
-              }`}
-            >
-              <Sparkles className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-xl bg-[#FFF8D6] dark:bg-zinc-800 border border-[#E7AC08]/40 flex items-center justify-center shrink-0">
+              <EhsaanFlameIcon size={20} className="shrink-0" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -254,41 +267,49 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
 
         {/* Scrollable Changelog List */}
         <div className="flex-1 overflow-y-auto px-5 sm:px-6 py-5 space-y-6">
-          {/* Important Development & Support Note */}
+          {/* Developer Note & Upcoming Release Section */}
           <div
             id="changelog-important-notice"
-            className="p-4 sm:p-4.5 rounded-2xl border-2 border-red-500 dark:border-red-500 bg-red-50/90 dark:bg-red-950/40 text-red-950 dark:text-red-100 shadow-sm flex flex-col justify-between space-y-3 ring-1 ring-red-500/20"
+            className="p-4 sm:p-4.5 rounded-2xl border-2 border-[#E7AC08] dark:border-[#E7AC08]/80 bg-amber-50/70 dark:bg-amber-950/30 text-amber-950 dark:text-amber-100 shadow-sm flex flex-col justify-between space-y-3 ring-1 ring-[#E7AC08]/20"
           >
             <div className="space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-600 text-white shadow-xs">
-                    Important Notice
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#E7AC08] text-black shadow-xs">
+                    Developer Note
                   </span>
-                  <span className="text-xs font-bold text-red-900 dark:text-red-200">
-                    Development Status Update
+                  <span className="text-xs font-bold text-amber-900 dark:text-amber-200">
+                    Release Roadmap Announcement
                   </span>
                 </div>
-                <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-900/60 text-red-700 dark:text-red-300">
-                  Through Dec 2026
+                <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-900/60 text-amber-800 dark:text-amber-300">
+                  v1.1.6 Active
                 </span>
               </div>
 
-              <p className="text-xs sm:text-[13px] leading-relaxed font-medium text-red-950 dark:text-red-100">
-                The app reaches at level where every system works well and polished so the development is stopped till december 2026. Any bug report may fix with request on ~{' '}
+              {/* Explicit Announcement Banner */}
+              <div
+                id="developer-note-announcement"
+                className="p-3 sm:p-3.5 rounded-xl border border-[#E7AC08] bg-[#FEF08A] dark:bg-[#FDE047]/20 text-black dark:text-amber-200 font-extrabold text-xs sm:text-[13px] tracking-wide text-center uppercase shadow-2xs"
+              >
+                THE NEW VERSION &ldquo;V1.1.7&rdquo; IS COMING AT 5 JANUARY 2027.
+              </div>
+
+              <p className="text-xs sm:text-[13px] leading-relaxed font-medium text-amber-950 dark:text-amber-100">
+                To support ongoing active development and maintain high polish, an optional ₹20 premium contribution pass is available. For bug reports or assistance, contact ~{' '}
                 <a
                   href="mailto:worsmon@proton.me?subject=EHSAAN%20QR%20Bug%20Report"
-                  className="font-bold underline text-red-700 dark:text-red-300 hover:text-red-900 dark:hover:text-red-100"
+                  className="font-bold underline text-amber-800 dark:text-amber-300 hover:text-amber-950 dark:hover:text-amber-100"
                 >
                   worsmon@proton.me
                 </a>
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-red-200/60 dark:border-red-900/50">
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-amber-200/60 dark:border-amber-900/50">
               <a
                 href="mailto:worsmon@proton.me?subject=EHSAAN%20QR%20Bug%20Report"
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 bg-red-600 hover:bg-red-700 text-white shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 bg-[#E7AC08] hover:bg-[#D9A007] text-black shadow-xs"
               >
                 <Mail className="w-3.5 h-3.5" />
                 <span>Send Bug Report</span>
@@ -300,7 +321,7 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
                 className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border text-xs font-bold transition-all cursor-pointer active:scale-95 ${
                   isMinimal
                     ? 'bg-white dark:bg-zinc-800 border-2 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-700'
-                    : 'bg-white dark:bg-zinc-800 border border-red-300 dark:border-red-900/70 text-red-900 dark:text-red-200 hover:bg-red-50 dark:hover:bg-zinc-700 font-semibold'
+                    : 'bg-white dark:bg-zinc-800 border border-amber-300 dark:border-amber-900/70 text-amber-900 dark:text-amber-200 hover:bg-amber-50 dark:hover:bg-zinc-700 font-semibold'
                 }`}
               >
                 {copiedEmail ? (
@@ -310,7 +331,7 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
                   </>
                 ) : (
                   <>
-                    <Copy className={`w-3.5 h-3.5 ${isMinimal ? 'text-zinc-600 dark:text-zinc-300' : 'text-red-600'}`} />
+                    <Copy className={`w-3.5 h-3.5 ${isMinimal ? 'text-zinc-600 dark:text-zinc-300' : 'text-amber-700'}`} />
                     <span>Copy worsmon@proton.me</span>
                   </>
                 )}
@@ -429,14 +450,14 @@ export const ChangelogModal: React.FC<ChangelogModalProps> = ({ isOpen, onClose,
         <div className="px-5 sm:px-6 py-3 border-t border-[#EDE8DF] dark:border-zinc-800 bg-[#FAF8F5]/80 dark:bg-zinc-900/80 flex items-center justify-between gap-3 shrink-0">
           <a
             id="changelog-footer-github-btn"
-            href="https://github.com/ehsaanullah0/ehsaanqr"
+            href="https://github.com/ehsaanullah0"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#EDE8DF] dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-[#EDE8DF]/50 dark:hover:bg-zinc-700/80 text-xs font-bold text-[#0F172A] dark:text-zinc-200 transition-all shadow-2xs"
-            title="Open GitHub Repository"
+            title="Open GitHub Profile"
           >
             <Github className="w-3.5 h-3.5 text-[#0F172A] dark:text-zinc-100" />
-            <span>GitHub Repository</span>
+            <span>GitHub Profile</span>
             <ExternalLink className="w-3 h-3 text-[#64748B]" />
           </a>
 

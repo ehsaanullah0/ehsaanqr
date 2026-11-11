@@ -22,6 +22,12 @@
   button:not([disabled]):active {
     transform: scale(0.98);
   }
+
+  /* Hardware acceleration for canvas rendering & interactive modals */
+  canvas, [id*="qr-canvas-container"] {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
 }
 
 /* ==========================================================================

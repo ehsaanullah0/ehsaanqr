@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ShieldCheck, MessageSquare, X, Github, ExternalLink, Eye, Trash2, CheckCircle2, AlertCircle, Mail, Compass } from 'lucide-react';
+import { ShieldCheck, MessageSquare, X, Github, ExternalLink, Eye, Trash2, CheckCircle2, AlertCircle, Mail, Globe, Compass, Download, Share2 } from 'lucide-react';
 import { EhsaanFlameIcon } from './EhsaanLogo';
+import { usePwaInstall } from '../hooks/usePwaInstall';
 
 interface FeedbackItem {
   id: string;
@@ -10,6 +11,7 @@ interface FeedbackItem {
 
 interface FooterProps {
   onOpenTour?: () => void;
+  onShowToast?: (message: string) => void;
 }
 
 const STORAGE_KEY_FEEDBACK = 'ehsaan_qr_feedback_list';
@@ -27,11 +29,33 @@ const INITIAL_FEEDBACK: FeedbackItem[] = [
   },
 ];
 
-export const Footer: React.FC<FooterProps> = ({ onOpenTour }) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenTour, onShowToast }) => {
   const [modalContent, setModalContent] = useState<'privacy' | 'about' | 'feedback' | null>(null);
   const [feedbackSent, setFeedbackSent] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   
+  // PWA Installation Hook & iOS Guide State
+  const { isInstallable, isInstalled, isIOS, triggerInstall } = usePwaInstall();
+  const [showIosGuide, setShowIosGuide] = useState(false);
+
+  const handleInstallClick = async () => {
+    if (isIOS) {
+      setShowIosGuide(true);
+      return;
+    }
+
+    if (isInstallable) {
+      const result = await triggerInstall();
+      if (result === 'accepted') {
+        onShowToast?.('Ehsaan QR installed successfully!');
+      } else if (result === 'dismissed') {
+        onShowToast?.('Installation prompt was dismissed.');
+      }
+    } else {
+      onShowToast?.('To install, open this app in Chrome, Edge, or Safari tab.');
+    }
+  };
+
   // Feedback view states (no password required)
   const [isViewingFeedback, setIsViewingFeedback] = useState(false);
   const [confirmClearOpen, setConfirmClearOpen] = useState(false);
@@ -114,87 +138,179 @@ export const Footer: React.FC<FooterProps> = ({ onOpenTour }) => {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center md:justify-end gap-2.5 sm:gap-3 text-xs font-semibold text-[#334155] dark:text-zinc-200">
-            {/* Minimal button to showcase Ehsaan Compressor in Ehsaan Ecosystem */}
+          {/* DESKTOP & TABLET VIEW (sm: and md: and above) */}
+          <div className="hidden sm:flex flex-col lg:flex-row items-center justify-end gap-4 lg:gap-6 text-xs font-semibold text-[#334155] dark:text-zinc-200">
+            {/* Nav & Action Links Group */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-end gap-x-2.5 sm:gap-x-3 gap-y-2">
+              <a
+                id="footer-github-link"
+                href="https://github.com/ehsaanullah0"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 transition-colors whitespace-nowrap"
+                title="View GitHub Profile (github.com/ehsaanullah0)"
+              >
+                <Github className="w-3.5 h-3.5 text-[#0F172A] dark:text-zinc-300" />
+                <span>GitHub</span>
+              </a>
+              <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
+              <a
+                id="footer-mail-link"
+                href="mailto:worsmon@proton.me"
+                className="inline-flex items-center gap-1.5 text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 transition-colors whitespace-nowrap"
+                title="Send Email to worsmon@proton.me"
+              >
+                <Mail className="w-3.5 h-3.5 text-[#0F172A] dark:text-zinc-300" />
+                <span>Mail</span>
+              </a>
+              <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
+              <a
+                id="footer-website-link"
+                href="https://ehsaan.odoo.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[#B45309] hover:text-[#E7AC08] dark:text-amber-400 hover:underline transition-colors whitespace-nowrap"
+                title="Visit Website (ehsaan.odoo.com)"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#B45309] dark:text-amber-400" />
+                <span>Website</span>
+              </a>
+              <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
+              <button
+                type="button"
+                onClick={() => setModalContent('privacy')}
+                className="hover:text-[#B45309] dark:hover:text-amber-400 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                Privacy
+              </button>
+              <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
+              <button
+                type="button"
+                onClick={() => setModalContent('about')}
+                className="hover:text-[#B45309] dark:hover:text-amber-400 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                About
+              </button>
+            </div>
+
+            {/* Column for EHSAAN PLAY button with Install App button placed directly underneath it with matching width */}
+            <div className="flex flex-col items-center lg:items-end gap-1.5 shrink-0">
+              <a
+                id="footer-ehsaan-play-btn"
+                href="https://ehsaanplay.ai.studio"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-zinc-950 dark:hover:text-white transition-all shadow-2xs group cursor-pointer active:scale-98 whitespace-nowrap"
+                title="Explore EHSAAN PLAY (ehsaanplay.ai.studio) in the Ehsaan Ecosystem"
+              >
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#c82020]">
+                  Ecosystem
+                </span>
+                <span className="text-zinc-300 dark:text-zinc-700">•</span>
+                <span className="font-bold text-zinc-900 dark:text-zinc-100 group-hover:underline">
+                  EHSAAN PLAY
+                </span>
+                <ExternalLink className="w-3 h-3 text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors" />
+              </a>
+
+              {!isInstalled && (
+                <button
+                  id="footer-install-app-btn-desktop"
+                  type="button"
+                  onClick={handleInstallClick}
+                  className="inline-flex items-center justify-center gap-1.5 w-full px-3.5 py-1.5 rounded-full text-xs font-bold bg-[#E7AC08] hover:bg-[#d99e00] text-zinc-950 dark:bg-[#E7AC08] dark:hover:bg-[#d99e00] dark:text-zinc-950 transition-all shadow-2xs cursor-pointer active:scale-98 whitespace-nowrap"
+                  title="Install Ehsaan QR directly on your device"
+                >
+                  <Download className="w-3.5 h-3.5 text-zinc-950" />
+                  <span>Install App</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* MOBILE VIEW (< sm:) */}
+          <div className="flex sm:hidden flex-col items-center gap-3 w-full text-xs font-semibold text-[#334155] dark:text-zinc-200">
             <a
-              id="footer-ehsaan-compressor-btn"
-              href="https://ehsaancompress.ai.studio"
+              id="footer-ehsaan-play-btn-mobile"
+              href="https://ehsaanplay.ai.studio"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-200 hover:border-zinc-400 dark:hover:border-zinc-600 hover:text-zinc-950 dark:hover:text-white transition-all shadow-2xs group cursor-pointer active:scale-98"
-              title="Explore Ehsaan Compressor (ehsaancompress.ai.studio) in the Ehsaan Ecosystem"
+              title="Explore EHSAAN PLAY in the Ehsaan Ecosystem"
             >
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#c82020]">
                 Ecosystem
               </span>
               <span className="text-zinc-300 dark:text-zinc-700">•</span>
               <span className="font-bold text-zinc-900 dark:text-zinc-100 group-hover:underline">
-                Ehsaan Compressor
+                EHSAAN PLAY
               </span>
               <ExternalLink className="w-3 h-3 text-zinc-400 group-hover:text-zinc-700 dark:group-hover:text-zinc-300 transition-colors" />
             </a>
 
-            <span className="text-[#CBD5E1] dark:text-zinc-600 hidden sm:inline">•</span>
-
-            <a
-              href="https://github.com/ehsaanullah0/ehsaanqr"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 transition-colors"
-              title="View Ehsaan QR on GitHub"
-            >
-              <Github className="w-3.5 h-3.5 text-[#0F172A] dark:text-zinc-300" />
-              <span>GitHub</span>
-            </a>
-            <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
-            <a
-              id="footer-ehsaan-odoo-link"
-              href="https://ehsaan.odoo.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#B45309] hover:text-[#E7AC08] dark:text-amber-400 hover:underline"
-            >
-              ehsaan.odoo.com
-            </a>
-            <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
-            <button
-              onClick={() => setModalContent('privacy')}
-              className="hover:text-[#B45309] dark:hover:text-amber-400 transition-colors"
-            >
-              Privacy
-            </button>
-            <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
-            <button
-              onClick={() => setModalContent('about')}
-              className="hover:text-[#B45309] dark:hover:text-amber-400 transition-colors"
-            >
-              About
-            </button>
-            <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
-            <button
-              id="footer-feedback-btn"
-              onClick={() => {
-                setModalContent('feedback');
-                setIsViewingFeedback(false);
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 hover:bg-black text-white dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-100 transition-all shadow-2xs cursor-pointer active:scale-98"
-              title="Open feedback dialog"
-            >
-              <MessageSquare className="w-3.5 h-3.5 text-zinc-300 dark:text-zinc-400" />
-              <span>Feedback</span>
-            </button>
-
-            {/* Quick Tour / Guide button: exact same theme as Feedback button */}
-            {onOpenTour && (
-              <button
-                id="footer-tour-btn"
-                onClick={onOpenTour}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 hover:bg-black text-white dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-100 transition-all shadow-2xs cursor-pointer active:scale-98"
-                title="Start interactive quick tour & guide"
-                aria-label="Start interactive quick tour"
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <a
+                id="footer-github-link-mobile"
+                href="https://github.com/ehsaanullah0"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 transition-colors"
+                title="View GitHub Profile (github.com/ehsaanullah0)"
               >
-                <Compass className="w-3.5 h-3.5 text-[#E7AC08] bg-white rounded-xs" />
-                <span>Tour</span>
+                <Github className="w-3.5 h-3.5 text-[#0F172A] dark:text-zinc-300" />
+                <span>GitHub</span>
+              </a>
+              <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
+              <a
+                id="footer-mail-link-mobile"
+                href="mailto:worsmon@proton.me"
+                className="inline-flex items-center gap-1.5 text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 transition-colors"
+                title="Send Email to worsmon@proton.me"
+              >
+                <Mail className="w-3.5 h-3.5 text-[#0F172A] dark:text-zinc-300" />
+                <span>Mail</span>
+              </a>
+              <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
+              <a
+                id="footer-website-link-mobile"
+                href="https://ehsaan.odoo.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[#B45309] hover:text-[#E7AC08] dark:text-amber-400 hover:underline transition-colors"
+                title="Visit Website (ehsaan.odoo.com)"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#B45309] dark:text-amber-400" />
+                <span>Website</span>
+              </a>
+              <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
+              <button
+                type="button"
+                onClick={() => setModalContent('privacy')}
+                className="hover:text-[#B45309] dark:hover:text-amber-400 transition-colors cursor-pointer"
+              >
+                Privacy
+              </button>
+              <span className="text-[#CBD5E1] dark:text-zinc-600">•</span>
+              <button
+                type="button"
+                onClick={() => setModalContent('about')}
+                className="hover:text-[#B45309] dark:hover:text-amber-400 transition-colors cursor-pointer"
+              >
+                About
+              </button>
+            </div>
+
+            {/* Install App button: placed in mobile view */}
+            {!isInstalled && (
+              <button
+                id="footer-install-app-btn-mobile"
+                type="button"
+                onClick={handleInstallClick}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold bg-[#E7AC08] hover:bg-[#d99e00] text-zinc-950 dark:bg-[#E7AC08] dark:hover:bg-[#d99e00] dark:text-zinc-950 transition-all shadow-2xs cursor-pointer active:scale-98"
+                title="Install Ehsaan QR directly on your device"
+              >
+                <Download className="w-3.5 h-3.5 text-zinc-950" />
+                <span>Install App</span>
               </button>
             )}
           </div>
@@ -210,9 +326,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenTour }) => {
           <div className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl border border-[#EDE8DF] dark:border-zinc-800 p-6 shadow-2xl space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-[#EDE8DF] dark:border-zinc-800">
               <div className="flex items-center gap-2">
+                {modalContent === 'about' && <EhsaanFlameIcon size={20} className="shrink-0" />}
                 <h3 className="text-sm font-bold text-[#0F172A] dark:text-zinc-100 capitalize">
                   {modalContent === 'privacy' && 'Privacy Commitment'}
-                  {modalContent === 'about' && 'About Ehsaan QR'}
+                  {modalContent === 'about' && 'About EHSAAN QR'}
                   {modalContent === 'feedback' && (
                     isViewingFeedback
                       ? 'All Feedback Submissions'
@@ -279,35 +396,54 @@ export const Footer: React.FC<FooterProps> = ({ onOpenTour }) => {
             {modalContent === 'about' && (
               <div className="space-y-3 text-xs text-[#334155] dark:text-zinc-300 leading-relaxed">
                 <p>
-                  <strong>Ehsaan QR</strong> was crafted as a companion utility to the{' '}
+                  <strong>Ehsaan QR</strong> was crafted as a companion utility to{' '}
                   <a
-                    href="https://ehsaancompress.ai.studio"
+                    href="https://ehsaanplay.ai.studio"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="font-bold underline text-[#B45309] hover:text-[#E7AC08] dark:text-amber-400 inline-flex items-center gap-0.5"
                   >
-                    Ehsaan Compressor
+                    EHSAAN PLAY
                     <ExternalLink className="w-3 h-3 inline ml-0.5" />
                   </a>{' '}
-                  suite in the Ehsaan Ecosystem. It provides professionals, developers, and creators with a clean, unbloated, high-fidelity QR generator.
+                  in the Ehsaan Ecosystem. It provides professionals, developers, and creators with a clean, unbloated, high-fidelity QR generator.
                 </p>
                 <p>
                   Engineered with pixel-precise SVG exports, high error correction resilience, and real ISO/IEC 18004 barcode validation.
                 </p>
-                <div className="pt-2 border-t border-[#EDE8DF] dark:border-zinc-800">
-                  <p className="font-semibold text-[#0F172A] dark:text-zinc-200 mb-1">
-                    Open Source Repository:
+                <div className="pt-2 border-t border-[#EDE8DF] dark:border-zinc-800 space-y-2">
+                  <p className="font-semibold text-[#0F172A] dark:text-zinc-200">
+                    Connect & Developer Links:
                   </p>
-                  <a
-                    href="https://github.com/ehsaanullah0/ehsaanqr"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-[#B45309] hover:text-[#E7AC08] dark:text-amber-400 hover:underline font-mono text-[11px]"
-                  >
-                    <Github className="w-3.5 h-3.5" />
-                    github.com/ehsaanullah0/ehsaanqr
-                    <ExternalLink className="w-3 h-3 ml-0.5" />
-                  </a>
+                  <div className="flex flex-col gap-1.5 text-xs">
+                    <a
+                      href="https://github.com/ehsaanullah0"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[#B45309] hover:text-[#E7AC08] dark:text-amber-400 hover:underline font-mono text-[11px]"
+                    >
+                      <Github className="w-3.5 h-3.5 shrink-0" />
+                      <span>github.com/ehsaanullah0</span>
+                      <ExternalLink className="w-3 h-3 ml-0.5" />
+                    </a>
+                    <a
+                      href="mailto:worsmon@proton.me"
+                      className="inline-flex items-center gap-1.5 text-[#B45309] hover:text-[#E7AC08] dark:text-amber-400 hover:underline font-mono text-[11px]"
+                    >
+                      <Mail className="w-3.5 h-3.5 shrink-0" />
+                      <span>worsmon@proton.me</span>
+                    </a>
+                    <a
+                      href="https://ehsaan.odoo.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[#B45309] hover:text-[#E7AC08] dark:text-amber-400 hover:underline font-mono text-[11px]"
+                    >
+                      <Globe className="w-3.5 h-3.5 shrink-0" />
+                      <span>ehsaan.odoo.com</span>
+                      <ExternalLink className="w-3 h-3 ml-0.5" />
+                    </a>
+                  </div>
                 </div>
               </div>
             )}
@@ -515,6 +651,57 @@ export const Footer: React.FC<FooterProps> = ({ onOpenTour }) => {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* iOS Installation Instructions Modal */}
+      {showIosGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs animate-in fade-in">
+          <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-zinc-900 p-5 shadow-2xl border border-zinc-300 dark:border-zinc-700 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-[#FFFBEA] dark:bg-zinc-800 border border-[#E7AC08]/40 flex items-center justify-center text-[#E7AC08]">
+                  <Share2 className="w-4 h-4" />
+                </div>
+                <h4 className="font-bold text-sm text-[#0F172A] dark:text-zinc-100">
+                  Install on iOS Safari
+                </h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowIosGuide(false)}
+                className="p-1 rounded-lg text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-100 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs font-medium text-[#334155] dark:text-zinc-300 leading-relaxed">
+              Safari on iOS does not support one-click installation prompts, but you can easily add Ehsaan QR to your Home Screen:
+            </p>
+
+            <ol className="space-y-2 text-xs font-medium text-[#0F172A] dark:text-zinc-200">
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-[11px] font-bold flex items-center justify-center shrink-0">1</span>
+                <span>Tap the <strong>Share</strong> button (box with an arrow) in the Safari toolbar.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-[11px] font-bold flex items-center justify-center shrink-0">2</span>
+                <span>Scroll down and select <strong>Add to Home Screen</strong>.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-[11px] font-bold flex items-center justify-center shrink-0">3</span>
+                <span>Tap <strong>Add</strong> at top right to complete installation.</span>
+              </li>
+            </ol>
+
+            <button
+              type="button"
+              onClick={() => setShowIosGuide(false)}
+              className="w-full py-2.5 rounded-xl bg-zinc-900 hover:bg-black text-white dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-900 text-xs font-bold transition-colors cursor-pointer"
+            >
+              Got it
+            </button>
           </div>
         </div>
       )}

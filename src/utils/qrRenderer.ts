@@ -81,6 +81,12 @@ export const LOCATION_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBo
   <circle cx="12" cy="10" r="3" />
 </svg>`;
 
+export const MULTI_URL_LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="512" height="512" fill="none" stroke="#111827" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <polygon points="12 2 2 7 12 12 22 7 12 2" />
+  <polyline points="2 17 12 22 22 17" />
+  <polyline points="2 12 12 17 22 12" />
+</svg>`;
+
 export const URL_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(URL_LOGO_SVG)}`;
 export const PHONE_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(PHONE_LOGO_SVG)}`;
 export const WHATSAPP_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(WHATSAPP_LOGO_SVG)}`;
@@ -93,6 +99,7 @@ export const SMS_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURICo
 export const CALENDAR_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(CALENDAR_LOGO_SVG)}`;
 export const VCARD_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(VCARD_LOGO_SVG)}`;
 export const LOCATION_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(LOCATION_LOGO_SVG)}`;
+export const MULTI_URL_LOGO_DATA_URL = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(MULTI_URL_LOGO_SVG)}`;
 
 /**
  * Maps a QR code data type category to the most appropriate center logo icon
@@ -121,6 +128,8 @@ export function getAutoLogoForCategory(category: QrType): LogoType {
       return 'vcard';
     case 'location':
       return 'location';
+    case 'multi-url':
+      return 'multi-url';
     default:
       return 'none';
   }
@@ -129,6 +138,8 @@ export function getAutoLogoForCategory(category: QrType): LogoType {
 export function getLogoSourceUrl(logo: LogoConfig): string | undefined {
   if (!logo || logo.type === 'none') return undefined;
   switch (logo.type) {
+    case 'brand':
+      return '/assets/aistudio/logo-transparent.png?v=5.0.0';
     case 'url':
       return URL_LOGO_DATA_URL;
     case 'phone':
@@ -153,6 +164,8 @@ export function getLogoSourceUrl(logo: LogoConfig): string | undefined {
       return VCARD_LOGO_DATA_URL;
     case 'location':
       return LOCATION_LOGO_DATA_URL;
+    case 'multi-url':
+      return MULTI_URL_LOGO_DATA_URL;
     case 'custom':
       return logo.customUrl;
     default:

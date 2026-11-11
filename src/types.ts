@@ -9,7 +9,8 @@ export type QrType =
   | 'vcard'
   | 'upi'
   | 'calendar'
-  | 'location';
+  | 'location'
+  | 'multi-url';
 
 export type PatternStyle =
   | 'square'
@@ -130,6 +131,27 @@ export interface LocationData {
   name: string;
 }
 
+export interface MultiUrlItem {
+  id: string;
+  title: string;
+  url: string;
+  description?: string;
+  isFeatured?: boolean;
+  icon?: string;
+  sectionHeader?: string;
+}
+
+export interface MultiUrlData {
+  heroHeading?: string;
+  title: string;
+  handle?: string;
+  description?: string;
+  tags?: string;
+  avatarLetter?: string;
+  avatarImage?: string;
+  links: MultiUrlItem[];
+}
+
 export interface QrFormData {
   url: UrlData;
   text: TextData;
@@ -142,10 +164,12 @@ export interface QrFormData {
   upi: UpiData;
   calendar: CalendarData;
   location: LocationData;
+  'multi-url': MultiUrlData;
 }
 
 export type LogoType =
   | 'none'
+  | 'brand'
   | 'url'
   | 'phone'
   | 'whatsapp'
@@ -158,6 +182,7 @@ export type LogoType =
   | 'calendar'
   | 'vcard'
   | 'location'
+  | 'multi-url'
   | 'custom';
 
 export interface LogoConfig {
@@ -179,7 +204,7 @@ export interface QrStyleOptions {
   gradientAngle: number; // 0 - 360
   bgColor: string;
   transparentBg: boolean;
-  bgSaturationPreference?: 'low' | 'high';
+  bgSaturationPreference?: 'low' | 'medium' | 'high';
 
   // Pattern & Corners
   patternStyle: PatternStyle;
@@ -232,6 +257,8 @@ export interface ReadabilityReport {
   minRegionalContrastRatio: number; // e.g. 5.1
   modulePixelSize: number; // px per module at export
   estimatedMatrixModules: number; // e.g. 29x29
+  isDenseQr?: boolean; // Matrix >= 41x41 or payload > 110 chars
+  isVeryDenseQr?: boolean; // Matrix >= 49x49 or payload > 180 chars
   isDarkBg: boolean;
 
   // Issues & suggestions
@@ -242,7 +269,7 @@ export interface ReadabilityReport {
   score: 'excellent' | 'good' | 'warning' | 'danger';
 }
 
-export type CustomizationTabKey = 'colors' | 'patterns' | 'eyes' | 'logo' | 'quality';
+export type CustomizationTabKey = 'colors' | 'shapes' | 'logo' | 'quality' | 'patterns' | 'eyes';
 
 export type RandomizeTarget =
   | 'all'
@@ -261,4 +288,26 @@ export type RandomizeType = 'both' | 'shape' | 'color';
 export interface RandomizeConfig {
   target: RandomizeTarget;
   type: RandomizeType;
+}
+
+// Home Page Card Identifiers for modular visibility and rearranging
+export type HomePageCardId =
+  | 'preview'
+  | 'readability'
+  | 'typeSelector'
+  | 'contentForm'
+  | 'customization'
+  | 'opensource';
+
+export interface AppSettings {
+  theme: AppTheme;
+  sidebarEnabled: boolean;
+  sidebarExpanded: boolean;
+  activeFocusItem: HomePageCardId | 'all';
+  visibleCards: Record<HomePageCardId, boolean>;
+  cardOrder: HomePageCardId[];
+  defaultErrorCorrection: ErrorCorrectionLevel;
+  defaultExportResolution: number;
+  defaultExportFormat: ExportFormat;
+  defaultAutoAdaptLogo: boolean;
 }

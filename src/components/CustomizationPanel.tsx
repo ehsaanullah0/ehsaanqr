@@ -16,6 +16,7 @@ import {
   Eye,
   Image as ImageIcon,
   Sliders,
+  ArrowUp,
   ArrowLeftRight,
   Upload,
   X,
@@ -33,10 +34,7 @@ import {
   QrCode,
   Check,
   Lock,
-  Crown,
 } from 'lucide-react';
-import { ExclusiveCrownBadge } from './ExclusiveCrownBadge';
-import { useExclusiveAccess } from '../context/ExclusiveAccessContext';
 import {
   resolvePupilShape,
   getAutoLogoForCategory,
@@ -52,6 +50,7 @@ import {
   CALENDAR_LOGO_DATA_URL,
   VCARD_LOGO_DATA_URL,
   LOCATION_LOGO_DATA_URL,
+  MULTI_URL_LOGO_DATA_URL,
 } from '../utils/qrRenderer';
 import { SmartRandomizeController } from './SmartRandomizeController';
 import { ColorPickerField } from './ColorPickerField';
@@ -62,12 +61,15 @@ import {
   getRandomBgAndPupil,
   getRandomAllOptions,
 } from '../utils/colorRandomizer';
-import { RandomizeTarget, RandomizeType } from '../types';
+import { estimateQrMatrixSize } from '../utils/readabilityEngine';
+import { RandomizeTarget, RandomizeType, ReadabilityReport } from '../types';
 
 interface CustomizationPanelProps {
   options: QrStyleOptions;
   onChange: (options: QrStyleOptions) => void;
   selectedType?: QrType;
+  payload?: string;
+  readability?: ReadabilityReport;
   activeTab?: CustomizationTabKey;
   onTabChange?: (tab: CustomizationTabKey) => void;
   selectedRandomizeTarget?: RandomizeTarget;
@@ -427,6 +429,8 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   options,
   onChange,
   selectedType,
+  payload = '',
+  readability,
   activeTab: propActiveTab,
   onTabChange,
   selectedRandomizeTarget,
@@ -437,8 +441,8 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
   onLockedTargetsChange,
   onShowToast,
 }) => {
-  const { isUnlocked, openExclusiveModal } = useExclusiveAccess();
   const [internalTab, setInternalTab] = useState<TabKey>('colors');
+  const [shapesFilter, setShapesFilter] = useState<'pixels' | 'eyes'>('pixels');
   const [internalRandTarget, setInternalRandTarget] = useState<RandomizeTarget>('all');
   const [internalRandType, setInternalRandType] = useState<RandomizeType>('both');
   const [activePaletteModal, setActivePaletteModal] = useState<{
@@ -446,6 +450,21 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
     title: string;
     color: string;
   } | null>(null);
+
+  // Dense QR code logo restriction & override state
+  const [overrideDenseLogoRestriction, setOverrideDenseLogoRestriction] = useState(false);
+  const [showDenseConfirmModal, setShowDenseConfirmModal] = useState(false);
+  const [pendingLogoSelection, setPendingLogoSelection] = useState<{
+    type: LogoType;
+    customUrl?: string;
+  } | null>(null);
+
+  const estimatedMatrix =
+    readability?.estimatedMatrixModules ||
+    estimateQrMatrixSize(payload.length || 20, options.errorCorrection);
+  const isDenseQr = Boolean(
+    readability?.isDenseQr ?? (estimatedMatrix >= 41 || (payload?.length || 0) >= 110)
+  );
 
   const currentRandTarget = selectedRandomizeTarget ?? internalRandTarget;
   const currentRandType = selectedRandomizeType ?? internalRandType;
@@ -460,18 +479,59 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
       setInternalTab(tab);
     }
   };
+
+  useEffect(() => {
+    if (activeTab === 'patterns') {
+      setShapesFilter('pixels');
+    } else if (activeTab === 'eyes') {
+      setShapesFilter('eyes');
+    }
+  }, [activeTab]);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const update = (partial: Partial<QrStyleOptions>) => {
     onChange({ ...options, ...partial });
   };
 
-  // Ensure 2048px quality is locked for free users and falls back to 1024px
-  useEffect(() => {
-    if (!isUnlocked && options.size === 2048) {
-      update({ size: 1024 });
+  const applyLogoSelection = (type: LogoType, customUrl?: string) => {
+    update({
+      logo: {
+        ...options.logo,
+        type,
+        ...(customUrl ? { customUrl } : {}),
+      },
+      errorCorrection:
+        type !== 'none' && (options.errorCorrection === 'L' || options.errorCorrection === 'M')
+          ? 'H'
+          : options.errorCorrection,
+    });
+  };
+
+  const handleLogoItemClick = (type: LogoType, customUrl?: string) => {
+    if (type === 'none') {
+      update({ logo: { ...options.logo, type: 'none' } });
+      return;
     }
-  }, [isUnlocked, options.size]);
+
+    // If QR is dense and user hasn't overridden the restriction, show modal
+    if (isDenseQr && !overrideDenseLogoRestriction) {
+      setPendingLogoSelection({ type, customUrl });
+      setShowDenseConfirmModal(true);
+      return;
+    }
+
+    applyLogoSelection(type, customUrl);
+  };
+
+  const handleConfirmDenseLogo = () => {
+    setOverrideDenseLogoRestriction(true);
+    setShowDenseConfirmModal(false);
+    if (pendingLogoSelection) {
+      applyLogoSelection(pendingLogoSelection.type, pendingLogoSelection.customUrl);
+      setPendingLogoSelection(null);
+    }
+    onShowToast?.('Logo enabled via override (Error Correction set to High) ⚠️');
+  };
 
   const handleRandomizeAll = () => {
     const randomized = getRandomAllOptions(options, options.bgSaturationPreference || 'low');
@@ -556,15 +616,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
-      update({
-        logo: {
-          ...options.logo,
-          type: 'custom',
-          customUrl: dataUrl,
-        },
-        // Recommend High error correction when logo is uploaded
-        errorCorrection: options.errorCorrection === 'L' || options.errorCorrection === 'M' ? 'H' : options.errorCorrection,
-      });
+      handleLogoItemClick('custom', dataUrl);
     };
     reader.readAsDataURL(file);
   };
@@ -582,20 +634,22 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
         <div className="grid grid-cols-5 gap-1">
           {[
             { id: 'colors', label: 'Colour', icon: Palette },
-            { id: 'patterns', label: 'Pattern', icon: Shapes },
-            { id: 'eyes', label: 'Eyes', icon: Eye },
+            { id: 'shapes', label: 'Shapes', icon: Shapes },
             { id: 'logo', label: 'Logo', icon: ImageIcon },
             { id: 'quality', label: 'Quality', icon: Sliders },
           ].map((tab) => {
             const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
+            const isActive =
+              tab.id === 'shapes'
+                ? activeTab === 'shapes' || activeTab === 'patterns' || activeTab === 'eyes'
+                : activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 id={`tab-custom-${tab.id}`}
                 type="button"
                 onClick={() => setActiveTab(tab.id as TabKey)}
-                className={`relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-1.5 sm:py-2 px-1 sm:px-3 rounded-xl text-center transition-all focus:outline-none ${
+                className={`relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-1.5 sm:py-2 px-1 sm:px-3 rounded-xl text-center transition-all focus:outline-none cursor-pointer ${
                   isActive
                     ? 'bg-[#FEF08A] dark:bg-[#FDE047] text-black shadow-xs font-extrabold ring-1 ring-[#FACC15]'
                     : 'text-[#334155] dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-white/70 dark:hover:bg-zinc-800/40 font-semibold'
@@ -609,6 +663,21 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
               </button>
             );
           })}
+
+          {/* 5th slot: Scroll to top button in navigation at right corner */}
+          <button
+            id="btn-scroll-to-top-panel"
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="relative flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-1.5 sm:py-2 px-1 sm:px-3 rounded-xl text-center transition-all focus:outline-none text-[#334155] dark:text-zinc-300 hover:text-black dark:hover:text-white hover:bg-[#FEF08A]/50 dark:hover:bg-zinc-800/40 font-semibold cursor-pointer active:scale-95"
+            title="Scroll to top of page"
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 stroke-[2.4] text-[#E7AC08] dark:text-amber-400" />
+            <span className="text-[10px] sm:text-xs tracking-tight whitespace-nowrap font-semibold">
+              Top
+            </span>
+          </button>
         </div>
       </div>
 
@@ -766,23 +835,21 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
             </div>
 
             {/* Curated Color Swatches & Presets (28 Combos matching reference) */}
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-[#FAF8F5] dark:bg-zinc-800 text-[#0F172A] dark:text-zinc-200">
-                    <Palette className="w-4 h-4 text-[#E7AC08]" />
-                  </div>
-                  <span className="text-xs font-bold tracking-wider uppercase text-[#0F172A] dark:text-zinc-100">
-                    Presets
+                <div className="flex items-center gap-1.5">
+                  <Palette className="w-4 h-4 text-[#E7AC08]" />
+                  <span className="text-xs font-bold text-[#0F172A] dark:text-zinc-100">
+                    Color Presets
                   </span>
                 </div>
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-[#EDE8DF] dark:bg-zinc-800 text-[#334155] dark:text-zinc-300 border border-[#CBD5E1]/60 dark:border-zinc-700">
-                  {PRESET_COLOR_COMBOS.length}
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#EDE8DF]/80 dark:bg-zinc-800 text-[#475569] dark:text-zinc-300">
+                  {PRESET_COLOR_COMBOS.length} presets
                 </span>
               </div>
 
-              {/* 6-Column Grid of 28 Rounded Swatches with centered dots */}
-              <div className="grid grid-cols-6 gap-2 sm:gap-2.5 p-3 rounded-2xl bg-[#FAF8F5] dark:bg-zinc-900/60 border border-[#EDE8DF] dark:border-zinc-800">
+              {/* Balanced, medium-sized 7-column responsive grid (4 clean rows of 7) */}
+              <div className="grid grid-cols-7 gap-1.5 sm:gap-2 p-2.5 sm:p-3 rounded-2xl bg-[#FAF8F5] dark:bg-zinc-900/60 border border-[#EDE8DF] dark:border-zinc-800">
                 {PRESET_COLOR_COMBOS.map((combo, idx) => {
                   const isSelected =
                     options.bgColor.toUpperCase() === combo.outer.toUpperCase() &&
@@ -806,15 +873,15 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                           colorMode: 'solid',
                         })
                       }
-                      className={`group relative flex flex-col items-center justify-center aspect-square rounded-2xl transition-all hover:scale-105 active:scale-95 border ${
+                      className={`group relative flex items-center justify-center aspect-square w-full rounded-xl sm:rounded-2xl transition-all duration-150 hover:scale-105 active:scale-95 border cursor-pointer ${
                         isSelected
-                          ? 'border-[#E7AC08] ring-2 ring-[#E7AC08] ring-offset-2 dark:ring-offset-zinc-900 shadow-xs'
-                          : 'border-black/10 dark:border-white/10 hover:border-black/20'
+                          ? 'border-[#E7AC08] ring-2 ring-[#E7AC08] ring-offset-2 dark:ring-offset-zinc-900 shadow-xs z-10'
+                          : 'border-black/10 dark:border-white/10 hover:border-black/25 dark:hover:border-white/25 shadow-2xs'
                       }`}
                       style={{ backgroundColor: combo.outer }}
                     >
                       <div
-                        className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-md shadow-2xs transition-transform group-hover:scale-110"
+                        className="w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-sm sm:rounded-md shadow-2xs transition-transform group-hover:scale-110"
                         style={{ backgroundColor: combo.inner }}
                       />
                       {isSelected && (
@@ -825,7 +892,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                 })}
               </div>
 
-              {/* 4 Quick Custom Swatch Buttons: Custom FG (default black), Custom BG, Eye, Pupil */}
+              {/* 4 Quick Custom Swatch Buttons: Custom FG, Custom BG, Eye, Pupil */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
                 {/* Custom FG */}
                 <button
@@ -838,17 +905,17 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                       color: options.fgColor || '#000000',
                     })
                   }
-                  className="flex items-center gap-2 p-2 rounded-xl border border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#CBD5E1] dark:hover:border-zinc-700 text-xs font-semibold text-[#0F172A] dark:text-zinc-200 transition-all shadow-2xs hover:scale-[1.02] active:scale-98"
+                  className="flex items-center gap-2 p-2 rounded-xl border border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-[#CBD5E1] dark:hover:border-zinc-700 text-xs font-semibold text-[#0F172A] dark:text-zinc-200 transition-all shadow-2xs hover:scale-[1.01] active:scale-98 cursor-pointer"
                 >
                   <div
-                    className="w-5 h-5 rounded-full border border-black/15 shadow-2xs shrink-0"
+                    className="w-4 h-4 rounded-full border border-black/15 shadow-2xs shrink-0"
                     style={{ backgroundColor: options.fgColor || '#000000' }}
                   />
                   <span className="truncate">Custom FG</span>
                 </button>
 
                 {/* Custom BG with inline Randomize button */}
-                <div className="flex items-center justify-between p-2 rounded-xl border border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#CBD5E1] dark:hover:border-zinc-700 text-xs font-semibold text-[#0F172A] dark:text-zinc-200 transition-colors shadow-2xs">
+                <div className="flex items-center justify-between p-2 rounded-xl border border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-[#CBD5E1] dark:hover:border-zinc-700 text-xs font-semibold text-[#0F172A] dark:text-zinc-200 transition-colors shadow-2xs">
                   <button
                     type="button"
                     id="btn-quick-custom-bg"
@@ -859,10 +926,10 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                         color: options.bgColor || '#FFFFFF',
                       })
                     }
-                    className="flex items-center gap-2 min-w-0 flex-1 text-left"
+                    className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
                   >
                     <div
-                      className="w-5 h-5 rounded-full border border-black/15 shadow-2xs shrink-0"
+                      className="w-4 h-4 rounded-full border border-black/15 shadow-2xs shrink-0"
                       style={{ backgroundColor: options.transparentBg ? '#EDE8DF' : options.bgColor }}
                     />
                     <span className="truncate">Custom BG</span>
@@ -871,7 +938,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                     type="button"
                     onClick={handleRandomizeBg}
                     title="Randomize Background Color"
-                    className="p-1 rounded-md text-[#64748B] hover:text-[#B45309] dark:hover:text-amber-400 hover:bg-[#F8F6F0] dark:hover:bg-zinc-800 transition-colors shrink-0"
+                    className="p-1 rounded text-[#64748B] hover:text-[#B45309] dark:hover:text-amber-400 hover:bg-[#F8F6F0] dark:hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer"
                   >
                     <Shuffle className="w-3 h-3" />
                   </button>
@@ -888,17 +955,17 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                       color: options.eyeOuterColor || options.fgColor || '#000000',
                     })
                   }
-                  className="flex items-center gap-2 p-2 rounded-xl border border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#CBD5E1] dark:hover:border-zinc-700 text-xs font-semibold text-[#0F172A] dark:text-zinc-200 transition-all shadow-2xs hover:scale-[1.02] active:scale-98"
+                  className="flex items-center gap-2 p-2 rounded-xl border border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-[#CBD5E1] dark:hover:border-zinc-700 text-xs font-semibold text-[#0F172A] dark:text-zinc-200 transition-all shadow-2xs hover:scale-[1.01] active:scale-98 cursor-pointer"
                 >
                   <div
-                    className="w-5 h-5 rounded-full border border-black/15 shadow-2xs shrink-0"
+                    className="w-4 h-4 rounded-full border border-black/15 shadow-2xs shrink-0"
                     style={{ backgroundColor: options.eyeOuterColor || options.fgColor || '#000000' }}
                   />
                   <span className="truncate">Eye</span>
                 </button>
 
                 {/* Pupil with inline Randomize button */}
-                <div className="flex items-center justify-between p-2 rounded-xl border border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-[#CBD5E1] dark:hover:border-zinc-700 text-xs font-semibold text-[#0F172A] dark:text-zinc-200 transition-colors shadow-2xs">
+                <div className="flex items-center justify-between p-2 rounded-xl border border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-900/90 hover:border-[#CBD5E1] dark:hover:border-zinc-700 text-xs font-semibold text-[#0F172A] dark:text-zinc-200 transition-colors shadow-2xs">
                   <button
                     type="button"
                     id="btn-quick-custom-pupil"
@@ -909,10 +976,10 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                         color: options.eyeInnerColor || options.fgColor || '#000000',
                       })
                     }
-                    className="flex items-center gap-2 min-w-0 flex-1 text-left"
+                    className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
                   >
                     <div
-                      className="w-5 h-5 rounded-full border border-black/15 shadow-2xs shrink-0"
+                      className="w-4 h-4 rounded-full border border-black/15 shadow-2xs shrink-0"
                       style={{ backgroundColor: options.eyeInnerColor || options.fgColor || '#000000' }}
                     />
                     <span className="truncate">Pupil</span>
@@ -921,7 +988,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                     type="button"
                     onClick={handleRandomizePupil}
                     title="Randomize Pupil Color"
-                    className="p-1 rounded-md text-[#64748B] hover:text-[#B45309] dark:hover:text-amber-400 hover:bg-[#F8F6F0] dark:hover:bg-zinc-800 transition-colors shrink-0"
+                    className="p-1 rounded text-[#64748B] hover:text-[#B45309] dark:hover:text-amber-400 hover:bg-[#F8F6F0] dark:hover:bg-zinc-800 transition-colors shrink-0 cursor-pointer"
                   >
                     <Shuffle className="w-3 h-3" />
                   </button>
@@ -940,329 +1007,457 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
           </div>
         )}
 
-        {/* TAB 2: PATTERNS */}
-        {activeTab === 'patterns' && (
+        {/* TAB 2: SHAPES (Consolidated Module Patterns, Corners, Eye Frames & Pupils) */}
+        {(activeTab === 'shapes' || activeTab === 'patterns' || activeTab === 'eyes') && (
           <div className="space-y-6">
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
-                    Module Pixel Style
-                  </label>
-                  <p className="text-[11px] text-[#64748B] dark:text-zinc-400">
-                    Choose distinctive geometric shapes for your QR code pixel matrix
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-medium text-[#64748B] dark:text-zinc-400 capitalize hidden sm:inline">
-                    {options.patternStyle === 'dots' ? 'Circle' : options.patternStyle.replace('-', ' ')}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleRandomizePattern}
-                    title="Pick random module pattern"
-                    className="flex items-center gap-1.5 text-[11px] font-medium text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 px-2.5 py-1 rounded-lg border border-[#EDE8DF] dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xs hover:bg-[#FAF8F5] transition-colors"
-                  >
-                    <Dices className="w-3.5 h-3.5 text-[#E7AC08]" />
-                    <span>Random Pattern</span>
-                  </button>
-                </div>
-              </div>
+            {/* Shapes Sub-Category Segment Switcher (Pixel Matrix vs Eye & Pupil) */}
+            <div className="p-1 bg-[#FAF8F5] dark:bg-zinc-900/80 border border-[#EDE8DF] dark:border-zinc-800 rounded-xl flex items-center gap-1 shadow-2xs">
+              <button
+                type="button"
+                id="btn-shapes-filter-pixels"
+                onClick={() => setShapesFilter('pixels')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  shapesFilter === 'pixels'
+                    ? 'bg-white dark:bg-zinc-800 text-[#0F172A] dark:text-zinc-100 shadow-2xs border border-[#EDE8DF] dark:border-zinc-700'
+                    : 'text-[#64748B] dark:text-zinc-400 hover:text-[#0F172A] dark:hover:text-zinc-200'
+                }`}
+              >
+                <QrCode className="w-3.5 h-3.5 text-[#E7AC08]" />
+                <span>Pixel Matrix</span>
+              </button>
 
-              {/* Pattern Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-                {PATTERN_STYLES_LIST.map((item) => {
-                  const isSelected =
-                    options.patternStyle === item.id ||
-                    (item.id === 'circle' && options.patternStyle === 'dots');
-                  return (
-                    <button
-                      key={item.id}
-                      id={`pattern-${item.id}`}
-                      type="button"
-                      onClick={() => update({ patternStyle: item.id as PatternStyle })}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
-                        isSelected
-                          ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
-                          : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/60 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
-                      }`}
-                    >
-                      <PixelShapePreview styleId={item.id} />
-                      <span className="text-xs font-bold leading-tight mb-0.5">
-                        {item.label}
-                      </span>
-                      <span className="text-[10px] text-[#64748B] dark:text-zinc-500 leading-tight">
-                        {item.desc}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+              <button
+                type="button"
+                id="btn-shapes-filter-eyes"
+                onClick={() => setShapesFilter('eyes')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  shapesFilter === 'eyes'
+                    ? 'bg-white dark:bg-zinc-800 text-[#0F172A] dark:text-zinc-100 shadow-2xs border border-[#EDE8DF] dark:border-zinc-700'
+                    : 'text-[#64748B] dark:text-zinc-400 hover:text-[#0F172A] dark:hover:text-zinc-200'
+                }`}
+              >
+                <Eye className="w-3.5 h-3.5 text-[#E7AC08]" />
+                <span>Eye & Pupil</span>
+              </button>
             </div>
 
-            {/* QR Code Corner Selection (Sharp Corners vs Smooth Corners) */}
-            <div className="pt-4 border-t border-[#EDE8DF] dark:border-zinc-800">
-              <div className="flex items-center justify-between mb-2.5">
+            {/* Pixels & Matrix Section */}
+            {shapesFilter === 'pixels' && (
+              <>
+                {/* 1. Module Pixel Style */}
                 <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
-                    QR Code Corners
-                  </label>
-                  <p className="text-[11px] text-[#64748B] dark:text-zinc-400">
-                    Choose whether the overall QR code canvas has sharp or smooth outer corners
-                  </p>
-                </div>
-                <span className="text-[11px] font-semibold text-[#B45309] dark:text-amber-400 capitalize">
-                  {options.cornerStyle === 'smooth' ? 'Smooth corners' : 'Sharp corners'}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Sharp Corners */}
-                <button
-                  id="corner-style-sharp"
-                  type="button"
-                  onClick={() => update({ cornerStyle: 'sharp' })}
-                  className={`flex items-center gap-3.5 p-3.5 rounded-xl border text-left transition-all ${
-                    options.cornerStyle === 'sharp'
-                      ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
-                      : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
-                  }`}
-                >
-                  <div className="w-10 h-10 shrink-0 bg-[#FAF8F5] dark:bg-zinc-900 rounded-none border-2 border-[#0F172A] dark:border-zinc-300 flex items-center justify-center shadow-2xs">
-                    <div className="w-4 h-4 bg-[#E7AC08] rounded-none" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold block leading-tight">
-                      Sharp Corners
-                    </span>
-                    <span className="text-[11px] text-[#64748B] dark:text-zinc-400">
-                      Classic 90° square boundary
-                    </span>
-                  </div>
-                </button>
-
-                {/* Smooth Corners */}
-                <button
-                  id="corner-style-smooth"
-                  type="button"
-                  onClick={() => update({ cornerStyle: 'smooth' })}
-                  className={`flex items-center gap-3.5 p-3.5 rounded-xl border text-left transition-all ${
-                    options.cornerStyle === 'smooth'
-                      ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
-                      : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
-                  }`}
-                >
-                  <div className="w-10 h-10 shrink-0 bg-[#FAF8F5] dark:bg-zinc-900 rounded-2xl border-2 border-[#0F172A] dark:border-zinc-300 flex items-center justify-center shadow-2xs">
-                    <div className="w-4 h-4 bg-[#E7AC08] rounded-full" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold block leading-tight">
-                      Smooth Corners
-                    </span>
-                    <span className="text-[11px] text-[#64748B] dark:text-zinc-400">
-                      Modern rounded curved boundary
-                    </span>
-                  </div>
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: EYES */}
-        {activeTab === 'eyes' && (
-          <div className="space-y-5">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
-                    Corner Finder Pattern (Eye Frame) Style
-                  </label>
-                  <p className="text-[11px] text-[#64748B] dark:text-zinc-400">
-                    Select the outer contour shape of the 3 positioning corner finders
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold text-[#B45309] dark:text-amber-400 capitalize hidden sm:inline">
-                    {options.eyeStyle}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleRandomizeEyeStyle}
-                    title="Pick random eye frame style"
-                    className="flex items-center gap-1.5 text-[11px] font-medium text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 px-2.5 py-1 rounded-lg border border-[#EDE8DF] dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xs hover:bg-[#FAF8F5] transition-colors"
-                  >
-                    <Dices className="w-3.5 h-3.5 text-[#E7AC08]" />
-                    <span>Random Frame</span>
-                  </button>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-                {EYE_STYLES.map((eye) => {
-                  const isSelected = options.eyeStyle === eye.id;
-                  return (
-                    <button
-                      key={eye.id}
-                      id={`eye-style-${eye.id}`}
-                      type="button"
-                      onClick={() => update({ eyeStyle: eye.id as EyeStyle })}
-                      className={`group flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
-                        isSelected
-                          ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
-                          : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1] dark:hover:border-zinc-700'
-                      }`}
-                    >
-                      <div
-                        className={`w-10 h-10 mb-2 flex items-center justify-center rounded-lg border transition-all ${
-                          isSelected
-                            ? 'bg-[#E7AC08] text-[#0F172A] border-[#E7AC08] shadow-2xs'
-                            : 'bg-[#FAF8F5] dark:bg-zinc-900 text-[#0F172A] border-[#EDE8DF] dark:border-zinc-700 group-hover:border-[#E7AC08]/50 dark:group-hover:border-amber-800'
-                        }`}
-                      >
-                        <EyeShapeIcon shape={eye.id} className="w-6 h-6" />
-                      </div>
-                      <span className="text-xs font-bold leading-tight truncate w-full">
-                        {eye.label}
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
+                        Module Pixel Style
+                      </label>
+                      <p className="text-[11px] text-[#64748B] dark:text-zinc-400">
+                        Choose distinctive geometric shapes for your QR code pixel matrix
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-medium text-[#64748B] dark:text-zinc-400 capitalize hidden sm:inline">
+                        {options.patternStyle === 'dots' ? 'Circle' : options.patternStyle.replace('-', ' ')}
                       </span>
-                      <span className="text-[10px] text-[#64748B] dark:text-zinc-500 block truncate w-full mt-0.5">
-                        {eye.desc}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Pupil Shapes (Inner Eye) */}
-            <div>
-              <div className="flex items-center justify-between mb-2.5">
-                <div>
-                  <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
-                    Inner Eye Pupil Shape
-                  </label>
-                  <p className="text-[11px] text-[#64748B] dark:text-zinc-400">
-                    Choose the geometry of the inner core in each finder pattern
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold text-[#B45309] dark:text-amber-400 capitalize hidden sm:inline">
-                    {options.pupilStyle && options.pupilStyle !== 'auto'
-                      ? options.pupilStyle
-                      : `Auto (${options.eyeStyle})`}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleRandomizePupilShape}
-                    title="Pick random pupil shape"
-                    className="flex items-center gap-1.5 text-[11px] font-medium text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 px-2.5 py-1 rounded-lg border border-[#EDE8DF] dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xs hover:bg-[#FAF8F5] transition-colors"
-                  >
-                    <Dices className="w-3.5 h-3.5 text-[#E7AC08]" />
-                    <span>Random Shape</span>
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
-                {PUPIL_SHAPES.map((pupil) => {
-                  const isSelected = (options.pupilStyle || 'auto') === pupil.id;
-                  return (
-                    <button
-                      key={pupil.id}
-                      id={`pupil-shape-${pupil.id}`}
-                      type="button"
-                      onClick={() => update({ pupilStyle: pupil.id })}
-                      className={`group flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all ${
-                        isSelected
-                          ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
-                          : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1] dark:hover:border-zinc-700'
-                      }`}
-                    >
-                      <div
-                        className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center border transition-all ${
-                          isSelected
-                            ? 'bg-[#E7AC08] text-[#0F172A] border-[#E7AC08] shadow-2xs'
-                            : 'bg-[#FAF8F5] dark:bg-zinc-900 text-[#0F172A] dark:text-zinc-300 border-[#EDE8DF] dark:border-zinc-700 group-hover:text-[#B45309] group-hover:border-[#E7AC08]/40 dark:group-hover:border-amber-900'
-                        }`}
-                      >
-                        <PupilShapeIcon
-                          shape={pupil.id}
-                          eyeStyle={options.eyeStyle}
-                          className="w-5 h-5"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <span className="text-xs font-bold block leading-tight truncate">
-                          {pupil.label}
-                        </span>
-                        <span className="text-[10px] text-[#64748B] dark:text-zinc-500 block truncate">
-                          {pupil.desc}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Custom Eye Colors */}
-            <div className="p-4 rounded-xl border border-[#EDE8DF] dark:border-zinc-800 bg-[#FAF8F5] dark:bg-zinc-800/20 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <label className="text-xs font-semibold text-[#0F172A] dark:text-zinc-200">
-                    Independent Eye Colors
-                  </label>
-                  <p className="text-[11px] text-[#64748B]">
-                    Customize the outer finder ring and inner pupil separately.
-                  </p>
-                </div>
-                <input
-                  type="checkbox"
-                  id="checkbox-custom-eye-colors"
-                  checked={options.customEyeColors}
-                  onChange={(e) => update({ customEyeColors: e.target.checked })}
-                  className="w-4 h-4 rounded-sm text-[#E7AC08] border-[#CBD5E1] focus:ring-[#E7AC08] accent-[#E7AC08]"
-                />
-              </div>
-
-              {options.customEyeColors && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  <ColorPickerField
-                    id="picker-eye-outer"
-                    label="Outer Eye Ring Color"
-                    color={options.eyeOuterColor || options.fgColor || '#000000'}
-                    pickerTitle="Outer Eye Ring Color"
-                    onChange={(hex) => update({ eyeOuterColor: hex, customEyeColors: true })}
-                    size="sm"
-                  />
-
-                  <ColorPickerField
-                    id="picker-eye-inner"
-                    label="Inner Eye Pupil Color"
-                    color={options.eyeInnerColor || options.fgColor || '#000000'}
-                    pickerTitle="Inner Eye Pupil Color"
-                    extraAction={
                       <button
                         type="button"
-                        onClick={handleRandomizePupil}
-                        className="flex items-center gap-1 text-[10px] font-semibold text-[#B45309] dark:text-amber-400 hover:underline"
-                        title="Randomize Pupil Color"
+                        onClick={handleRandomizePattern}
+                        title="Pick random module pattern"
+                        className="flex items-center gap-1.5 text-[11px] font-medium text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 px-2.5 py-1 rounded-lg border border-[#EDE8DF] dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xs hover:bg-[#FAF8F5] transition-colors"
                       >
-                        <Shuffle className="w-3 h-3" />
-                        <span>Randomize</span>
+                        <Dices className="w-3.5 h-3.5 text-[#E7AC08]" />
+                        <span>Random Pattern</span>
                       </button>
-                    }
-                    onChange={(hex) => update({ eyeInnerColor: hex, customEyeColors: true })}
-                    size="sm"
-                  />
+                    </div>
+                  </div>
+
+                  {/* Pattern Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                    {PATTERN_STYLES_LIST.map((item) => {
+                      const isSelected =
+                        options.patternStyle === item.id ||
+                        (item.id === 'circle' && options.patternStyle === 'dots');
+                      return (
+                        <button
+                          key={item.id}
+                          id={`pattern-${item.id}`}
+                          type="button"
+                          onClick={() => update({ patternStyle: item.id as PatternStyle })}
+                          className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                            isSelected
+                              ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
+                              : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/60 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
+                          }`}
+                        >
+                          <PixelShapePreview styleId={item.id} />
+                          <span className="text-xs font-bold leading-tight mb-0.5">
+                            {item.label}
+                          </span>
+                          <span className="text-[10px] text-[#64748B] dark:text-zinc-500 leading-tight">
+                            {item.desc}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-              )}
-            </div>
+
+                {/* 2. QR Code Corner Selection (Sharp Corners vs Smooth Corners) */}
+                <div className="pt-5 border-t border-[#EDE8DF] dark:border-zinc-800">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
+                        QR Code Corners
+                      </label>
+                      <p className="text-[11px] text-[#64748B] dark:text-zinc-400">
+                        Choose whether the overall QR code canvas has sharp or smooth outer corners
+                      </p>
+                    </div>
+                    <span className="text-[11px] font-semibold text-[#B45309] dark:text-amber-400 capitalize">
+                      {options.cornerStyle === 'smooth' ? 'Smooth corners' : 'Sharp corners'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Sharp Corners */}
+                    <button
+                      id="corner-style-sharp"
+                      type="button"
+                      onClick={() => update({ cornerStyle: 'sharp' })}
+                      className={`flex items-center gap-3.5 p-3.5 rounded-xl border text-left transition-all ${
+                        options.cornerStyle === 'sharp'
+                          ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
+                          : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
+                      }`}
+                    >
+                      <div className="w-10 h-10 shrink-0 bg-[#FAF8F5] dark:bg-zinc-900 rounded-none border-2 border-[#0F172A] dark:border-zinc-300 flex items-center justify-center shadow-2xs">
+                        <div className="w-4 h-4 bg-[#E7AC08] rounded-none" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold block leading-tight">
+                          Sharp Corners
+                        </span>
+                        <span className="text-[11px] text-[#64748B] dark:text-zinc-400">
+                          Classic 90° square boundary
+                        </span>
+                      </div>
+                    </button>
+
+                    {/* Smooth Corners */}
+                    <button
+                      id="corner-style-smooth"
+                      type="button"
+                      onClick={() => update({ cornerStyle: 'smooth' })}
+                      className={`flex items-center gap-3.5 p-3.5 rounded-xl border text-left transition-all ${
+                        options.cornerStyle === 'smooth'
+                          ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
+                          : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
+                      }`}
+                    >
+                      <div className="w-10 h-10 shrink-0 bg-[#FAF8F5] dark:bg-zinc-900 rounded-2xl border-2 border-[#0F172A] dark:border-zinc-300 flex items-center justify-center shadow-2xs">
+                        <div className="w-4 h-4 bg-[#E7AC08] rounded-full" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold block leading-tight">
+                          Smooth Corners
+                        </span>
+                        <span className="text-[11px] text-[#64748B] dark:text-zinc-400">
+                          Modern rounded curved boundary
+                        </span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Eyes & Finder Pattern Section */}
+            {shapesFilter === 'eyes' && (
+              <>
+                {/* 3. Corner Finder Pattern (Eye Frame) Style */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
+                        Corner Finder Pattern (Eye Frame) Style
+                      </label>
+                      <p className="text-[11px] text-[#64748B] dark:text-zinc-400">
+                        Select the outer contour shape of the 3 positioning corner finders
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-semibold text-[#B45309] dark:text-amber-400 capitalize hidden sm:inline">
+                        {options.eyeStyle}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleRandomizeEyeStyle}
+                        title="Pick random eye frame style"
+                        className="flex items-center gap-1.5 text-[11px] font-medium text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 px-2.5 py-1 rounded-lg border border-[#EDE8DF] dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xs hover:bg-[#FAF8F5] transition-colors"
+                      >
+                        <Dices className="w-3.5 h-3.5 text-[#E7AC08]" />
+                        <span>Random Frame</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+                    {EYE_STYLES.map((eye) => {
+                      const isSelected = options.eyeStyle === eye.id;
+                      return (
+                        <button
+                          key={eye.id}
+                          id={`eye-style-${eye.id}`}
+                          type="button"
+                          onClick={() => update({ eyeStyle: eye.id as EyeStyle })}
+                          className={`group flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                            isSelected
+                              ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
+                              : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1] dark:hover:border-zinc-700'
+                          }`}
+                        >
+                          <div
+                            className={`w-10 h-10 mb-2 flex items-center justify-center rounded-lg border transition-all ${
+                              isSelected
+                                ? 'bg-[#E7AC08] text-[#0F172A] border-[#E7AC08] shadow-2xs'
+                                : 'bg-[#FAF8F5] dark:bg-zinc-900 text-[#0F172A] border-[#EDE8DF] dark:border-zinc-700 group-hover:border-[#E7AC08]/50 dark:group-hover:border-amber-800'
+                            }`}
+                          >
+                            <EyeShapeIcon shape={eye.id} className="w-6 h-6" />
+                          </div>
+                          <span className="text-xs font-bold leading-tight truncate w-full">
+                            {eye.label}
+                          </span>
+                          <span className="text-[10px] text-[#64748B] dark:text-zinc-500 block truncate w-full mt-0.5">
+                            {eye.desc}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 4. Pupil Shapes (Inner Eye) */}
+                <div className="pt-5 border-t border-[#EDE8DF] dark:border-zinc-800">
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
+                        Inner Eye Pupil Shape
+                      </label>
+                      <p className="text-[11px] text-[#64748B] dark:text-zinc-400">
+                        Choose the geometry of the inner core in each finder pattern
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-semibold text-[#B45309] dark:text-amber-400 capitalize hidden sm:inline">
+                        {options.pupilStyle && options.pupilStyle !== 'auto'
+                          ? options.pupilStyle
+                          : `Auto (${options.eyeStyle})`}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleRandomizePupilShape}
+                        title="Pick random pupil shape"
+                        className="flex items-center gap-1.5 text-[11px] font-medium text-[#334155] hover:text-[#0F172A] dark:text-zinc-300 dark:hover:text-amber-300 px-2.5 py-1 rounded-lg border border-[#EDE8DF] dark:border-zinc-700 bg-white dark:bg-zinc-900 shadow-2xs hover:bg-[#FAF8F5] transition-colors"
+                      >
+                        <Dices className="w-3.5 h-3.5 text-[#E7AC08]" />
+                        <span>Random Shape</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+                    {PUPIL_SHAPES.map((pupil) => {
+                      const isSelected = (options.pupilStyle || 'auto') === pupil.id;
+                      return (
+                        <button
+                          key={pupil.id}
+                          id={`pupil-shape-${pupil.id}`}
+                          type="button"
+                          onClick={() => update({ pupilStyle: pupil.id })}
+                          className={`group flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all ${
+                            isSelected
+                              ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
+                              : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1] dark:hover:border-zinc-700'
+                          }`}
+                        >
+                          <div
+                            className={`w-9 h-9 shrink-0 rounded-lg flex items-center justify-center border transition-all ${
+                              isSelected
+                                ? 'bg-[#E7AC08] text-[#0F172A] border-[#E7AC08] shadow-2xs'
+                                : 'bg-[#FAF8F5] dark:bg-zinc-900 text-[#0F172A] dark:text-zinc-300 border-[#EDE8DF] dark:border-zinc-700 group-hover:text-[#B45309] group-hover:border-[#E7AC08]/40 dark:group-hover:border-amber-900'
+                            }`}
+                          >
+                            <PupilShapeIcon
+                              shape={pupil.id}
+                              eyeStyle={options.eyeStyle}
+                              className="w-5 h-5"
+                            />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-xs font-bold block leading-tight truncate">
+                              {pupil.label}
+                            </span>
+                            <span className="text-[10px] text-[#64748B] dark:text-zinc-500 block truncate">
+                              {pupil.desc}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 5. Custom Eye Colors */}
+                <div className="p-4 rounded-xl border border-[#EDE8DF] dark:border-zinc-800 bg-[#FAF8F5] dark:bg-zinc-800/20 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-xs font-semibold text-[#0F172A] dark:text-zinc-200">
+                        Independent Eye Colors
+                      </label>
+                      <p className="text-[11px] text-[#64748B]">
+                        Customize the outer finder ring and inner pupil separately.
+                      </p>
+                    </div>
+                    <input
+                      type="checkbox"
+                      id="checkbox-custom-eye-colors"
+                      checked={options.customEyeColors}
+                      onChange={(e) => update({ customEyeColors: e.target.checked })}
+                      className="w-4 h-4 rounded-sm text-[#E7AC08] border-[#CBD5E1] focus:ring-[#E7AC08] accent-[#E7AC08]"
+                    />
+                  </div>
+
+                  {options.customEyeColors && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                      <ColorPickerField
+                        id="picker-eye-outer"
+                        label="Outer Eye Ring Color"
+                        color={options.eyeOuterColor || options.fgColor || '#000000'}
+                        pickerTitle="Outer Eye Ring Color"
+                        onChange={(hex) => update({ eyeOuterColor: hex, customEyeColors: true })}
+                        size="sm"
+                      />
+
+                      <ColorPickerField
+                        id="picker-eye-inner"
+                        label="Inner Eye Pupil Color"
+                        color={options.eyeInnerColor || options.fgColor || '#000000'}
+                        pickerTitle="Inner Eye Pupil Color"
+                        extraAction={
+                          <button
+                            type="button"
+                            onClick={handleRandomizePupil}
+                            className="flex items-center gap-1 text-[10px] font-semibold text-[#B45309] dark:text-amber-400 hover:underline"
+                            title="Randomize Pupil Color"
+                          >
+                            <Shuffle className="w-3 h-3" />
+                            <span>Randomize</span>
+                          </button>
+                        }
+                        onChange={(hex) => update({ eyeInnerColor: hex, customEyeColors: true })}
+                        size="sm"
+                      />
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
 
         {/* TAB 4: CENTER LOGO */}
         {activeTab === 'logo' && (
           <div className="space-y-5">
+            {/* High Matrix Density Warning & Restriction Banner */}
+            {isDenseQr && (
+              <div
+                id="dense-qr-logo-warning-banner"
+                className={`p-3.5 sm:p-4 rounded-2xl border transition-all ${
+                  options.logo.type !== 'none'
+                    ? 'border-orange-300 dark:border-orange-800/80 bg-gradient-to-r from-orange-50 via-amber-50 to-orange-50/60 dark:from-orange-950/40 dark:via-zinc-900 dark:to-orange-950/30'
+                    : 'border-amber-200/90 dark:border-amber-800/60 bg-amber-50/70 dark:bg-amber-950/30'
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <div
+                      className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${
+                        options.logo.type !== 'none'
+                          ? 'bg-orange-100 dark:bg-orange-900/60 text-orange-700 dark:text-orange-400'
+                          : 'bg-amber-100 dark:bg-amber-900/60 text-amber-700 dark:text-amber-400'
+                      }`}
+                    >
+                      <AlertTriangle className="w-4 h-4" />
+                    </div>
+                    <div className="space-y-0.5 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
+                          Dense QR Matrix (~{estimatedMatrix}×{estimatedMatrix} modules)
+                        </span>
+                        {options.logo.type !== 'none' ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-200 dark:bg-orange-900/60 text-orange-900 dark:text-orange-200">
+                            Scan Risk Elevated
+                          </span>
+                        ) : overrideDenseLogoRestriction ? (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-900/60 text-amber-900 dark:text-amber-200">
+                            Override Active
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
+                            Restricted
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed">
+                        {options.logo.type !== 'none'
+                          ? 'A center logo over tight data modules increases camera decode failures. Keeping a clean matrix is recommended.'
+                          : overrideDenseLogoRestriction
+                          ? 'Restriction bypassed: you can select a logo. Error Correction will automatically be set to High (H).'
+                          : 'Dense payloads produce tiny modules. Logos are restricted by default to guarantee camera readability.'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Controls */}
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                    {options.logo.type !== 'none' ? (
+                      <button
+                        type="button"
+                        id="btn-dense-remove-logo"
+                        onClick={() => {
+                          update({ logo: { ...options.logo, type: 'none' } });
+                          onShowToast?.('Logo removed for guaranteed scannability ✓');
+                        }}
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-white dark:bg-zinc-800 border border-orange-300 dark:border-orange-800 text-orange-900 dark:text-orange-200 hover:bg-orange-50 dark:hover:bg-zinc-700 transition-colors cursor-pointer shadow-2xs"
+                      >
+                        Remove Logo
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        id="btn-toggle-dense-override"
+                        onClick={() => {
+                          setOverrideDenseLogoRestriction((prev) => !prev);
+                          onShowToast?.(
+                            !overrideDenseLogoRestriction
+                              ? 'Logo restriction bypassed: choose any logo with caution'
+                              : 'Logo restriction re-enabled'
+                          );
+                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer shadow-2xs ${
+                          overrideDenseLogoRestriction
+                            ? 'bg-amber-100 dark:bg-amber-900/40 border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200'
+                            : 'bg-white dark:bg-zinc-800 border-amber-300 dark:border-amber-700/80 text-amber-900 dark:text-amber-300 hover:bg-amber-50 dark:hover:bg-zinc-700'
+                        }`}
+                      >
+                        {overrideDenseLogoRestriction ? 'Lock Restriction' : 'Choose Anyway'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Auto-adaptation Toggle Banner (Refined Light Theme Visual Readiness) */}
             <div
               className={`p-4 rounded-2xl transition-all duration-200 border flex items-center justify-between gap-3.5 shadow-2xs ${
@@ -1285,9 +1480,6 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-bold text-[#0F172A] dark:text-zinc-100 tracking-tight flex items-center gap-1.5">
                       <span>Auto-adapt Icon to Category</span>
-                      {!isUnlocked && (
-                        <ExclusiveCrownBadge size="xs" />
-                      )}
                     </span>
                     {Boolean(options.logo.autoAdapt) && selectedType ? (
                       <span className="inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100/90 dark:bg-amber-900/50 text-[#92400E] dark:text-amber-200 border border-amber-200/80 dark:border-amber-700/50 uppercase tracking-wider">
@@ -1313,10 +1505,6 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                 role="switch"
                 aria-checked={Boolean(options.logo.autoAdapt)}
                 onClick={() => {
-                  if (!isUnlocked) {
-                    openExclusiveModal('Icon Auto Adapt');
-                    return;
-                  }
                   const nextVal = !options.logo.autoAdapt;
                   try {
                     localStorage.setItem('ehsaan_qr_auto_adapt_logo', String(nextVal));
@@ -1326,6 +1514,11 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
 
                   if (nextVal) {
                     const autoLogo = selectedType ? getAutoLogoForCategory(selectedType) : 'none';
+                    if (isDenseQr && !overrideDenseLogoRestriction && autoLogo !== 'none') {
+                      setPendingLogoSelection({ type: autoLogo });
+                      setShowDenseConfirmModal(true);
+                      return;
+                    }
                     update({
                       logo: {
                         ...options.logo,
@@ -1334,7 +1527,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                       },
                       errorCorrection:
                         autoLogo !== 'none' && (options.errorCorrection === 'L' || options.errorCorrection === 'M')
-                          ? 'Q'
+                          ? 'H'
                           : options.errorCorrection,
                     });
                     onShowToast?.(
@@ -1387,7 +1580,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                 <button
                   type="button"
                   id="logo-type-none"
-                  onClick={() => update({ logo: { ...options.logo, type: 'none' } })}
+                  onClick={() => handleLogoItemClick('none')}
                   className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all ${
                     options.logo.type === 'none'
                       ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
@@ -1405,6 +1598,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
 
                 {/* Dedicated Monochrome Preset Logos */}
                 {[
+                  { id: 'brand' as LogoType, label: 'Ehsaan Q', sub: 'Brand logo', dataUrl: '/assets/aistudio/logo-transparent.png?v=5.0.0' },
                   { id: 'url' as LogoType, label: 'URL', sub: 'Website', dataUrl: URL_LOGO_DATA_URL },
                   { id: 'phone' as LogoType, label: 'Phone', sub: 'Handset', dataUrl: PHONE_LOGO_DATA_URL },
                   { id: 'whatsapp' as LogoType, label: 'WhatsApp', sub: 'Chat', dataUrl: WHATSAPP_LOGO_DATA_URL },
@@ -1417,6 +1611,7 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                   { id: 'calendar' as LogoType, label: 'Calendar', sub: 'Schedule', dataUrl: CALENDAR_LOGO_DATA_URL },
                   { id: 'vcard' as LogoType, label: 'Contact', sub: 'vCard', dataUrl: VCARD_LOGO_DATA_URL },
                   { id: 'location' as LogoType, label: 'Location', sub: 'Address pin', dataUrl: LOCATION_LOGO_DATA_URL },
+                  { id: 'multi-url' as LogoType, label: 'Links', sub: 'Multi-URL', dataUrl: MULTI_URL_LOGO_DATA_URL },
                 ].map((item) => {
                   const isSelected = options.logo.type === item.id;
                   const isAutoTarget =
@@ -1429,26 +1624,18 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                       key={item.id}
                       type="button"
                       id={`logo-type-${item.id}`}
-                      onClick={() => {
-                        update({
-                          logo: { ...options.logo, type: item.id },
-                          errorCorrection:
-                            options.errorCorrection === 'L' || options.errorCorrection === 'M'
-                              ? 'H'
-                              : options.errorCorrection,
-                        });
-                      }}
+                      onClick={() => handleLogoItemClick(item.id)}
                       className={`relative flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all ${
                         isSelected
                           ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
                           : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/60 hover:border-[#CBD5E1]'
                       }`}
                     >
-                      <div className="w-8 h-8 rounded-lg p-1.5 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200/70 dark:border-zinc-700/70">
+                      <div className="w-8 h-8 rounded-lg p-1 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center shrink-0 overflow-hidden border border-zinc-200/70 dark:border-zinc-700/70">
                         <img
                           src={item.dataUrl}
                           alt={item.label}
-                          className="w-full h-full object-contain dark:invert"
+                          className={`w-full h-full object-contain ${item.id === 'brand' ? '' : 'dark:invert'}`}
                         />
                       </div>
                       <div className="min-w-0">
@@ -1468,7 +1655,14 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
                 <button
                   type="button"
                   id="logo-type-custom"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => {
+                    if (isDenseQr && !overrideDenseLogoRestriction) {
+                      setPendingLogoSelection({ type: 'custom' });
+                      setShowDenseConfirmModal(true);
+                    } else {
+                      fileInputRef.current?.click();
+                    }
+                  }}
                   className={`flex items-center gap-2.5 p-2.5 rounded-xl border text-left transition-all ${
                     options.logo.type === 'custom'
                       ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 ring-1 ring-[#E7AC08]/50 shadow-2xs'
@@ -1630,38 +1824,28 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[256, 512, 1024, 2048].map((s) => {
-                  const isLocked = s === 2048 && !isUnlocked;
                   return (
                     <button
                       key={s}
                       id={`size-btn-${s}`}
                       type="button"
                       onClick={() => {
-                        if (isLocked) {
-                          openExclusiveModal('2048 × 2048 Pixel Quality');
-                          return;
-                        }
                         update({ size: s });
                       }}
                       className={`py-2 px-3 rounded-xl border text-xs font-medium transition-all cursor-pointer relative ${
                         options.size === s
                           ? 'border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 font-bold ring-1 ring-[#E7AC08]/50 shadow-2xs'
-                          : isLocked
-                          ? 'border-[#FDE68A] dark:border-amber-900/40 bg-[#FFFDF5] dark:bg-amber-950/20 text-[#334155] dark:text-zinc-300 hover:border-[#E7AC08]/60'
                           : 'border-[#EDE8DF] dark:border-zinc-800 bg-white dark:bg-zinc-800/30 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="block font-bold">{s} × {s} px</span>
-                        {isLocked && (
-                          <ExclusiveCrownBadge size="xs" />
-                        )}
                       </div>
                       <span className="text-[10px] text-[#64748B] dark:text-zinc-400 block mt-0.5">
                         {s === 256 && 'Web Thumbnail'}
                         {s === 512 && 'Standard Display'}
                         {s === 1024 && 'High Res Print'}
-                        {s === 2048 && (isLocked ? 'Ultra Poster 4K (Exclusive)' : 'Ultra Poster 4K')}
+                        {s === 2048 && 'Ultra Poster 4K'}
                       </span>
                     </button>
                   );
@@ -1763,6 +1947,76 @@ export const CustomizationPanel: React.FC<CustomizationPanelProps> = ({
           </div>
         )}
       </div>
+
+      {/* Dense QR Matrix Logo Restriction & Scannability Modal */}
+      {showDenseConfirmModal && (
+        <div
+          id="dense-qr-logo-confirm-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="dense-logo-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => {
+            setShowDenseConfirmModal(false);
+            setPendingLogoSelection(null);
+          }}
+        >
+          <div
+            className="w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl p-5 sm:p-6 border border-amber-300 dark:border-amber-700/80 shadow-2xl space-y-4 animate-in zoom-in-95 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-3">
+              <div className="p-2.5 rounded-2xl bg-amber-100 dark:bg-amber-950/80 text-amber-700 dark:text-amber-400 shrink-0 border border-amber-200 dark:border-amber-800">
+                <AlertTriangle className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div className="space-y-1">
+                <h3
+                  id="dense-logo-modal-title"
+                  className="text-sm sm:text-base font-extrabold text-zinc-900 dark:text-zinc-100"
+                >
+                  Dense QR Matrix Warning
+                </h3>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                  Matrix estimate: ~{estimatedMatrix}×{estimatedMatrix} modules
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 text-xs text-amber-900 dark:text-amber-200 space-y-2 leading-relaxed">
+              <p className="font-semibold">
+                Your QR code contains extensive data. Center logos cover essential data blocks and will increase the chance of smartphone camera scan failure.
+              </p>
+              <p className="text-[11px] text-amber-800/90 dark:text-amber-300/90">
+                A clean matrix without a logo is strongly recommended for 100% scanning reliability.
+              </p>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
+              <button
+                type="button"
+                id="btn-dense-modal-keep-clean"
+                onClick={() => {
+                  setShowDenseConfirmModal(false);
+                  setPendingLogoSelection(null);
+                  update({ logo: { ...options.logo, type: 'none' } });
+                  onShowToast?.('Kept clean matrix for guaranteed scannability ✓');
+                }}
+                className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 transition-colors cursor-pointer text-center"
+              >
+                Keep Clean (No Logo)
+              </button>
+              <button
+                type="button"
+                id="btn-dense-modal-choose-anyway"
+                onClick={handleConfirmDenseLogo}
+                className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold bg-[#E7AC08] hover:bg-[#D9A007] text-black shadow-xs transition-colors cursor-pointer text-center active:scale-98"
+              >
+                Choose Anyway
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Direct Color Palette Selector Modal for Quick Swatches or Mobile triggers */}
       {activePaletteModal && (

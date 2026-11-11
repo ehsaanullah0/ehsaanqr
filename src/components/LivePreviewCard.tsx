@@ -6,12 +6,14 @@ import {
   AppTheme,
   RandomizeTarget,
   RandomizeType,
+  QrType,
 } from '../types';
 import { renderQrToCanvas } from '../utils/qrRenderer';
 import {
   exportQrCode,
   copyQrImageToClipboard,
   shareQr,
+  printQrCode,
 } from '../utils/exportUtils';
 import {
   Download,
@@ -32,11 +34,8 @@ import {
   Mail,
   Check,
   X,
-  Lock,
-  Crown,
+  Printer,
 } from 'lucide-react';
-import { ExclusiveCrownBadge } from './ExclusiveCrownBadge';
-import { useExclusiveAccess } from '../context/ExclusiveAccessContext';
 import { EhsaanFlameIcon } from './EhsaanLogo';
 import { SmartRandomizeController } from './SmartRandomizeController';
 import {
@@ -50,6 +49,7 @@ import {
 import { PreDownloadCheckModal } from './PreDownloadCheckModal';
 
 interface LivePreviewCardProps {
+  selectedType?: QrType;
   payload: string;
   options: QrStyleOptions;
   readability: ReadabilityReport;
@@ -68,6 +68,7 @@ interface LivePreviewCardProps {
 }
 
 export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
+  selectedType,
   payload,
   options,
   readability,
@@ -84,11 +85,11 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
   onLockedTargetsChange,
   theme,
 }) => {
-  const { isUnlocked, openExclusiveModal, openOverviewModal } = useExclusiveAccess();
   const isMinimal = theme === 'minimal' || (typeof document !== 'undefined' && document.documentElement.classList.contains('minimal'));
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>('png');
   const [isExporting, setIsExporting] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
   const [copiedPayload, setCopiedPayload] = useState(false);
   const [copiedImage, setCopiedImage] = useState(false);
   const [showExportSettings, setShowExportSettings] = useState(false);
@@ -190,24 +191,14 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
   };
 
   useEffect(() => {
-    if (!isUnlocked && options.size === 2048) {
-      setExportRes(1024);
-      onOptionsChange?.({ size: 1024 });
-    } else {
-      setExportRes(options.size);
-    }
-  }, [options.size, isUnlocked]);
+    setExportRes(options.size || 1024);
+  }, [options.size]);
 
-  // Fallback if SVG was selected and user is not unlocked
-  useEffect(() => {
-    if (!isUnlocked && selectedFormat === 'svg') {
-      setSelectedFormat('png');
-    }
-  }, [selectedFormat, isUnlocked]);
-
-  // Re-render canvas whenever payload or options change
+  // Re-render canvas whenever payload or options change (optimized with requestAnimationFrame)
   useEffect(() => {
     if (!canvasRef.current) return;
+    let animId: number;
+
     if (!payload) {
       const ctx = canvasRef.current.getContext('2d');
       if (ctx) {
@@ -215,20 +206,21 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
       }
       return;
     }
-    renderQrToCanvas(canvasRef.current, payload, options);
+
+    animId = requestAnimationFrame(() => {
+      if (canvasRef.current) {
+        renderQrToCanvas(canvasRef.current, payload, options);
+      }
+    });
+
+    return () => {
+      if (animId) cancelAnimationFrame(animId);
+    };
   }, [payload, options]);
 
   const executeDownload = async () => {
     if (!payload) {
       onShowToast('Please enter some QR content first');
-      return;
-    }
-    if ((exportRes === 2048 || options.size === 2048) && !isUnlocked) {
-      openExclusiveModal('2048 × 2048 Pixel Quality');
-      return;
-    }
-    if (selectedFormat === 'svg' && !isUnlocked) {
-      openExclusiveModal('SVG Vector Format Export');
       return;
     }
     setIsExporting(true);
@@ -249,18 +241,28 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
       onShowToast('Please enter some QR content first');
       return;
     }
-    if ((exportRes === 2048 || options.size === 2048) && !isUnlocked) {
-      openExclusiveModal('2048 × 2048 Pixel Quality');
-      return;
-    }
-    if (selectedFormat === 'svg' && !isUnlocked) {
-      openExclusiveModal('SVG Vector Format Export');
-      return;
-    }
     if (dontShowAgainPreDownload) {
       executeDownload();
     } else {
       setShowPreDownloadCheck(true);
+    }
+  };
+
+  const handlePrintClick = async () => {
+    if (!payload) {
+      onShowToast('Please enter some QR content first');
+      return;
+    }
+
+    setIsPrinting(true);
+    try {
+      onShowToast(`Preparing ${selectedFormat.toUpperCase()} for print...`);
+      await printQrCode(selectedFormat, payload, options, exportRes);
+    } catch (err) {
+      console.error(err);
+      onShowToast('Print failed. Please try again.');
+    } finally {
+      setIsPrinting(false);
     }
   };
 
@@ -371,15 +373,6 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
               <span>Changelog</span>
             </button>
           )}
-
-          {/* Exclusive Features Button - Styled with ExclusiveCrownBadge */}
-          <ExclusiveCrownBadge
-            asButton
-            id="btn-live-preview-exclusive-suite"
-            onClick={openOverviewModal}
-            title="View Exclusive Features (₹20) & Unlock Details"
-            className="cursor-pointer shrink-0 whitespace-nowrap"
-          />
         </div>
       </div>
 
@@ -404,41 +397,150 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                 options.cornerStyle === 'smooth' ? 'rounded-2xl' : 'rounded-none'
               }`}
             >
-              <canvas
-                ref={canvasRef}
-                id="qr-code-canvas"
-                className={`w-full h-full object-contain ${
-                  options.cornerStyle === 'smooth' ? 'rounded-2xl' : 'rounded-none'
-                } ${!payload ? 'hidden' : 'block'}`}
-                style={{
-                  imageRendering: 'pixelated',
-                  backgroundColor: options.transparentBg ? 'transparent' : options.bgColor,
-                }}
-              />
-              {!payload && (
-                <div className="flex flex-col items-center justify-center p-4 text-center text-zinc-400 dark:text-zinc-500 select-none">
-                  <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 mb-2">
-                    <QrCode className="w-7 h-7 text-zinc-400 dark:text-zinc-500 stroke-[1.5]" />
+              {selectedType === 'multi-url' ? (
+                <div
+                  id="multi-url-qr-disabled-box"
+                  className="flex flex-col items-center justify-center p-4 text-center select-none"
+                >
+                  <div className="p-3 rounded-2xl bg-amber-100/80 dark:bg-amber-950/60 border border-[#E7AC08]/50 mb-2.5">
+                    <FileCode className="w-8 h-8 text-[#E7AC08] stroke-[1.75]" />
                   </div>
-                  <span className="text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
-                    Awaiting content
+                  <span className="text-xs sm:text-sm font-black text-[#0F172A] dark:text-zinc-100 leading-snug">
+                    No QR code available because Multi URL selected.
                   </span>
-                  <span className="text-[11px] text-[#64748B] dark:text-zinc-500 mt-0.5">
-                    Enter details below to preview
+                  <span className="text-[10px] font-semibold text-[#64748B] dark:text-zinc-400 mt-1">
+                    Multi URL exports a full responsive HTML landing page (.html).
                   </span>
                 </div>
+              ) : (
+                <>
+                  <canvas
+                    ref={canvasRef}
+                    id="qr-code-canvas"
+                    className={`w-full h-full object-contain ${
+                      options.cornerStyle === 'smooth' ? 'rounded-2xl' : 'rounded-none'
+                    } ${!payload ? 'hidden' : 'block'}`}
+                    style={{
+                      imageRendering: 'pixelated',
+                      backgroundColor: options.transparentBg ? 'transparent' : options.bgColor,
+                    }}
+                  />
+                  {!payload && (
+                    <div className="flex flex-col items-center justify-center p-4 text-center text-zinc-400 dark:text-zinc-500 select-none">
+                      <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 mb-2">
+                        <QrCode className="w-7 h-7 text-zinc-400 dark:text-zinc-500 stroke-[1.5]" />
+                      </div>
+                      <span className="text-xs font-semibold text-[#0F172A] dark:text-zinc-300">
+                        Awaiting content
+                      </span>
+                      <span className="text-[11px] text-[#64748B] dark:text-zinc-500 mt-0.5">
+                        Enter details below to preview
+                      </span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
 
+          {/* Direct Print Button (Minimal, right bottom to QR preview) */}
+          <button
+            id="btn-direct-print-qr"
+            type="button"
+            disabled={isPrinting || !payload || selectedType === 'multi-url'}
+            onClick={handlePrintClick}
+            className="mt-2.5 inline-flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-full border border-[#FCD34D] dark:border-amber-700/60 bg-[#FFFDF0] dark:bg-amber-950/30 text-[#92400E] dark:text-amber-200 hover:bg-[#FEF3C7] dark:hover:bg-amber-900/50 hover:border-[#E7AC08] text-xs font-bold transition-all shadow-2xs hover:shadow-xs active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            title={`Direct Print without downloading (${selectedFormat.toUpperCase()})`}
+          >
+            <Printer className="w-3.5 h-3.5 text-[#D97706] dark:text-amber-400 shrink-0" />
+            <span>{isPrinting ? 'Opening Print Window...' : `Print QR (${selectedFormat.toUpperCase()})`}</span>
+          </button>
+
+          {/* Multi URL Step-by-Step Notice Card */}
+          {selectedType === 'multi-url' && (
+            <div
+              id="notice-multiurl-qr-steps-card"
+              className="w-full mt-3 p-3.5 sm:p-4 rounded-2xl border-2 border-[#E7AC08] bg-[#FFFBEA] dark:bg-amber-950/40 text-amber-950 dark:text-amber-100 shadow-xs space-y-2"
+            >
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-wider bg-[#E7AC08] text-black">
+                  Notice
+                </span>
+                <span className="text-xs font-black text-[#0F172A] dark:text-zinc-100">
+                  Multi URL QR Code Guide
+                </span>
+              </div>
+
+              <p className="text-xs leading-relaxed font-semibold text-zinc-800 dark:text-zinc-200">
+                Multi URL supports HTML so you can make it in QR code by following some steps:
+              </p>
+
+              <ol className="space-y-1 text-xs font-bold text-zinc-700 dark:text-zinc-300 list-decimal pl-4">
+                <li>Upload the HTML file in Google Drive</li>
+                <li>Copy the shareable link</li>
+                <li>Make a QR code using that link</li>
+              </ol>
+
+              <div className="pt-2 border-t border-amber-200 dark:border-amber-900/60 text-[11px] font-bold text-[#D97706] dark:text-[#E7AC08]">
+                * When anyone scans the QR it will open the Multi URL HTML page
+              </div>
+            </div>
+          )}
+
           {/* Metadata Subtitle */}
-          <div className="flex items-center gap-2 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 font-mono">
+          <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 sm:mt-2 text-[10px] sm:text-[11px] text-zinc-500 dark:text-zinc-400 font-mono flex-wrap justify-center">
             <span className="font-semibold text-zinc-700 dark:text-zinc-300">
               {options.size} × {options.size} px
             </span>
             <span>•</span>
             <span>{ecNames[options.errorCorrection]}</span>
+            {readability.estimatedMatrixModules && (
+              <>
+                <span>•</span>
+                <span
+                  className={`font-semibold ${
+                    readability.isDenseQr
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-zinc-600 dark:text-zinc-400'
+                  }`}
+                  title={
+                    readability.isDenseQr
+                      ? 'Dense QR Code Matrix (Large Payload)'
+                      : 'QR Matrix Grid Size'
+                  }
+                >
+                  ~{readability.estimatedMatrixModules}×{readability.estimatedMatrixModules}
+                  {readability.isDenseQr ? ' (Dense)' : ''}
+                </span>
+              </>
+            )}
           </div>
+
+          {/* Dense Matrix + Center Logo Risk Alert */}
+          {readability.isDenseQr && options.logo.type !== 'none' && (
+            <div
+              id="preview-dense-logo-warning"
+              className="w-full max-w-[260px] sm:max-w-[340px] mt-2 p-2 sm:p-2.5 rounded-xl border border-orange-200 dark:border-orange-800/80 bg-orange-50/90 dark:bg-orange-950/40 text-[11px] text-orange-900 dark:text-orange-200 flex items-center justify-between gap-2 shadow-2xs animate-in fade-in"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <AlertTriangle className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
+                <span className="truncate font-medium">Dense QR + Logo: Elevated scan failure risk</span>
+              </div>
+              {onOptionsChange && (
+                <button
+                  type="button"
+                  id="btn-preview-remove-dense-logo"
+                  onClick={() => {
+                    onOptionsChange({ logo: { ...options.logo, type: 'none' } });
+                    onShowToast('Logo removed to restore scan reliability ✓');
+                  }}
+                  className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-white dark:bg-zinc-800 border border-orange-300 dark:border-orange-700 hover:bg-orange-100 text-orange-900 dark:text-orange-100 cursor-pointer shrink-0 shadow-2xs transition-colors"
+                >
+                  Remove Logo
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Randomize Options: Smart Expandable Controller with quick actions */}
           {onOptionsChange && (
@@ -488,77 +590,95 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
 
         {/* Right Side: Export & Actions Suite (7 cols on md+) */}
         <div className="md:col-span-7 space-y-3 sm:space-y-4">
-          {/* Randomize Background Saturation Option for Randomize System */}
+          {/* Modern & Minimal Saturation Controller */}
           <div
             id="randomize-bg-saturation-card"
-            className="p-3 sm:p-3.5 rounded-2xl bg-[#FDFCF9] dark:bg-zinc-800/40 border border-[#EDE8DF] dark:border-zinc-700/70 transition-all space-y-2.5"
+            className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-zinc-900 border border-[#EDE8DF] dark:border-zinc-800 shadow-2xs transition-all space-y-2.5"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <Dices className="w-3.5 h-3.5 text-[#E7AC08] shrink-0" />
                 <span className="text-xs font-bold text-[#0F172A] dark:text-zinc-100">
-                  Randomize System
+                  Saturation Shifter
                 </span>
               </div>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#EDE8DF] dark:bg-zinc-700/80 text-[#334155] dark:text-zinc-300 font-mono">
-                {bgSaturation === 'high' ? 'High' : 'Low'} Saturation
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#FFFBEA] dark:bg-amber-950/40 text-[#92400E] dark:text-amber-300 border border-amber-200/80 dark:border-amber-900/50 font-mono capitalize">
+                {bgSaturation === 'low' ? 'Pastel' : bgSaturation === 'medium' ? 'Balanced' : 'Vivid'}
               </span>
             </div>
 
-            {/* Segmented Choice Buttons: Low Saturation vs High Saturation */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* 3 Modern Segmented Swatch Buttons */}
+            <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-[#FAF8F5] dark:bg-zinc-950/60 border border-[#EDE8DF] dark:border-zinc-800/80">
+              {/* Option 1: Low (Pastel) */}
               <button
                 type="button"
                 id="btn-bg-saturation-low"
                 onClick={() => handleSelectSaturation('low')}
-                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 p-2 sm:p-2.5 rounded-xl border text-left transition-all ${
+                className={`relative flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   bgSaturation === 'low'
-                    ? 'border-[#E7AC08] bg-white dark:bg-zinc-800 text-[#0F172A] dark:text-amber-100 ring-1 ring-[#E7AC08]/50 shadow-2xs font-bold'
-                    : 'border-[#EDE8DF] dark:border-zinc-700 bg-white/70 dark:bg-zinc-900/60 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1] hover:bg-white dark:hover:bg-zinc-800'
+                    ? 'bg-white dark:bg-zinc-800 text-[#0F172A] dark:text-zinc-100 shadow-xs ring-1 ring-[#E7AC08]'
+                    : 'text-[#64748B] dark:text-zinc-400 hover:text-[#0F172A] dark:hover:text-zinc-200 hover:bg-white/50 dark:hover:bg-zinc-800/40'
                 }`}
-                title="Select Low Saturation (Soft, pastel & neutral background colors)"
+                title="Low Saturation: Soft pastel background colors"
               >
-                <div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-bold">Low Saturation</span>
-                  </div>
-                  <span className="text-[10px] text-[#64748B] dark:text-zinc-400 block font-normal">
-                    Soft, pastel & neutral
-                  </span>
-                </div>
-                {/* Visual Swatches */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FAF8F5] border border-[#EDE8DF] dark:border-zinc-600" title="#FAF8F5" />
-                  <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FEF3C7] border border-amber-200 dark:border-amber-700" title="#FEF3C7" />
-                  <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#E0F2FE] border border-sky-200 dark:border-sky-700" title="#E0F2FE" />
-                </div>
+                <span
+                  className={`w-3.5 h-3.5 rounded-full shrink-0 transition-transform ${
+                    bgSaturation === 'low' ? 'scale-110 ring-2 ring-[#E7AC08]/60' : ''
+                  }`}
+                  style={{
+                    background: 'linear-gradient(135deg, #FAF8F5 0%, #FEF3C7 50%, #E0F2FE 100%)',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                  }}
+                />
+                <span className="text-[11px] font-bold">Pastel</span>
               </button>
 
+              {/* Option 2: Medium (Balanced) */}
+              <button
+                type="button"
+                id="btn-bg-saturation-medium"
+                onClick={() => handleSelectSaturation('medium')}
+                className={`relative flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  bgSaturation === 'medium'
+                    ? 'bg-white dark:bg-zinc-800 text-[#0F172A] dark:text-zinc-100 shadow-xs ring-1 ring-[#E7AC08]'
+                    : 'text-[#64748B] dark:text-zinc-400 hover:text-[#0F172A] dark:hover:text-zinc-200 hover:bg-white/50 dark:hover:bg-zinc-800/40'
+                }`}
+                title="Medium Saturation: Balanced warm background colors"
+              >
+                <span
+                  className={`w-3.5 h-3.5 rounded-full shrink-0 transition-transform ${
+                    bgSaturation === 'medium' ? 'scale-110 ring-2 ring-[#E7AC08]/60' : ''
+                  }`}
+                  style={{
+                    background: 'linear-gradient(135deg, #FDE047 0%, #38BDF8 50%, #4ADE80 100%)',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                  }}
+                />
+                <span className="text-[11px] font-bold">Balanced</span>
+              </button>
+
+              {/* Option 3: High (Vivid) */}
               <button
                 type="button"
                 id="btn-bg-saturation-high"
                 onClick={() => handleSelectSaturation('high')}
-                className={`flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 p-2 sm:p-2.5 rounded-xl border text-left transition-all ${
+                className={`relative flex items-center justify-center gap-1.5 py-2 px-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   bgSaturation === 'high'
-                    ? 'border-[#E7AC08] bg-white dark:bg-zinc-800 text-[#0F172A] dark:text-amber-100 ring-1 ring-[#E7AC08]/50 shadow-2xs font-bold'
-                    : 'border-[#EDE8DF] dark:border-zinc-700 bg-white/70 dark:bg-zinc-900/60 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1] hover:bg-white dark:hover:bg-zinc-800'
+                    ? 'bg-white dark:bg-zinc-800 text-[#0F172A] dark:text-zinc-100 shadow-xs ring-1 ring-[#E7AC08]'
+                    : 'text-[#64748B] dark:text-zinc-400 hover:text-[#0F172A] dark:hover:text-zinc-200 hover:bg-white/50 dark:hover:bg-zinc-800/40'
                 }`}
-                title="Select High Saturation (Vibrant, rich & colorful background colors)"
+                title="High Saturation: Rich vibrant background colors"
               >
-                <div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-xs font-bold">High Saturation</span>
-                  </div>
-                  <span className="text-[10px] text-[#64748B] dark:text-zinc-400 block font-normal">
-                    Vibrant, rich & punchy
-                  </span>
-                </div>
-                {/* Visual Swatches */}
-                <div className="flex items-center gap-1 shrink-0">
-                  <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#FDE047] border border-amber-300" title="#FDE047" />
-                  <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#38BDF8] border border-sky-300" title="#38BDF8" />
-                  <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#F472B6] border border-pink-300" title="#F472B6" />
-                </div>
+                <span
+                  className={`w-3.5 h-3.5 rounded-full shrink-0 transition-transform ${
+                    bgSaturation === 'high' ? 'scale-110 ring-2 ring-[#E7AC08]/60' : ''
+                  }`}
+                  style={{
+                    background: 'linear-gradient(135deg, #F43F5E 0%, #EA580C 50%, #7C3AED 100%)',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                  }}
+                />
+                <span className="text-[11px] font-bold">Vivid</span>
               </button>
             </div>
           </div>
@@ -584,31 +704,21 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
 
             <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
               {(['png', 'jpg', 'svg', 'pdf'] as ExportFormat[]).map((fmt) => {
-                const isLockedFmt = fmt === 'svg' && !isUnlocked;
                 return (
                   <button
                     key={fmt}
                     id={`format-btn-${fmt}`}
                     type="button"
                     onClick={() => {
-                      if (isLockedFmt) {
-                        openExclusiveModal('SVG Vector Format Export');
-                        return;
-                      }
                       setSelectedFormat(fmt);
                     }}
                     className={`relative py-1.5 sm:py-2 px-1 sm:px-2 rounded-xl text-xs font-bold uppercase transition-all min-h-[34px] sm:min-h-[38px] flex items-center justify-center gap-1 cursor-pointer ${
                       selectedFormat === fmt
                         ? 'bg-[#0F172A] dark:bg-white text-white dark:text-[#0F172A] shadow-xs ring-1 ring-[#0F172A] dark:ring-white'
-                        : isLockedFmt
-                        ? 'bg-[#FFFDF5] dark:bg-amber-950/20 text-[#78350F] dark:text-amber-300 hover:border-[#E7AC08]/50 border border-[#FDE68A] dark:border-amber-900/40'
                         : 'bg-[#F8F6F0] dark:bg-zinc-800 text-[#334155] dark:text-zinc-300 hover:bg-[#F1ECE1] dark:hover:bg-zinc-700 border border-[#EDE8DF] dark:border-zinc-700/60'
                     }`}
                   >
                     <span>{fmt}</span>
-                    {isLockedFmt && (
-                      <Crown className="w-2.5 h-2.5 text-[#D97706] dark:text-amber-400 stroke-[2.2] shrink-0" />
-                    )}
                   </button>
                 );
               })}
@@ -625,16 +735,11 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                 </div>
                 <div className="grid grid-cols-4 gap-1.5">
                   {[256, 512, 1024, 2048].map((res) => {
-                    const isLockedRes = res === 2048 && !isUnlocked;
                     return (
                       <button
                         key={res}
                         type="button"
                         onClick={() => {
-                          if (isLockedRes) {
-                            openExclusiveModal('2048 × 2048 Pixel Quality');
-                            return;
-                          }
                           setExportRes(res);
                           onOptionsChange?.({ size: res });
                         }}
@@ -645,9 +750,6 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                         }`}
                       >
                         <span>{res}px</span>
-                        {isLockedRes && (
-                          <Crown className="w-2.5 h-2.5 text-[#D97706] dark:text-amber-400 stroke-[2.2]" />
-                        )}
                       </button>
                     );
                   })}
@@ -795,7 +897,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
                         : 'text-red-600 dark:text-red-400'
                     }`}
                   >
-                    Status Update • Through Dec 2026
+                    Status Update • Through 5 January 2027
                   </span>
                 </div>
               </div>
@@ -817,7 +919,7 @@ export const LivePreviewCard: React.FC<LivePreviewCardProps> = ({
               }`}
             >
               <p>
-                The app reaches at level where every system works well and polished so the development is stopped till december 2026.
+                The app reaches at level where every system works well and polished so the development is stopped till 5 January 2027.
               </p>
               <p>
                 Any bug report may fix with request on ~{' '}

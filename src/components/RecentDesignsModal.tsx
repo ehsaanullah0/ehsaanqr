@@ -47,6 +47,8 @@ interface RecentDesignsModalProps {
   onSaveCurrentAsTemplate?: () => void;
 }
 
+export const STORAGE_TEMPLATES_GUIDE_KEY = 'ehsaan_qr_show_templates_guide';
+
 export const RecentDesignsModal: React.FC<RecentDesignsModalProps> = ({
   isOpen,
   onClose,
@@ -65,8 +67,27 @@ export const RecentDesignsModal: React.FC<RecentDesignsModalProps> = ({
   const [customName, setCustomName] = useState('');
   const [liveThumbnail, setLiveThumbnail] = useState<string | null>(null);
   const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
-  const [showFunctionGuide, setShowFunctionGuide] = useState(true);
+  const [showFunctionGuide, setShowFunctionGuide] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_TEMPLATES_GUIDE_KEY);
+      if (saved !== null) {
+        return saved === 'true';
+      }
+      return true;
+    } catch {
+      return true;
+    }
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync templates guide collapse/expand state to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_TEMPLATES_GUIDE_KEY, String(showFunctionGuide));
+    } catch {
+      // ignore storage errors
+    }
+  }, [showFunctionGuide]);
 
   // Sub-modal for viewing/copying full template code
   const [codeViewerData, setCodeViewerData] = useState<{
@@ -498,6 +519,10 @@ export const RecentDesignsModal: React.FC<RecentDesignsModalProps> = ({
                       { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
                     );
 
+                    const isMultiUrl = design.qrType === 'multi-url' || Boolean(design.formData?.['multi-url']);
+                    const multiData = design.formData?.['multi-url'];
+                    const linkCount = (multiData?.links || []).filter(l => l.url && l.url.trim()).length;
+
                     const patternLabel = design.style.patternStyle.replace('-', ' ');
                     const colorLabel = design.style.colorMode.replace('-', ' ');
                     const isCopied = copiedCodeId === design.id;
@@ -514,6 +539,8 @@ export const RecentDesignsModal: React.FC<RecentDesignsModalProps> = ({
                             thumbnailUrl={design.previewThumbnail}
                             alt={`${design.name} preview`}
                             className="w-12 h-12 rounded-xl object-contain bg-white border border-zinc-200 dark:border-zinc-700 p-0.5 shrink-0 shadow-2xs"
+                            isMultiUrl={isMultiUrl}
+                            qrType={design.qrType}
                           />
 
                           <div className="min-w-0 flex-1">
@@ -521,9 +548,16 @@ export const RecentDesignsModal: React.FC<RecentDesignsModalProps> = ({
                               <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 truncate max-w-[200px]">
                                 {design.name}
                               </span>
-                              <span className="text-[9px] sm:text-[10px] capitalize font-bold px-1.5 py-0.2 rounded-sm bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 shrink-0">
-                                {patternLabel}
-                              </span>
+                              {isMultiUrl ? (
+                                <span className="text-[9px] sm:text-[10px] font-bold px-1.5 py-0.2 rounded-sm bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 shrink-0 flex items-center gap-1 border border-amber-300/50">
+                                  <FileCode className="w-2.5 h-2.5 text-amber-600" />
+                                  <span>HTML Landing Page</span>
+                                </span>
+                              ) : (
+                                <span className="text-[9px] sm:text-[10px] capitalize font-bold px-1.5 py-0.2 rounded-sm bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300 shrink-0">
+                                  {patternLabel}
+                                </span>
+                              )}
                             </div>
 
                             <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-zinc-400 mt-0.5 flex-wrap">
@@ -531,10 +565,25 @@ export const RecentDesignsModal: React.FC<RecentDesignsModalProps> = ({
                                 <Calendar className="w-3 h-3 shrink-0" />
                                 <span className="truncate">{formattedDate}</span>
                               </span>
-                              <span>•</span>
-                              <span className="capitalize">{colorLabel}</span>
-                              <span>•</span>
-                              <span className="capitalize">{design.style.eyeStyle} eyes</span>
+                              {isMultiUrl ? (
+                                <>
+                                  <span>•</span>
+                                  <span className="font-semibold text-amber-600 dark:text-amber-400">{linkCount} Links</span>
+                                  {multiData?.heroHeading && (
+                                    <>
+                                      <span>•</span>
+                                      <span className="truncate max-w-[120px]">{multiData.heroHeading}</span>
+                                    </>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  <span>•</span>
+                                  <span className="capitalize">{colorLabel}</span>
+                                  <span>•</span>
+                                  <span className="capitalize">{design.style.eyeStyle} eyes</span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -729,6 +778,8 @@ export const RecentDesignsModal: React.FC<RecentDesignsModalProps> = ({
                             alt="Detected Template"
                             className="w-14 h-14 rounded-xl object-contain bg-white border border-zinc-200 dark:border-zinc-700 p-0.5 shrink-0 shadow-2xs"
                             size={56}
+                            isMultiUrl={parseResult.templates[0].qrType === 'multi-url' || Boolean(parseResult.templates[0].formData?.['multi-url'])}
+                            qrType={parseResult.templates[0].qrType}
                             onGenerated={(thumb) => setLiveThumbnail(thumb)}
                           />
 
@@ -798,6 +849,8 @@ export const RecentDesignsModal: React.FC<RecentDesignsModalProps> = ({
                                   alt={`${tpl.name} thumbnail`}
                                   className="w-9 h-9 rounded-lg object-contain bg-white border border-zinc-200 dark:border-zinc-700 p-0.5 shrink-0 shadow-2xs"
                                   size={36}
+                                  isMultiUrl={tpl.qrType === 'multi-url' || Boolean(tpl.formData?.['multi-url'])}
+                                  qrType={tpl.qrType}
                                 />
                                 <div className="min-w-0">
                                   <div className="font-bold text-zinc-800 dark:text-zinc-200 truncate">

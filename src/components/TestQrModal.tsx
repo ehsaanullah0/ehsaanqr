@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { ExportFormat, QrStyleOptions } from '../types';
 import { decodeQrPayload, decodeImageData, DecodeResult } from '../utils/qrDecoder';
 import { exportQrCode, triggerDownloadCelebration } from '../utils/exportUtils';
-import { useExclusiveAccess } from '../context/ExclusiveAccessContext';
 import {
   X,
   CheckCircle2,
@@ -18,8 +17,6 @@ import {
   Play,
   Timer,
   Info,
-  Lock,
-  Crown,
 } from 'lucide-react';
 
 interface MultiTestStats {
@@ -48,7 +45,6 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
   onOptionsChange,
   onShowToast,
 }) => {
-  const { isUnlocked, openExclusiveModal } = useExclusiveAccess();
   const [activeMode, setActiveMode] = useState<'engine' | 'camera'>('engine');
   const [engineResult, setEngineResult] = useState<{
     success: boolean;
@@ -84,13 +80,6 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
       setDownloadResolution(options.size);
     }
   }, [options.size]);
-
-  // Fallback to PNG if SVG is active while locked
-  useEffect(() => {
-    if (!isUnlocked && downloadFormat === 'svg') {
-      setDownloadFormat('png');
-    }
-  }, [downloadFormat, isUnlocked]);
 
   // Single test runner function
   const runSingleEngineTest = async (
@@ -254,10 +243,6 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
   };
 
   const handleSelectResolution = (res: number) => {
-    if (res === 2048 && !isUnlocked) {
-      openExclusiveModal('2048 × 2048 Pixel Quality');
-      return;
-    }
     setDownloadResolution(res);
     if (onOptionsChange) {
       onOptionsChange({ size: res });
@@ -268,14 +253,6 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
     if (!payload) return;
     const targetFormat = fmt || downloadFormat;
     const targetResolution = res || downloadResolution || options.size || 1024;
-    if (targetResolution === 2048 && !isUnlocked) {
-      openExclusiveModal('2048 × 2048 Pixel Quality');
-      return;
-    }
-    if (targetFormat === 'svg' && !isUnlocked) {
-      openExclusiveModal('SVG Vector Format Export');
-      return;
-    }
     setIsDownloading(true);
     try {
       await exportQrCode(targetFormat, payload, options, targetResolution);
@@ -479,30 +456,20 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                       <div className="text-[10px] uppercase tracking-wider font-bold text-[#64748B]">Format</div>
                       <div className="grid grid-cols-4 gap-1.5">
                         {(['png', 'svg', 'pdf', 'jpg'] as ExportFormat[]).map((fmt) => {
-                          const isLockedFmt = fmt === 'svg' && !isUnlocked;
                           return (
                             <button
                               key={fmt}
                               type="button"
                               onClick={() => {
-                                if (isLockedFmt) {
-                                  openExclusiveModal('SVG Vector Format Export');
-                                  return;
-                                }
                                 setDownloadFormat(fmt);
                               }}
                               className={`py-1.5 px-2 rounded-lg text-xs font-bold uppercase transition-all flex items-center justify-center gap-1 cursor-pointer ${
                                 downloadFormat === fmt
                                   ? 'bg-[#000000] text-[#f9f9ff] shadow-xs'
-                                  : isLockedFmt
-                                  ? 'bg-[#FFFDF5] dark:bg-amber-950/20 border border-[#FDE68A] dark:border-amber-900/40 text-[#78350F] dark:text-amber-300 hover:border-[#E7AC08]/50'
                                   : 'bg-[#FAF8F5] dark:bg-zinc-900 border border-[#EDE8DF] dark:border-zinc-700 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
                               }`}
                             >
                               <span>{fmt}</span>
-                              {isLockedFmt && (
-                                <Crown className="w-2.5 h-2.5 text-[#D97706] dark:text-amber-400 stroke-[2.2] shrink-0" />
-                              )}
                             </button>
                           );
                         })}
@@ -514,7 +481,6 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                       <div className="text-[10px] uppercase tracking-wider font-bold text-[#64748B]">Resolution</div>
                       <div className="grid grid-cols-4 gap-1.5">
                         {[256, 512, 1024, 2048].map((res) => {
-                          const isLockedRes = res === 2048 && !isUnlocked;
                           return (
                             <button
                               key={res}
@@ -523,15 +489,10 @@ export const TestQrModal: React.FC<TestQrModalProps> = ({
                               className={`py-1.5 px-1.5 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
                                 downloadResolution === res
                                   ? 'border-2 border-[#000000] dark:border-amber-400 bg-[#f5f5d9] dark:bg-amber-950/40 text-zinc-900 dark:text-[#E7AC08]'
-                                  : isLockedRes
-                                  ? 'bg-[#FFFDF5] dark:bg-amber-950/20 border border-[#FDE68A] dark:border-amber-900/40 text-[#64748B] dark:text-zinc-400 hover:border-[#E7AC08]/50'
                                   : 'bg-[#FAF8F5] dark:bg-zinc-900 border border-[#EDE8DF] dark:border-zinc-700 text-[#334155] dark:text-zinc-300 hover:border-[#CBD5E1]'
                               }`}
                             >
                               <span>{res}px</span>
-                              {isLockedRes && (
-                                <Crown className="w-2.5 h-2.5 text-[#D97706] dark:text-amber-400 stroke-[2.2]" />
-                              )}
                             </button>
                           );
                         })}

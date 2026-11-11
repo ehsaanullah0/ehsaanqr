@@ -401,6 +401,30 @@ export function analyzeReadability(
   const totalModulesWithMargin = estimatedMatrixModules + options.margin * 2;
   const modulePixelSize = Number((options.size / totalModulesWithMargin).toFixed(1));
 
+  const isDenseQr = estimatedMatrixModules >= 41 || (payload.length || 0) >= 110;
+  const isVeryDenseQr = estimatedMatrixModules >= 49 || (payload.length || 0) >= 180;
+
+  if (isDenseQr) {
+    warnings.push(
+      `Dense QR Matrix (~${estimatedMatrixModules}×${estimatedMatrixModules} modules) due to payload size.`
+    );
+    recommendations.push(
+      'Dense codes require sharp print resolution and higher contrast for fast camera recognition.'
+    );
+  }
+
+  if (isDenseQr && options.logo.type !== 'none') {
+    // Heavy penalty for placing center logos on dense QR codes
+    const densityPenalty = isVeryDenseQr ? 25 : 15;
+    logoImpactScore = Math.max(10, logoImpactScore - densityPenalty);
+    warnings.push(
+      `High Matrix Density Warning: Center logo obscures dense data tracks (~${estimatedMatrixModules}×${estimatedMatrixModules} modules), risking scan failure.`
+    );
+    recommendations.push(
+      'Consider removing the center logo for dense payloads, or keep logo size under 18% with Error Correction "H".'
+    );
+  }
+
   if (modulePixelSize < 5 && options.size <= 256) {
     warnings.push(`High module density for ${options.size}px export (${modulePixelSize}px/module).`);
     recommendations.push('Export at 512px or 1024px to ensure crisp module boundaries on physical prints.');
@@ -438,9 +462,9 @@ export function analyzeReadability(
   }
 
   let confidence: 'High' | 'Moderate' | 'Low' = 'High';
-  if (minRegionalContrast < 3.0 || overallScore < 60) {
+  if (minRegionalContrast < 3.0 || overallScore < 60 || (isVeryDenseQr && options.logo.type !== 'none')) {
     confidence = 'Low';
-  } else if (minRegionalContrast < 4.5 || overallScore < 75) {
+  } else if (minRegionalContrast < 4.5 || overallScore < 75 || (isDenseQr && options.logo.type !== 'none')) {
     confidence = 'Moderate';
   }
 
@@ -463,6 +487,8 @@ export function analyzeReadability(
     minRegionalContrastRatio: Number(minRegionalContrast.toFixed(1)),
     modulePixelSize,
     estimatedMatrixModules,
+    isDenseQr,
+    isVeryDenseQr,
     isDarkBg,
     warnings,
     recommendations,
@@ -527,12 +553,17 @@ export function getImprovedReadabilityOptions(
       patch.errorCorrection = 'H';
       fixesApplied.push('Upgraded Error Correction to High (H) for center logo redundancy');
     }
-    if (options.logo.sizeRatio > 0.25) {
+    const maxSafeSize = report.isDenseQr ? 0.18 : 0.22;
+    if (options.logo.sizeRatio > maxSafeSize) {
       patch.logo = {
         ...options.logo,
-        sizeRatio: 0.22,
+        sizeRatio: maxSafeSize,
       };
-      fixesApplied.push('Slightly scaled logo to 22% of matrix to clear data tracks');
+      fixesApplied.push(
+        report.isDenseQr
+          ? 'Optimized logo size to 18% to preserve dense QR modules'
+          : 'Slightly scaled logo to 22% of matrix to clear data tracks'
+      );
     }
   }
 

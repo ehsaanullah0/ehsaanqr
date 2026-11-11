@@ -5,7 +5,6 @@ import {
   ReadabilityLevel,
 } from '../types';
 import { getImprovedReadabilityOptions } from '../utils/readabilityEngine';
-import { useExclusiveAccess } from '../context/ExclusiveAccessContext';
 import {
   Sparkles,
   Camera,
@@ -21,10 +20,7 @@ import {
   ChevronUp,
   Info,
   Maximize2,
-  Lock,
-  Crown,
 } from 'lucide-react';
-import { ExclusiveCrownBadge } from './ExclusiveCrownBadge';
 
 interface ReadabilityDashboardProps {
   report: ReadabilityReport;
@@ -41,7 +37,6 @@ export const ReadabilityDashboard: React.FC<ReadabilityDashboardProps> = ({
   onOpenScanner,
   onShowToast,
 }) => {
-  const { isUnlocked, openExclusiveModal } = useExclusiveAccess();
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Level Badge configuration
@@ -163,20 +158,12 @@ export const ReadabilityDashboard: React.FC<ReadabilityDashboardProps> = ({
 
           <button
             type="button"
-            onClick={() => {
-              if (!isUnlocked) {
-                openExclusiveModal('QR Intelligence Analytics');
-                return;
-              }
-              setIsExpanded((prev) => !prev);
-            }}
+            onClick={() => setIsExpanded((prev) => !prev)}
             className="p-1.5 rounded-lg text-[#64748B] hover:text-[#0F172A] dark:hover:text-zinc-200 hover:bg-[#EDE8DF]/60 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-            title={!isUnlocked ? 'QR Intelligence Analytics (Exclusive)' : isExpanded ? 'Collapse breakdown' : 'Expand full metrics'}
+            title={isExpanded ? 'Collapse breakdown' : 'Expand full metrics'}
             aria-label="Toggle metrics breakdown"
           >
-            {!isUnlocked ? (
-              <Crown className="w-4 h-4 text-[#D97706] dark:text-amber-400 stroke-[2.2]" />
-            ) : isExpanded ? (
+            {isExpanded ? (
               <ChevronUp className="w-4 h-4" />
             ) : (
               <ChevronDown className="w-4 h-4" />
@@ -187,45 +174,8 @@ export const ReadabilityDashboard: React.FC<ReadabilityDashboardProps> = ({
 
       {/* Main Body */}
       <div className="p-3.5 sm:p-4 space-y-3.5">
-        {!isUnlocked ? (
-          /* Locked State for Intelligence Analytics */
-          <div
-            onClick={() => openExclusiveModal('QR Intelligence Analytics')}
-            className="p-4 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/40 border border-[#EDE8DF] dark:border-zinc-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#FFF7D9] dark:bg-amber-950/60 border border-[#FDE68A] dark:border-amber-800/70 flex items-center justify-center shrink-0 text-[#D97706] dark:text-amber-400">
-                <Crown className="w-4.5 h-4.5 stroke-[2.2]" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100">
-                    QR Intelligence Analytics
-                  </span>
-                  <ExclusiveCrownBadge size="xs" />
-                </div>
-                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
-                  Deep 7-zone contrast breakdown, module geometry analysis, and auto-fix diagnostics.
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                openExclusiveModal('QR Intelligence Analytics');
-              }}
-              className="px-3.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-900 text-white text-xs font-bold shadow-xs transition-colors shrink-0 cursor-pointer"
-            >
-              Unlock Analytics →
-            </button>
-          </div>
-        ) : (
-          /* Unlocked Full Analytics Grid */
-          <>
-            {/* Metric Grid Overview */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+        {/* Metric Grid Overview */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
               {/* 1. Contrast */}
               <div className="p-2.5 rounded-xl bg-[#FAF8F5] dark:bg-zinc-800/50 border border-[#EDE8DF] dark:border-zinc-800">
                 <div className="flex items-center justify-between text-[11px] font-semibold text-[#64748B] dark:text-zinc-400 mb-1">
@@ -418,8 +368,6 @@ export const ReadabilityDashboard: React.FC<ReadabilityDashboardProps> = ({
                 )}
               </div>
             )}
-          </>
-        )}
 
         {/* Action Controls */}
         <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">

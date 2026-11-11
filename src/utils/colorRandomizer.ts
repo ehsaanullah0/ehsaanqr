@@ -11,7 +11,7 @@ import {
   LogoType,
 } from '../types';
 
-export type SaturationPreference = 'low' | 'high';
+export type SaturationPreference = 'low' | 'medium' | 'high';
 
 export const PATTERN_STYLES_POOL: PatternStyle[] = [
   'square',
@@ -194,6 +194,8 @@ export function getRandomBg(
   const palette =
     saturationPreference === 'high'
       ? HIGH_SATURATION_BG_COLORS
+      : saturationPreference === 'medium'
+      ? [...LOW_SATURATION_BG_COLORS.slice(10), ...HIGH_SATURATION_BG_COLORS.slice(0, 20)]
       : LOW_SATURATION_BG_COLORS;
 
   const validBgs = palette.filter((bg) => {
@@ -905,6 +907,7 @@ export function executeSmartRandomize(
       'calendar',
       'vcard',
       'location',
+      'multi-url',
     ];
     const logoType = current.logo.type === 'none' ? getRandomItem(monoLogos) : current.logo.type;
     const borderRadii = [0, 8, 16, 24, 50];

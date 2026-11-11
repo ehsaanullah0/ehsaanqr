@@ -1,12 +1,17 @@
 // Service worker for Ehsaan QR PWA
-const CACHE_NAME = 'ehsaan-qr-v1.1.3';
+const CACHE_NAME = 'ehsaan-qr-v5.0.0';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
   '/favicon.svg',
-  '/ehsaan-flame.svg',
+  '/favicon-16x16.png',
+  '/favicon-32x32.png',
+  '/favicon-48x48.png',
+  '/apple-touch-icon.png',
   '/icon-192.png',
+  '/icon-maskable-192.png',
   '/icon-512.png',
+  '/icon-maskable-512.png',
   '/site.webmanifest',
   '/manifest.json'
 ];

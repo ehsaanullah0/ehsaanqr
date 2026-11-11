@@ -18,13 +18,18 @@ import {
   Sparkles,
   MapPin,
   Navigation,
+  Layers,
 } from 'lucide-react';
+import { MultiUrlForm } from './MultiUrlForm';
 
 interface ContentFormProps {
   type: QrType;
   formData: QrFormData;
   onChange: <K extends keyof QrFormData>(key: K, value: QrFormData[K]) => void;
   validation: ValidationResult;
+  qrCodeDataUrl?: string;
+  onSaveMultiUrlTemplate?: (data: any) => void;
+  onOpenTemplates?: () => void;
 }
 
 export const ContentForm: React.FC<ContentFormProps> = ({
@@ -32,6 +37,9 @@ export const ContentForm: React.FC<ContentFormProps> = ({
   formData,
   onChange,
   validation,
+  qrCodeDataUrl,
+  onSaveMultiUrlTemplate,
+  onOpenTemplates,
 }) => {
   const [showPassword, setShowPassword] = React.useState(false);
 
@@ -52,6 +60,7 @@ export const ContentForm: React.FC<ContentFormProps> = ({
             {type === 'upi' && 'UPI Instant Payment'}
             {type === 'calendar' && 'Calendar Event Invite'}
             {type === 'location' && 'Map Location'}
+            {type === 'multi-url' && 'Multi-URL Link Hub'}
           </h2>
         </div>
 
@@ -799,6 +808,17 @@ export const ContentForm: React.FC<ContentFormProps> = ({
             Encodes direct Google Maps coordinates. Scanners will immediately open the pin in Google Maps or the device's default navigation app.
           </p>
         </div>
+      )}
+
+      {/* Multi-URL Link Hub */}
+      {type === 'multi-url' && (
+        <MultiUrlForm
+          data={formData['multi-url']}
+          onChange={(newData) => onChange('multi-url', newData)}
+          qrCodeDataUrl={qrCodeDataUrl}
+          onSaveTemplate={onSaveMultiUrlTemplate}
+          onOpenTemplates={onOpenTemplates}
+        />
       )}
     </div>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { QrStyleOptions } from '../types';
 import { generateTemplateThumbnail } from '../utils/templateCode';
-import { Layers } from 'lucide-react';
+import { Layers, FileCode } from 'lucide-react';
 
 interface TemplateThumbnailProps {
   style: QrStyleOptions;
@@ -9,8 +9,33 @@ interface TemplateThumbnailProps {
   alt?: string;
   className?: string;
   size?: number; // pixel dimension (default 48px)
+  isMultiUrl?: boolean;
+  qrType?: string;
   onGenerated?: (thumb: string) => void;
 }
+
+export const HtmlTemplateLogo: React.FC<{ className?: string; size?: number }> = ({
+  className = 'w-12 h-12 rounded-xl shrink-0 shadow-2xs',
+  size = 48,
+}) => {
+  const isSmall = size <= 38;
+  const isLarge = size >= 56;
+
+  return (
+    <div
+      className={`${className} bg-amber-50/90 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/60 flex flex-col items-center justify-center shrink-0 text-amber-600 dark:text-amber-400 font-medium relative overflow-hidden`}
+      style={{ width: size, height: size }}
+      title="HTML Landing Page Template"
+    >
+      <FileCode className={`${isSmall ? 'w-4 h-4' : isLarge ? 'w-6 h-6' : 'w-5 h-5'} text-amber-600 dark:text-amber-400 stroke-[1.8]`} />
+      {!isSmall && (
+        <span className="text-[8px] font-bold tracking-wider uppercase text-amber-800/80 dark:text-amber-300/80 mt-0.5">
+          HTML
+        </span>
+      )}
+    </div>
+  );
+};
 
 // In-memory cache for rendered thumbnails to prevent duplicate canvas operations
 const thumbnailCache = new Map<string, string>();
@@ -45,8 +70,16 @@ export const TemplateThumbnail: React.FC<TemplateThumbnailProps> = ({
   alt = 'Template Preview',
   className = 'w-12 h-12 rounded-xl object-contain bg-white border border-zinc-200 dark:border-zinc-700 p-0.5 shrink-0 shadow-2xs',
   size = 48,
+  isMultiUrl,
+  qrType,
   onGenerated,
 }) => {
+  const isHtml = isMultiUrl || qrType === 'multi-url';
+
+  if (isHtml) {
+    return <HtmlTemplateLogo className={className} size={size} />;
+  }
+
   const [currentSrc, setCurrentSrc] = useState<string | null>(() => {
     if (thumbnailUrl && thumbnailUrl.startsWith('data:image/')) {
       return thumbnailUrl;

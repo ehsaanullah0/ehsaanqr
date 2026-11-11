@@ -26,7 +26,7 @@ function formatIcsDateTime(dateStr: string): string {
 
 export const DEFAULT_FORM_DATA: QrFormData = {
   url: {
-    url: 'https://ehsaan.odoo.com',
+    url: 'ehsaan.odoo.com',
   },
   text: {
     text: '',
@@ -82,6 +82,15 @@ export const DEFAULT_FORM_DATA: QrFormData = {
     latitude: '',
     longitude: '',
     name: '',
+  },
+  'multi-url': {
+    heroHeading: '',
+    handle: '',
+    title: '',
+    description: '',
+    tags: '',
+    avatarLetter: '',
+    links: [],
   },
 };
 
@@ -197,6 +206,38 @@ export function buildPayload(type: QrType, data: QrFormData): string {
       return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
     }
 
+    case 'multi-url': {
+      const m = data['multi-url'];
+      const validLinks = (m.links || []).filter((l) => l.url && l.url.trim());
+      if (validLinks.length === 0) return '';
+      
+      const lines: string[] = [];
+      const heading = (m.heroHeading || m.title || '').trim();
+      if (heading) {
+        lines.push(`✦ ${heading}`);
+      }
+      if (m.handle?.trim()) {
+        lines.push(`${m.handle.trim()}`);
+      }
+      if (m.description?.trim()) {
+        lines.push(m.description.trim());
+      }
+      if (lines.length > 0) {
+        lines.push('---');
+      }
+      
+      validLinks.forEach((link, idx) => {
+        let u = link.url.trim();
+        if (!u.startsWith('http://') && !u.startsWith('https://')) {
+          u = 'https://' + u;
+        }
+        const label = link.title.trim() || `Link ${idx + 1}`;
+        const iconPrefix = link.icon ? `${link.icon} ` : '';
+        lines.push(`${idx + 1}. ${iconPrefix}${label}\n   ${u}`);
+      });
+      return lines.join('\n');
+    }
+
     default:
       return '';
   }
@@ -285,6 +326,15 @@ export function validatePayload(type: QrType, data: QrFormData): ValidationResul
       }
       if (isNaN(lngNum) || lngNum < -180 || lngNum > 180) {
         return { isValid: false, message: 'Longitude must be between -180 and 180' };
+      }
+      return { isValid: true };
+    }
+
+    case 'multi-url': {
+      const m = data['multi-url'];
+      const validLinks = (m.links || []).filter((l) => l.url && l.url.trim());
+      if (validLinks.length === 0) {
+        return { isValid: false, message: 'Please add at least one valid URL to your Link Hub' };
       }
       return { isValid: true };
     }
