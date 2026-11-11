@@ -19,22 +19,10 @@
     alt="Watch EHSAAN QR Demo Video"
   />
 </a>
-  
-A simple, fast, and privacy-friendly QR code generator built to make creating customized QR codes effortless.
-
-**Made for everyday QR codes.
-Built for creativity.
-Designed to keep things simple.**
 
 </div>
 
 <div align="center">
-
-# WHAT'S NEW ~ 📌 V1.1.5
-
-<img width="606" height="470" alt="image" src="https://github.com/user-attachments/assets/c7d6d66a-10e0-46da-b133-7d800ab80a56" />
-
-### premium pass no longer available on app
 
 ### ✨ New in V1.1.5
 
@@ -108,7 +96,7 @@ Whether you're making QR codes for personal or business use, it just works.
 
 This is a **GPL-licensed product**.
 
-# 🔗 [**ehsaanqr.ai.studio**](https://ehsaanqr.ai.studio/)
+[<img width="300" height="70" alt="image" src="https://github.com/user-attachments/assets/ed8a7719-d3a1-44a2-983e-c42c7bd4e8bd" />](https://ehsaanqr.ai.studio)
 
 ---
 
@@ -169,9 +157,6 @@ Just create a QR code that works **and looks good**.
   </a>
   <a href="https://ehsaanflow.ai.studio/" target="_blank">
  <img width="170" src="https://github.com/user-attachments/assets/f1f073ca-70f6-418a-8ea8-dbf07780247f" />
-  </a>
-  <a href="https://ehsaanqr.ai.studio/" target="_blank">
- <img width="170" src="https://github.com/user-attachments/assets/432a43cc-999e-4f0d-8674-07443b19ade8" />
   </a>
   <a href="https://ehsaanplay.ai.studio/" target="_blank">
  <img width="170" src="https://github.com/user-attachments/assets/7d64243b-7eaa-49c8-bf67-897415f990ee" />
