@@ -6,7 +6,7 @@
 
 # MAKE QR LINK TO YOUR PERSONALITY
 
-# 🔗 [**ehsaanqr.ai.studio**](https://ehsaanqr.ai.studio/)
+[<img width="400" height="90" alt="image" src="https://github.com/user-attachments/assets/ed8a7719-d3a1-44a2-983e-c42c7bd4e8bd" />](https://ehsaanqr.ai.studio)
 
 </div>
 
