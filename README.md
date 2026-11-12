@@ -7,7 +7,7 @@
 # MAKE QR LINK TO YOUR PERSONALITY
 
 [<img width="350" height="85" alt="image" src="https://github.com/user-attachments/assets/ed8a7719-d3a1-44a2-983e-c42c7bd4e8bd" />](https://ehsaanqr.ai.studio)
-[<img width="350" height="85" alt="image" src="https://github.com/user-attachments/assets/7afd8861-9ded-4590-bb59-a62160d42721" />](https://rookieenough.github.io/Orion-Data/app/?id=ehsaanflow)
+[<img width="350" height="85" alt="image" src="https://github.com/user-attachments/assets/7afd8861-9ded-4590-bb59-a62160d42721" />](https://rookieenough.github.io/Orion-Data/app/?id=ehsaan-qr)
 </div>
 
 <p align="center">
