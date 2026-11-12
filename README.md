@@ -58,10 +58,10 @@
 <table align="center">
   <tr>
     <td align="center">
-      <img width="300" height="300" alt="db (1)" src="https://github.com/user-attachments/assets/99bfe38a-8f5d-4db2-aa1c-b81ea036f8fa" />
+   <img width="300" height="300" alt="ehsaan-qr-1024x1024 (2)" src="https://github.com/user-attachments/assets/8df45b1b-ad2a-4e8a-91a2-276a679a72f5" />
     </td>
     <td align="center">
-      <img width="300" height="300" alt="ehsaan-qr-512x512" src="https://github.com/user-attachments/assets/efeffe88-e6ec-4b41-917e-e650a1fd060a" />
+   <img width="300" height="300" alt="ehsaan-qr-1024x1024" src="https://github.com/user-attachments/assets/4546f9ab-810e-4dee-8c4a-c40a997f2270" />
     </td>
   </tr>
 
@@ -70,7 +70,7 @@
       <img width="300" height="300" alt="ehsaan-qr-1024x1024 (2)" src="https://github.com/user-attachments/assets/1f80c60a-13bf-42e0-bf6d-cd563e0c8c76" />
     </td>
     <td align="center">
-      <img width="300" height="300" alt="qr-url-2048px" src="https://github.com/user-attachments/assets/dae23645-b4a8-4049-bea7-acd196f33cd2" />
+   <img width="300" height="300" alt="ehsaan-qr-1024x1024 (1)" src="https://github.com/user-attachments/assets/18b82f83-6768-4155-92c1-e4e514e056bd" />
     </td>
   </tr>
 
