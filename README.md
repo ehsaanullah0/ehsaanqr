@@ -10,6 +10,9 @@
 [<img width="350" height="85" alt="image" src="https://github.com/user-attachments/assets/7afd8861-9ded-4590-bb59-a62160d42721" />](https://rookieenough.github.io/Orion-Data/app/?id=ehsaan-qr)
 </div>
 
+> [!IMPORTANT]
+> This repo was archived by the owner untill 5th july 2027. the project is now in maintainance mode for that period.
+
 <p align="center">
   
 <a href="https://youtu.be/3nfh-KudZfk" target="_blank">
